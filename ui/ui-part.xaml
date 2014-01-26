@@ -1,0 +1,227 @@
+﻿<ContentControl x:Class="xigt2.ui_part"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                xmlns:x2="clr-namespace:xigt2"
+                xmlns:aw="clr-namespace:alib.Wpf;assembly=alib-wpf"
+                xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                mc:Ignorable="d" 
+                d:DesignHeight="300" 
+                d:DesignWidth="300">
+
+    <ContentControl.Resources>
+
+        <DataTemplate DataType="{x:Type x2:temp_drag_part}">
+            <ContentControl Content="{Binding Path=Source}" />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type x2:SegPart}">
+            <TextBlock 
+                        Text="{Binding Text, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                        HorizontalAlignment="Left"
+                        Background="#E8FFE8"
+                        Margin="0 2 0 2"
+                        Padding="5 0 5 0" />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type x2:TextPart}">
+            <TextBox Text="{Binding Path=Text,UpdateSourceTrigger=PropertyChanged}"
+                        Padding="1 0 1 0"
+                        HorizontalAlignment="Left"
+                        MinWidth="{Binding Text, Converter={x:Static x2:MinWidthIfBlank.Instance}}"
+			            Background="White" />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type x2:MergePart}">
+            <!--<TextBox Text="{Binding Text}"
+                        Padding="1 0 1 0"
+                        HorizontalAlignment="Left"
+                        MinWidth="{Binding Text, Converter={x:Static x2:MinWidthIfBlank.Instance}}"
+			            Background="Tan" />-->
+
+            <ItemsControl ItemsSource="{Binding Mode=OneWay}">
+                <ItemsControl.Template>
+                    <ControlTemplate>
+                        <Border BorderThickness="0 0 1 1" 
+                                        Margin="0 2 0 2"
+                                        BorderBrush="Gray"  
+                                        HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal"
+                                         AllowDrop="True"
+                                         IsItemsHost="True"
+                                         />
+                        </Border>
+                    </ControlTemplate>
+                </ItemsControl.Template>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <!--<x2:ui_part_base />-->
+                        <Border BorderBrush="Gray" 
+                                        BorderThickness="1 1 0 0"
+                                        HorizontalAlignment="Left">
+                            <TextBlock 
+                                        Text="{Binding Text, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Background="#E8FFE8"
+                                        Margin="1 0 1 0" />
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+
+            </ItemsControl>
+
+
+            <!--<Border Background="Bisque" BorderThickness="0" BorderBrush="Transparent" HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal" AllowDrop="True" Margin="0 2 0 2" >
+                            <TextBox Text="dummy" />
+                            <TextBox Text="dummy" />
+                        </StackPanel>
+                    </Border>-->
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type x2:GroupPart}">
+            <!--<TextBox Text="{Binding Text}"
+                        Padding="1 0 1 0"
+                        HorizontalAlignment="Left"
+                        MinWidth="{Binding Text, Converter={x:Static x2:MinWidthIfBlank.Instance}}"
+			            Background="Tan" />-->
+
+            <ItemsControl ItemsSource="{Binding Mode=OneWay}">
+                <ItemsControl.Template>
+                    <ControlTemplate>
+                        <Border Background="Bisque" BorderThickness="0" BorderBrush="Transparent"  HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal"
+                                                Margin="0 2 0 2"
+                                                AllowDrop="True"
+                                         MinHeight="25"   
+                                         MinWidth="70"
+                                        IsItemsHost="True"
+                                         />
+                        </Border>
+                    </ControlTemplate>
+                </ItemsControl.Template>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <x2:ui_part_base />
+
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+
+            </ItemsControl>
+
+
+            <!--<Border Background="Bisque" BorderThickness="0" BorderBrush="Transparent" HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal" AllowDrop="True" Margin="0 2 0 2" >
+                            <TextBox Text="dummy" />
+                            <TextBox Text="dummy" />
+                        </StackPanel>
+                    </Border>-->
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type x2:CopyPart}">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+
+                <!-- also picks up the outer data template -->
+                <ContentControl Content="{Binding Path=Source}" Margin="0 0 0 5" />
+
+                <TextBox 
+                                Text="{Binding Text}"
+                                Padding="1 0 1 0"
+                                HorizontalAlignment="Left"
+                                MinWidth="{Binding Text, Converter={x:Static x2:MinWidthIfBlank.Instance}}"
+			                    Background="White" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type x2:AlignPart}">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+
+                <!-- also picks up the outer data template -->
+                <ContentControl Content="{Binding Path=Source}" Margin="0 0 0 5" />
+
+                <!--<ContentControl Content="{Binding Path=Target}" />-->
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type x2:DepPart}">
+            <Menu>
+                <MenuItem Header="Arg">
+                    <MenuItem Header="comp">
+                        <sys:String>acomp</sys:String>
+                        <sys:String>ccomp</sys:String>
+                        <MenuItem Header="obj">
+                            <sys:String>dobj</sys:String>
+                            <sys:String>iobj</sys:String>
+                            <sys:String>pobj</sys:String>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="subj">
+                        <MenuItem Header="nsubj" />
+                        <MenuItem Header="csubj" />
+                    </MenuItem>
+                </MenuItem>
+
+                <MenuItem Header="mod">
+                    <sys:String>appos</sys:String>
+                    <sys:String>acomp</sys:String>
+                    <sys:String>mwe</sys:String>
+                    <sys:String>rcmod</sys:String>
+                    <sys:String>prt</sys:String>
+                </MenuItem>
+
+                <MenuItem Header="marker">
+                    <sys:String>case</sys:String>
+                </MenuItem>
+            </Menu>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type x2:TagPart}">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+
+                <!--<ContentControl Content="{Binding Path=Source}" Margin="0 0 0 5" />-->
+                <!--<x2:ui_part_base DataContext="{Binding Path=Source}" />-->
+                <TextBlock 
+                            Text="{Binding Path=Source.Text, Mode=OneWay}"
+                                HorizontalAlignment="Left"
+                                Margin="2 2 0 4"
+                                Background="#FCFCF0"
+                                 />
+
+                <ComboBox SelectedItem="{Binding Path=Text}" 
+                                  TextBlock.FontWeight="SemiBold"
+                                  HorizontalAlignment="Left">
+                    <ComboBox.Items>
+                        <sys:String>unk</sys:String>
+                        <Separator MinWidth="100" />
+                        <sys:String>N</sys:String>
+                        <sys:String>V</sys:String>
+                        <sys:String>A</sys:String>
+                        <sys:String>Adj</sys:String>
+                        <sys:String>Aux</sys:String>
+                        <Separator />
+                        <sys:String>PN</sys:String>
+                        <sys:String>Det</sys:String>
+                        <sys:String>Num</sys:String>
+                        <sys:String>Adp</sys:String>
+                        <sys:String>Conj</sys:String>
+                        <sys:String>SC</sys:String>
+                        <sys:String>Pun</sys:String>
+                        <sys:String>Sym</sys:String>
+                        <sys:String>Comp</sys:String>
+                        <Separator />
+                        <sys:String>CaseM</sys:String>
+                        <sys:String>ASP</sys:String>
+                        <sys:String>CL</sys:String>
+                        <sys:String>Expl</sys:String>
+                        <sys:String>SP</sys:String>
+                        <sys:String>PossM</sys:String>
+                    </ComboBox.Items>
+                </ComboBox>
+            </StackPanel>
+        </DataTemplate>
+
+    </ContentControl.Resources>
+
+</ContentControl>

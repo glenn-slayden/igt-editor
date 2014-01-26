@@ -1,0 +1,44 @@
+﻿<DockPanel x:Class="xigt2.IgtControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:x2="clr-namespace:xigt2"
+             xmlns:a="clr-namespace:alib.Wpf;assembly=alib-wpf"
+             mc:Ignorable="d" 
+             TextBlock.FontSize="14"
+             d:DesignHeight="300" 
+             d:DesignWidth="300"
+             LastChildFill="True">
+
+    <StackPanel DockPanel.Dock="Top" 
+                            Orientation="Horizontal"
+                            Background="#FFF8F0">
+        <TextBlock Padding="5 3 3 3">File:</TextBlock>
+        <TextBlock Padding="3" FontWeight="SemiBold" Text="{Binding IgtCorpus.Filename}" />
+        <TextBlock Padding="3">DocId:</TextBlock>
+        <TextBlock Padding="3" FontWeight="SemiBold" Text="{Binding DocId}" />
+        <TextBlock Padding="3">Lines:</TextBlock>
+        <TextBlock Padding="3" FontWeight="SemiBold" Text="{Binding SourceLineRange}" />
+        <TextBlock Padding="3">Language:</TextBlock>
+        <TextBlock Padding="3" FontWeight="SemiBold" Text="{Binding Language}" />
+    </StackPanel>
+
+    <Rectangle DockPanel.Dock="Top" 
+               Height="1" 
+               Fill="LightGray" 
+               HorizontalAlignment="Stretch" />
+
+    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto">
+
+        <x2:DragCanvas a:AttachmentHandles.HostParent="True">
+
+            <x2:TiersControl Margin="4 0 0 0"
+                             ItemsSource="{Binding Path=Tiers,Mode=OneWay}" />
+
+        </x2:DragCanvas>
+
+    </ScrollViewer>
+
+</DockPanel>

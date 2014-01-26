@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F3C4D521-2860-457C-8153-AEF2214AFE78}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>xigt2</RootNamespace>
+    <AssemblyName>xigt-edit</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn>0067</NoWarn>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>xigt2.App</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="alib">
+      <HintPath>bin-external\alib.dll</HintPath>
+    </Reference>
+    <Reference Include="alib-wpf">
+      <HintPath>bin-external\alib-wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="Microsoft.WindowsAPICodePack">
+      <HintPath>bin-external\Microsoft.WindowsAPICodePack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Shell">
+      <HintPath>bin-external\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="_images\Pencil.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\App.config" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="app\app.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="app\app.xaml.cs">
+      <DependentUpon>app.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="app\settings.cs" />
+    <Compile Include="app\converters.cs" />
+    <Compile Include="app\text-igt.cs" />
+    <Compile Include="app\drag-canvas.cs" />
+    <Compile Include="app\misc.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="_old\lattice-version.cs" />
+    <Compile Include="_old\ui-objs %28old%29.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="__main.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="__main.xaml.cs">
+      <DependentUpon>__main.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="commands.cs">
+      <DependentUpon>__main.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="tiers.cs" />
+    <Compile Include="corpus.cs" />
+    <Compile Include="_properties.cs" />
+    <Compile Include="_promoter.cs" />
+    <Compile Include="_interface.cs" />
+    <Compile Include="parts.cs" />
+    <Compile Include="collections.cs" />
+    <Compile Include="igt.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ui\dep_ctrl.cs" />
+    <Page Include="ui\IgtControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="ui\IgtControl.xaml.cs">
+      <DependentUpon>IgtControl.xaml</DependentUpon>
+    </Compile>
+    <Page Include="ui\TiersControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="ui\TiersControl.xaml.cs">
+      <DependentUpon>TiersControl.xaml</DependentUpon>
+    </Compile>
+    <Page Include="ui\tier-ui-base.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="ui\tier-ui-base.xaml.cs">
+      <DependentUpon>tier-ui-base.xaml</DependentUpon>
+    </Compile>
+    <Page Include="ui\tier-ui-content.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="ui\tier-ui-content.xaml.cs">
+      <DependentUpon>tier-ui-content.xaml</DependentUpon>
+    </Compile>
+    <Page Include="ui\ui-part.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="ui\ui-part.xaml.cs">
+      <DependentUpon>ui-part.xaml</DependentUpon>
+    </Compile>
+    <Page Include="ui\ui-part-base.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="ui\ui-part-base.xaml.cs">
+      <DependentUpon>ui-part-base.xaml</DependentUpon>
+    </Compile>
+    <Page Include="ui\ui-part-controls.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="ui\ui-part-controls.xaml.cs">
+      <DependentUpon>ui-part-controls.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

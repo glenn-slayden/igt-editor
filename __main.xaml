@@ -1,0 +1,168 @@
+﻿<Window x:Class="xigt2.__main"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:x2="clr-namespace:xigt2"
+        ResizeMode="CanResizeWithGrip"
+        
+        WindowStartupLocation="CenterScreen"
+        Title="IGT prototype"
+        x:Name="w_main">
+    <!--WindowState="Maximized"-->
+
+    <DockPanel LastChildFill="True" >
+
+        <Menu DockPanel.Dock="Top">
+
+            <MenuItem Header="File">
+                <!--<MenuItem Header="Convert txt-IGT directory..." Click="Menu_OpenTxtIgtDir" />-->
+                <!--<MenuItem Header="Open txt-IGT file..." Click="Menu_OpenTxtIgtFile" />-->
+                <!--<Separator />-->
+                <MenuItem Header="Open xaml-IGT directory..." Click="Menu_OpenXamlIgtDir" />
+                <MenuItem Header="Open xaml-IGT file..." Click="Menu_OpenXamlIgtFile" />
+                <Separator />
+                <!--<MenuItem Header="Save" Click="Menu_SaveFile" />-->
+                <MenuItem Header="Save all..." Click="Menu_SaveAll" />
+                <Separator />
+                <MenuItem Header="Close all" Click="Menu_CloseAll" />
+                <MenuItem Header="Exit" Click="Menu_Exit" />
+            </MenuItem>
+
+            <MenuItem Header="Options">
+                <MenuItem Header="Reset app settings" Click="Menu_ResetSettings" />
+                <MenuItem Header="Reload last session" IsCheckable="True" IsChecked="{Binding Source={x:Static x2:App.settings},Path=ReloadLastSession}" />
+                <MenuItem Header="Escape key exits app" IsCheckable="True" IsChecked="{Binding Source={x:Static x2:App.settings},Path=EscapeKeyExit}" />
+                <!--<MenuItem Header="Save on exit" IsCheckable="True" IsChecked="{Binding Source={x:Static x2:App.settings},Path=SaveOnExit}" />-->
+            </MenuItem>
+
+            <MenuItem x:Name="mi_font_families" Header="Fonts" >
+                <MenuItem IsCheckable="True" Header="Calibri" Click="Font_Click" />
+                <MenuItem IsCheckable="True" Header="Cambria" Click="Font_Click" />
+                <MenuItem IsCheckable="True" Header="Segoe UI" Click="Font_Click"  />
+                <MenuItem IsCheckable="True" Header="Arial"  Click="Font_Click" />
+                <MenuItem IsCheckable="True" Header="Times New Roman" Click="Font_Click"  />
+                <MenuItem IsCheckable="True" Header="Arial Unicode MS" Click="Font_Click"  />
+                <MenuItem IsCheckable="True" Header="Doulos SIL" Click="Font_Click"  />
+                <MenuItem IsCheckable="True" Header="Charis SIL"  Click="Font_Click" />
+                <Separator />
+                <MenuItem IsCheckable="True" Header="Consolas" Click="Font_Click"  />
+                <MenuItem IsCheckable="True" Header="Lucida Console" Click="Font_Click"   />
+            </MenuItem>
+
+        </Menu>
+
+        <Rectangle DockPanel.Dock="Top" Fill="#bbbbfa" Height="1" HorizontalAlignment="Stretch" />
+
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem x:Name="w_status" Width="90">Ready</StatusBarItem>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+            <StatusBarItem x:Name="w_opened" Width="350" HorizontalAlignment="Left"></StatusBarItem>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+            <StatusBarItem></StatusBarItem>
+        </StatusBar>
+
+        <Grid DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="168" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="277" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <x2:CorporaListView x:Name="w_corpora" Grid.Column="0" 
+                     VerticalAlignment="Stretch"
+                     ItemsSource="{Binding Mode=OneWay}"
+                     BorderThickness="0">
+                <x2:CorporaListView.View>
+                    <GridView>
+                        <GridViewColumn Width="90" Header="Filename">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ShortFilename}" TextAlignment="Left" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="50" Header="Items">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Count}" TextAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </x2:CorporaListView.View>
+                <x2:CorporaListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Top" />
+                    </Style>
+                </x2:CorporaListView.ItemContainerStyle>
+
+            </x2:CorporaListView>
+
+            <GridSplitter Grid.Column="1"
+                          Width="4"
+                          ResizeDirection="Columns" 
+                          ResizeBehavior="PreviousAndCurrent" 
+                          HorizontalAlignment="Right"  
+                          VerticalAlignment="Stretch"
+                          Background="LightGray"
+                          BorderThickness="0 0 1.5 0"
+                          BorderBrush="DarkBlue" />
+            <x2:CorpusIgtsListView x:Name="w_items" Grid.Column="2" 
+                     VerticalAlignment="Stretch"
+                     ItemsSource="{Binding ElementName=w_corpora,Path=SelectedItem,Mode=OneWay}"
+                     BorderThickness="0">
+
+                <x2:CorpusIgtsListView.View>
+                    <GridView>
+                        <GridViewColumn Width="60" Header="DocId">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DocId}" TextAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="83" Header="Lines">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding SourceLineRange}" TextAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="106" Header="Language">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Language}" TextAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </x2:CorpusIgtsListView.View>
+                <x2:CorpusIgtsListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Top" />
+                    </Style>
+                </x2:CorpusIgtsListView.ItemContainerStyle>
+
+            </x2:CorpusIgtsListView>
+
+            <GridSplitter Grid.Column="3" 
+                          Width="4"
+                          ResizeDirection="Columns" 
+                          ResizeBehavior="PreviousAndCurrent" 
+                          HorizontalAlignment="Right" 
+                          VerticalAlignment="Stretch" 
+                          Background="LightGray"
+                          BorderThickness="0 0 1.5 0"
+                          BorderBrush="DarkBlue" />
+
+            <x2:IgtControl x:Name="w_igt" Grid.Column="4"
+                        DataContext="{Binding ElementName=w_items,Path=SelectedItem,Mode=OneWay}" />
+
+        </Grid>
+
+    </DockPanel>
+
+</Window>

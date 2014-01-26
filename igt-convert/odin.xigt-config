@@ -1,0 +1,167 @@
+<XigtConfig
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib"
+  xmlns="clr-namespace:xigt2.config;assembly=igt-convert"
+  IgnoreUnmatchedSourceLines="False"
+  IgnoreEmptyIgts="True">
+
+    <XigtConfig.Resources>
+        <ValueMap x:Name="odin_tier_letter_map">
+            <Mapping Key="L" Value="Language" />
+            <Mapping Key="G" Value="Gloss" />
+            <Mapping Key="T" Value="Translation" />
+            <Mapping Key="B" Value="Blank" />
+            <Mapping Key="M" Value="Miscellaneous" />
+        </ValueMap>
+    </XigtConfig.Resources>
+
+    <XigtConfig.SourceDescriptors>
+
+        <SourceLinePattern x:Name="src_line_info"
+                           Expression="^doc_id=(\S+)\s+(\d+)\s+(\d+)\s*(.*)"
+                           AllowMultiple="False"
+                           ContinueMatching="False" />
+        <!--IsRequired="True"   no: this is already implied by not having a 'line_match' for an 'IsRequired' attribute -->
+
+        <SourceLinePattern x:Name="src_line_lang"
+                           Expression="^language:\s+(.*)"
+                           AllowMultiple="False"
+                           ContinueMatching="False" />
+        <!--IsRequired="False"-->
+
+        <SourceLinePattern x:Name="src_line_tier"
+                           IsTierInstance="True"
+                           AllowMultiple="True"
+                           Expression="^line=(\d+) tag=(.+?):(.*)">
+        </SourceLinePattern>
+
+        <!--<SourceLinePattern x:Name="aaa_test_test"
+                           Expression="ine(.)"
+                           IsTierInstance="True"
+                           AllowMultiple="True"
+                           ContinueMatching="True" />-->
+
+        <SourceValuePattern x:Name="tag_line_Ttyp"
+                    Expression="^[LGTBM]"
+		         ValueSource="{SourceValueRef {x:Reference src_line_tier}, 2}"
+                    SourceIndex="2"
+                    ValueMap="{x:Reference odin_tier_letter_map}"
+                    AllowMultiple="True" />
+
+        <SourceValuePattern x:Name="tag_line_mm_G"
+                            Expression="-G"
+                               ValueSource="{SourceValueRef {x:Reference src_line_tier}, 2}"
+                            SourceIndex="2"
+                            AllowMultiple="True" />
+
+        <SourceValuePattern x:Name="tag_line_mm_T"
+                            Expression="-T"
+                               ValueSource="{SourceValueRef {x:Reference src_line_tier}, 2}"
+                            SourceIndex="2"
+                            AllowMultiple="True" />
+
+        <SourceValuePattern x:Name="tag_line_ppAC"
+                            Expression="\+AC"
+                               ValueSource="{SourceValueRef {x:Reference src_line_tier}, 2}"
+                            SourceIndex="2"
+                            AllowMultiple="True" />
+
+        <SourceValuePattern x:Name="tag_line_ppAL"
+                            Expression="\+AL"
+                               ValueSource="{SourceValueRef {x:Reference src_line_tier}, 2}"
+                            SourceIndex="2"
+                            AllowMultiple="True" />
+
+        <SourceValuePattern x:Name="tag_line_ppCN"
+                            Expression="\+CN"
+                               ValueSource="{SourceValueRef {x:Reference src_line_tier}, 2}"
+                            SourceIndex="2"
+                            AllowMultiple="True" />
+
+        <SourceValuePattern x:Name="tag_line_ppCR"
+                            Expression="\+CR"
+                               ValueSource="{SourceValueRef {x:Reference src_line_tier}, 2}"
+                            SourceIndex="2"
+                            AllowMultiple="True" />
+
+        <SourceValuePattern x:Name="tag_line_ppDB"
+                            Expression="\+DB"
+                               ValueSource="{SourceValueRef {x:Reference src_line_tier}, 2}"
+                            SourceIndex="2"
+                            AllowMultiple="True" />
+
+        <SourceValuePattern x:Name="tag_line_ppEX"
+                            Expression="\+EX"
+                               ValueSource="{SourceValueRef {x:Reference src_line_tier}, 2}"
+                            SourceIndex="2"
+                            AllowMultiple="True" />
+
+        <SourceValuePattern x:Name="tag_line_ppLN"
+                            Expression="\+LN"
+                               ValueSource="{SourceValueRef {x:Reference src_line_tier}, 2}"
+                            SourceIndex="2"
+                            AllowMultiple="True" />
+
+        <SourceValuePattern x:Name="tag_line_ppLT"
+                            Expression="\+LT"
+                               ValueSource="{SourceValueRef {x:Reference src_line_tier}, 2}"
+                            SourceIndex="2"
+                            AllowMultiple="True" />
+
+        <SourceValuePattern x:Name="tag_line_ppSY"
+                            Expression="\+SY"
+                               ValueSource="{SourceValueRef {x:Reference src_line_tier}, 2}"
+                            SourceIndex="2"
+                            AllowMultiple="True" />
+
+        <IgtDelimiterPattern Expression="^\s*$" />
+
+    </XigtConfig.SourceDescriptors>
+
+    <XigtConfig.IgtAttributes>
+
+        <TextAttribute x:Name="Name" IsRequired="False" />
+
+        <TextAttribute x:Name="DocId"
+                   IsRequired="True"
+                   DefaultValue="unknown DocId"
+                   ValueSource="{SourceValueRef {x:Reference src_line_info}, 1}" />
+
+        <IntegerAttribute x:Name="FromLine"
+                  ValueSource="{SourceValueRef {x:Reference src_line_info}, 2}"/>
+
+        <IntegerAttribute x:Name="ToLine"
+                  ValueSource="{SourceValueRef {x:Reference src_line_info}, 3}"/>
+
+        <TextAttribute x:Name="Language"
+                   IsRequired="False"
+                   ValueSource="{SourceValueRef {x:Reference src_line_lang}, 1}" />
+
+        <!--<BooleanAttribute x:Name="Cleaned" DefaultValue="True" />-->
+
+    </XigtConfig.IgtAttributes>
+
+    <XigtConfig.TierAttributes>
+
+        <TextAttribute x:Name="Status" IsRequired="False" />
+
+        <BooleanAttribute x:Name="IsVisible" IsRequired="False" DefaultValue="True" />
+
+        <CategoricalAttribute x:Name="TierType"
+                              IsRequired="True"
+                              DefaultValue="{x:Null}"
+                              ValueSource="{SourceValueRef {x:Reference tag_line_Ttyp}}" >
+            <x:String>Language</x:String>
+            <x:String>Gloss"</x:String>
+            <x:String>Translation</x:String>
+            <x:String>Blank</x:String>
+            <x:String>Miscellaneous</x:String>
+        </CategoricalAttribute>
+
+        <!--<IntegerAttribute x:Name="LineNum"
+                  ValueSource="{SourceValueRef {x:Reference src_line_tier}, 1}"/>-->
+
+    </XigtConfig.TierAttributes>
+
+</XigtConfig>
+

@@ -1,0 +1,83 @@
+﻿<Border x:Class="xigt2.tier_ui_base"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:aw="clr-namespace:alib.Wpf;assembly=alib-wpf"
+             xmlns:pr="clr-namespace:alib.Wpf.pathref;assembly=alib-wpf"
+             xmlns:x2="clr-namespace:xigt2"
+             mc:Ignorable="d" 
+             d:DesignWidth="300"
+             BorderBrush="Black"  
+             BorderThickness="1"
+             Margin="0 3 4 0"
+             CornerRadius="2.5"
+             Background="{Binding TierBrush}"
+             Visibility="{Binding Path=(x2:dps.IsVisible), Converter={x:Static aw:util.BooleanToVisibilityConverterInst}, Mode=TwoWay}"
+        >
+
+    <Grid HorizontalAlignment="Stretch"
+          Margin="4 0 0 0">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="60" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <!--<ColumnDefinition Width="Auto" MinWidth="80" />
+            <ColumnDefinition Width="Auto" />-->
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <!--<StackPanel  Grid.Column="0" 
+                     Orientation="Horizontal"
+                     VerticalAlignment="Center">
+
+            <TextBlock Text="{Binding TierMode}"
+                   VerticalAlignment="Top"
+                   FontSize="12"
+                   FontWeight="Bold" />
+
+            <TextBlock x:Name="tb_tier_index"
+                   Margin="3 0 0 0"
+                   VerticalAlignment="Top"
+                   FontSize="12"
+                   FontWeight="Bold" />
+
+        </StackPanel>-->
+
+        <TextBox Grid.Column="0" Text="{Binding TierType}"
+                   VerticalAlignment="Center"
+                   FontSize="12"
+                   FontWeight="Bold" />
+
+        <Button Grid.Column="1" 
+                Content="✘"
+                Background="Transparent"
+                BorderThickness="0"
+                BorderBrush="Transparent"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Padding="0"
+                Margin="0 0 3 3"
+                Click="delete_tier">
+            <!--<Button.LayoutTransform>
+                <ScaleTransform ScaleX="1.0" ScaleY=".8" />
+            </Button.LayoutTransform>-->
+        </Button>
+
+        <Rectangle Grid.Column="2" Width="3" Fill="Gray" HorizontalAlignment="Left" Margin="0 1.5 0 1.5" />
+        <Rectangle Grid.Column="2" Width="2" Fill="Gainsboro" HorizontalAlignment="Left" Margin="0 1.5 0 1.5" />
+
+        <!--<TextBox Grid.Column="3" 
+                 Margin="5 3 5 3" Text="{Binding Path=(x2:dps.TierType), Mode=TwoWay}"
+                 VerticalAlignment="Top" />
+
+        <Rectangle Grid.Column="4" Width="3" Fill="Gray" HorizontalAlignment="Left" Margin="0 1.5 0 1.5" />
+        <Rectangle Grid.Column="4" Width="2" Fill="Gainsboro" HorizontalAlignment="Left" Margin="0 1.5 0 1.5" />-->
+
+        <x2:tier_ui_content Grid.Column="3" 
+                            Content="{Binding Mode=OneWay}"
+                            HorizontalAlignment="Stretch" />
+
+    </Grid>
+</Border>
