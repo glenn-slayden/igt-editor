@@ -85,7 +85,6 @@
     </Compile>
     <Compile Include="app\settings.cs" />
     <Compile Include="app\converters.cs" />
-    <Compile Include="app\text-igt.cs" />
     <Compile Include="app\drag-canvas.cs" />
     <Compile Include="app\misc.cs" />
   </ItemGroup>
