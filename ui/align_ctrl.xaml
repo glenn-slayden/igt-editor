@@ -23,7 +23,6 @@
         <ItemsControl.ItemTemplate>
             <DataTemplate DataType="{x:Type x2:CopyPart}">
                 <ToggleButton Margin="2 0 0 30"
-                              Background="{x:Null}"
                               HorizontalAlignment="Left">
                     <TextBlock Text="{Binding Source.Text, Mode=OneWay}" />
                 </ToggleButton>
@@ -47,8 +46,7 @@
         <ItemsControl.ItemTemplate>
             <DataTemplate DataType="{x:Type x2:AlignPart}">
                 <ToggleButton Margin="2 0 0 0"
-                            Background="ForestGreen"
-                            HorizontalAlignment="Left">
+                              HorizontalAlignment="Left">
                     <TextBlock Text="{Binding Text, Mode=OneWay}" />
                 </ToggleButton>
             </DataTemplate>

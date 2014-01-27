@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using alib.Wpf;
+
 namespace xigt2
 {
 	public partial class align_ctrl : DockPanel
@@ -21,5 +23,14 @@ namespace xigt2
 		{
 			InitializeComponent();
 		}
-	}
+
+		protected override void OnRender(DrawingContext dc)
+		{
+			base.OnRender(dc);
+
+			var r = new Rect(base.RenderSize);
+
+			dc.DrawLine(new Pen(Brushes.Black, 2), r.TopLeft, r.BottomRight);
+		}
+	};
 }
