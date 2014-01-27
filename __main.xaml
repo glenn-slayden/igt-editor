@@ -3,11 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:x2="clr-namespace:xigt2"
         ResizeMode="CanResizeWithGrip"
-        
+        WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
         Title="IGT prototype"
         x:Name="w_main">
-    <!--WindowState="Maximized"-->
 
     <DockPanel LastChildFill="True" >
 
