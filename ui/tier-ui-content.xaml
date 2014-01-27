@@ -35,7 +35,6 @@
                            VerticalAlignment="Center" />
             </Grid>
         </DataTemplate>
-        <!--IsReadOnly="{Binding Path=(x2:dps.IsReadOnly)}"-->
 
         <DataTemplate DataType="{x:Type x2:TierGroupTier}" >
             <Expander IsExpanded="True">
@@ -53,7 +52,6 @@
                         </ItemsControl.Template>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="x2:tier_base">
-                                <!--<TextBlock Margin="4 0 0 0" Text="{Binding TierMode}" />-->
                                 <ToggleButton Margin="4 0 0 0" 
                                               MinWidth="35"
                                               Content="{Binding TierType}"
@@ -66,7 +64,6 @@
                 <x2:TiersControl ItemsSource="{Binding Mode=OneWay}" />
             </Expander>
         </DataTemplate>
-
 
         <DataTemplate DataType="{x:Type x2:CompoundTextTier}" >
             <Grid>
@@ -97,16 +94,6 @@
                                     Margin="4 0 0 0" 
                                     Command="{x:Static x2:Cmd_AddTextPart.Instance}"
                                     CommandParameter="{Binding ElementName=w_cc, Path=Tier}" />
-
-                            <!--<Button Content="{}{…}"
-                                    FontWeight="Bold"
-                                    Background="Transparent"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Top"
-                                    Padding="1.5"
-                                    Margin="4 25 0 0" 
-                                    Command="{x:Static x2:Cmd_AddGroupPart.Instance}"
-                                    CommandParameter="{Binding ElementName=w_cc, Path=Tier}" />-->
                         </StackPanel>
                     </ControlTemplate>
                 </ItemsControl.Template>
@@ -125,12 +112,8 @@
                 <ItemsControl.Template>
                     <ControlTemplate>
                         <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Left">
-                            <StackPanel Orientation="Horizontal"
-                                        IsItemsHost="True"
-                                        HorizontalAlignment="Left" />
-
-                        </StackPanel>
+                                    IsItemsHost="True"
+                                    HorizontalAlignment="Left" />
                     </ControlTemplate>
                 </ItemsControl.Template>
 
@@ -138,61 +121,10 @@
                     <DataTemplate>
                         <x2:ui_part Content="{Binding}"
                                     Margin="1 1 1 1" />
-                        <!--<x2:ui_part_base />-->
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
 
             </ItemsControl>
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type x2:AlignmentTier}" >
-            <StackPanel Orientation="Vertical">
-                <ItemsControl ItemsSource="{Binding Mode=OneWay}">
-                    <ItemsControl.Template>
-                        <ControlTemplate>
-
-                            <StackPanel Orientation="Horizontal"
-                                IsItemsHost="True" />
-
-                        </ControlTemplate>
-                    </ItemsControl.Template>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type x2:CopyPart}">
-                            <!--<StackPanel Orientation="Vertical" 
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Center"
-                                    Margin="4 0 4 0">-->
-                            <ToggleButton Margin="2 0 0 25"
-                                              Background="{x:Null}"
-                                              HorizontalAlignment="Left">
-                                <TextBlock Text="{Binding Source.Text, Mode=OneWay}" />
-                            </ToggleButton>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <ItemsControl ItemsSource="{Binding Path=AlignWith}">
-
-                    <ItemsControl.Template>
-                        <ControlTemplate>
-
-                            <StackPanel Orientation="Horizontal"
-                                        IsItemsHost="True" />
-
-                        </ControlTemplate>
-                    </ItemsControl.Template>
-
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type x2:AlignPart}">
-                            <ToggleButton Margin="2 0 0 25"
-                                              Background="ForestGreen"
-                                              HorizontalAlignment="Left">
-                                <TextBlock Text="{Binding Text, Mode=OneWay}" />
-                            </ToggleButton>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type x2:DependenciesTier}" >
@@ -200,13 +132,6 @@
                 <x2:DepItemsControl ItemsSource="{Binding Mode=OneWay}">
                     <x2:DepItemsControl.Template>
                         <ControlTemplate>
-                            <!--<StackPanel 
-                                Orientation="Horizontal"
-                                IsItemsHost="True" />-->
-                            <!--<x2:dep_ctrl IsItemsHost="True"
-                                         HorizontalAlignment="Left"
-                                         VerticalAlignment="Top"
-                                         Background="Red" />-->
                             <aw:TreeLayoutPanel 
                                          x:Name="w_dep_tree"
                                          IsItemsHost="True"
@@ -214,12 +139,7 @@
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Top"
                                          VerticalBuffer="70"
-                                                HorizontalBuffer="50"
-                                          />
-                            <!--<aw:DagPanelControl IsItemsHost="True"
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Top"
-                                                Background="#FCFCCE" />-->
+                                         HorizontalBuffer="50" />
                         </ControlTemplate>
                     </x2:DepItemsControl.Template>
                     <x2:DepItemsControl.ItemTemplate>
@@ -280,58 +200,61 @@
                                         </ContextMenu>
                                     </TextBlock.ContextMenu>-->
                                 </x2:DepNode>
-
                             </Border>
-                            <!--<x2:DepToggleButton 
-                                    MinWidth="30"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Center"
-                                    IsChecked="{Binding IsSelected,Mode=TwoWay}"
-                                    >
-                                <x2:DepToggleButton.Resources>
-                                    <ContextMenu x:Key="ctx_menu">
-                                        <MenuItem Header="Arg">
-                                            <MenuItem Header="comp">
-                                                <sys:String>acomp</sys:String>
-                                                <sys:String>ccomp</sys:String>
-                                                <MenuItem Header="obj">
-                                                    <sys:String>dobj</sys:String>
-                                                    <sys:String>iobj</sys:String>
-                                                    <sys:String>pobj</sys:String>
-                                                </MenuItem>
-                                            </MenuItem>
-                                            <MenuItem Header="subj">
-                                                <MenuItem Header="nsubj" />
-                                                <MenuItem Header="csubj" />
-                                            </MenuItem>
-                                        </MenuItem>
 
-                                        <MenuItem Header="mod">
-                                            <sys:String>appos</sys:String>
-                                            <sys:String>acomp</sys:String>
-                                            <sys:String>mwe</sys:String>
-                                            <sys:String>rcmod</sys:String>
-                                            <sys:String>prt</sys:String>
-                                        </MenuItem>
-
-                                        <MenuItem Header="marker">
-                                            <sys:String>case</sys:String>
-                                        </MenuItem>
-                                    </ContextMenu>
-                                </x2:DepToggleButton.Resources>
-
-                                <TextBlock Text="{Binding Text, Mode=OneWay}" />
-                            </x2:DepToggleButton>-->
                         </DataTemplate>
                     </x2:DepItemsControl.ItemTemplate>
                 </x2:DepItemsControl>
-                <!--<aw:TreeLayoutPanel x:Name="w_tree"
-                                   VerticalBuffer="40"
-                                   Margin="0 13 0 0">
-
-                </aw:TreeLayoutPanel>-->
             </StackPanel>
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type x2:AlignmentTier}" >
+            <StackPanel Orientation="Vertical">
+                <ItemsControl ItemsSource="{Binding Mode=OneWay}">
+
+                    <ItemsControl.Template>
+                        <ControlTemplate>
+                            <StackPanel Orientation="Horizontal"
+                                        IsItemsHost="True" />
+                        </ControlTemplate>
+                    </ItemsControl.Template>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type x2:CopyPart}">
+                            <ToggleButton Margin="2 0 0 25"
+                                              Background="{x:Null}"
+                                              HorizontalAlignment="Left">
+                                <TextBlock Text="{Binding Source.Text, Mode=OneWay}" />
+                            </ToggleButton>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+
+                </ItemsControl>
+
+                <ItemsControl ItemsSource="{Binding Path=AlignWith}">
+
+                    <ItemsControl.Template>
+                        <ControlTemplate>
+
+                            <StackPanel Orientation="Horizontal"
+                                        IsItemsHost="True" />
+
+                        </ControlTemplate>
+                    </ItemsControl.Template>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type x2:AlignPart}">
+                            <ToggleButton Margin="2 0 0 25"
+                                              Background="ForestGreen"
+                                              HorizontalAlignment="Left">
+                                <TextBlock Text="{Binding Text, Mode=OneWay}" />
+                            </ToggleButton>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </DataTemplate>
+
     </ContentControl.Resources>
 
 </ContentControl>

@@ -96,6 +96,11 @@ namespace xigt2
 				}
 
 				var host = stier.TiersHost;
+
+				ITier pt;
+				while ((pt = host as ITier) != null)
+					host = pt.TiersHost;
+
 				MenuItem m = null;
 				foreach (var t in host.Tiers)
 				{
