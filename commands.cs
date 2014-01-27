@@ -151,6 +151,8 @@ namespace xigt2
 
 			var corpus = IgtCorpus.LoadXaml(fn);
 
+			corpus.Filename = fn;
+
 			ccc.Add(corpus);
 
 			if (w_corpora.SelectedIndex == -1)

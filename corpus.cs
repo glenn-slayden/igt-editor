@@ -20,14 +20,18 @@ namespace xigt2
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	public class IgtCorpora : CorpusSet, Iitems<IgtCorpus>
+	public class IgtCorpora : OwnerCorpusSet, Iitems<IgtCorpus>
 	{
 		public IgtCorpora()
 			: base(null)
 		{
 		}
 
-		public String Name { get; set; }
+		public String Name
+		{
+			get { return (String)this.GetValue(dps.NameProperty); }
+			set { this.SetValue(dps.NameProperty, value); }
+		}
 
 		public new Iset<IgtCorpus> Items { get { return this; } }
 		public IList GetList() { return this; }
@@ -52,22 +56,24 @@ namespace xigt2
 	{
 		static IgtCorpus()
 		{
-			dps.FilenameProperty.AddOwner(typeof(IgtCorpus), new PropertyMetadata(default(String), (o, e) =>
+			dps.FilenameProperty.AddOwner(typeof(IgtCorpus), new PropertyMetadata(default(String)
+				, (o, e) =>
 				{
 					var _this = (IgtCorpus)o;
 					_this.ShortFilename =
 						Path.GetDirectoryName(_this.Filename).Split(Path.DirectorySeparatorChar).Last() + "/" +
 						Path.GetFileName(_this.Filename);
-				}));
+				}
+				));
 			dps.DelimiterProperty.AddOwner(typeof(IgtCorpus));
 		}
 
 		public IgtCorpus()
 		{
-			this.Igts = new IgtsSet(this);
+			this.Igts = new OwnerIgtsSet(this);
 		}
 
-		readonly IgtsSet Igts;
+		readonly OwnerIgtsSet Igts;
 
 		public Igt this[int index]
 		{
@@ -94,6 +100,7 @@ namespace xigt2
 			set { host = (Iitems<IgtCorpus>)value; }
 		}
 
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public String Filename
 		{
 			get { return (String)GetValue(dps.FilenameProperty); }
@@ -107,7 +114,7 @@ namespace xigt2
 			set { SetValue(dps.DelimiterProperty, value); }
 		}
 
-
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public String ShortFilename
 		{
 			get { return (String)GetValue(ShortFilenameProperty); }
@@ -126,11 +133,8 @@ namespace xigt2
 
 		public void Save(String xigtdir)
 		{
-			var fn = Path.Combine(xigtdir, Path.GetFileNameWithoutExtension(Filename) + ".xml");
-
-			this.Filename = fn;
-
-			using (var sw = XmlWriter.Create(fn, new XmlWriterSettings
+			var temp_fn = Path.GetTempFileName();
+			using (var sw = XmlWriter.Create(temp_fn, new XmlWriterSettings
 			{
 				Indent = true,
 				NewLineOnAttributes = true,
@@ -147,6 +151,16 @@ namespace xigt2
 				}
 				sw.Close();
 			}
+
+			var fn = this.Filename;
+			if (Path.GetExtension(fn).ToLower() == ".txt")
+			{
+				fn = Path.Combine(Path.GetFullPath(xigtdir), Path.GetFileNameWithoutExtension(fn) + ".xml");
+				this.Filename = fn;
+			}
+
+			File.Copy(temp_fn, fn, true);
+			File.Delete(temp_fn);
 		}
 
 		public static IgtCorpus LoadXaml(String fn)

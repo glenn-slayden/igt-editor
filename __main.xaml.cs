@@ -54,10 +54,10 @@ namespace xigt2
 
 		protected override void OnClosing(CancelEventArgs e)
 		{
-			//if (App.settings.SaveOnExit && App.settings.XigtDirectory != null && System.IO.Directory.Exists(App.settings.XigtDirectory))
-			//{
-			//	cmd_SaveAll(App.settings.XigtDirectory);
-			//}
+			if (App.settings.SaveOnExit && App.settings.LastDirectory != null && System.IO.Directory.Exists(App.settings.LastDirectory))
+			{
+				cmd_SaveAll(App.settings.LastDirectory);
+			}
 
 			App.settings.SessionFiles =
 							w_corpora

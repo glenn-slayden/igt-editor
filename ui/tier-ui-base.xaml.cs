@@ -169,9 +169,14 @@ namespace xigt2
 					};
 					mi.Click += (o, ee) =>
 					{
-						var mst = new CompoundTextTier();
-						mst.Tiers.Add(tier1);
-						mst.Tiers.Add(tier2);
+						var stt = (tier1.TierType ?? tier1.GetHashCode().ToString("X")) + ";" + (tier2.TierType ?? tier2.GetHashCode().ToString("X"));
+						var mst = new CompoundTextTier
+						{
+							TierType = stt
+						};
+
+						mst.Lines.Add(tier1);
+						mst.Lines.Add(tier2);
 						host.Add(mst);
 					};
 					m.Add(mi);

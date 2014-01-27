@@ -179,7 +179,7 @@ namespace xigt2
 
 		public MergePart()
 		{
-			var ps = new _PartsSet(this);
+			var ps = new OwnerPartsSet(this);
 			ps.CollectionChanged += (o, e) => CoerceValue(dps.TextProperty);
 			SetValue(PartsPropertyKey, ps);
 		}
@@ -233,7 +233,7 @@ namespace xigt2
 
 		public GroupPart()
 		{
-			SetValue(PartsPropertyKey, new _PartsSet(this));
+			SetValue(PartsPropertyKey, new OwnerPartsSet(this));
 		}
 	};
 
@@ -246,7 +246,7 @@ namespace xigt2
 		static CopyPart()
 		{
 			dps.TextProperty.AddOwner(typeof(CopyPart), new PropertyMetadata(default(String),
-				(o, e) => ((CopyPart)o).Source.Text = (String)e.NewValue,
+				null,//(o, e) => ((CopyPart)o).Source.Text = (String)e.NewValue,
 				(d, o) =>
 				{
 					IPart src;
@@ -371,6 +371,7 @@ namespace xigt2
 		public static readonly DependencyProperty HeadProperty =
 			DependencyProperty.Register("Head", typeof(DepPart), typeof(DepPart), new PropertyMetadata(default(DepPart)));
 
+		[DefaultValue(default(String))]
 		public String DependencyType
 		{
 			get { return (String)GetValue(DependencyTypeProperty); }
@@ -379,7 +380,6 @@ namespace xigt2
 
 		public static readonly DependencyProperty DependencyTypeProperty =
 			DependencyProperty.Register("DependencyType", typeof(String), typeof(DepPart), new PropertyMetadata(default(String)));
-
 
 
 		public IList<DepPart> AvailableHeads
@@ -410,6 +410,7 @@ namespace xigt2
 		}
 
 
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public bool IsSelected
 		{
 			get { return (bool)GetValue(Selector.IsSelectedProperty); }

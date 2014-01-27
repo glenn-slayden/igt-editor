@@ -29,7 +29,7 @@ namespace xigt2
 			DependencyProperty.RegisterAttached("IsReadOnly", typeof(bool), typeof(dps), new PropertyMetadata(false));
 
 		public static DependencyProperty TextProperty =
-			DependencyProperty.RegisterAttached("Text", typeof(String), typeof(dps), new PropertyMetadata("", (o, e) => { }, (d, _s) =>
+			DependencyProperty.RegisterAttached("Text", typeof(String), typeof(dps), new PropertyMetadata("", null, (d, _s) =>
 				{
 					var txt = (String)_s;
 					if (txt == null)
@@ -119,6 +119,11 @@ namespace xigt2
 		static name_dp_base()
 		{
 			dps.NameProperty.AddOwner(typeof(name_dp_base));
+		}
+
+		public name_dp_base()
+		{
+			this.Name = "_" + Guid.NewGuid().ToString("N");
 		}
 
 		public String Name

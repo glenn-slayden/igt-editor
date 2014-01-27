@@ -72,14 +72,17 @@ namespace xigt2
 		where T : class, ITier
 	{
 	};
+	public interface ITextTier : ITier
+	{
+	};
+	public interface ITextTiers : ITiers<ITextTier>
+	{
+		TextTierSet Lines { get; }
+	};
 	public interface ITiers : ITiers<ITier>
 	{
 		TierSet Tiers { get; }
 	};
-	//public interface ITextTiers : ITiers<TextTier>
-	//{
-	//	TextTierSet Lines { get; }
-	//};
 	public interface IPartsTier : IParts, ITier
 	{
 	};

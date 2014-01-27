@@ -110,7 +110,7 @@ namespace xigt2
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public class TextTier : tier_base
+	public class TextTier : tier_base, ITextTier
 	{
 		protected TextTier(Color tier_color)
 			: base(tier_color)
@@ -156,68 +156,56 @@ namespace xigt2
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public sealed class CompoundTextTier : TextTier, ITiersTier// ITextTiers
+	public sealed class CompoundTextTier : TextTier, ITextTiers
 	{
-		//readonly static DependencyPropertyKey LinesPropertyKey;
-		//public static DependencyProperty LinesProperty { get { return LinesPropertyKey.DependencyProperty; } }
+		readonly static DependencyPropertyKey LinesPropertyKey;
+		public static DependencyProperty LinesProperty { get { return LinesPropertyKey.DependencyProperty; } }
 
 		static CompoundTextTier()
 		{
+			LinesPropertyKey = DependencyProperty.RegisterReadOnly("Lines", typeof(TextTierSet), typeof(CompoundTextTier),
+				new PropertyMetadata(default(TextTierSet)));
+
 			dps.TextProperty.AddOwner(typeof(CompoundTextTier), new PropertyMetadata(default(String),
-					(o, e) => { },
-					(d, o) => ((CompoundTextTier)d).coerce_text((String)o)));
-
-			//LinesPropertyKey = DependencyProperty.RegisterReadOnly("Lines", typeof(TextTierSet), typeof(CompoundTextTier),
-			//	new PropertyMetadata(default(TextTierSet)));
-			dps.TiersProperty.AddOwner(typeof(CompoundTextTier));
-
+				null,
+				(d, o) => ((CompoundTextTier)d).coerce_text((String)o)));
 		}
 
 		String coerce_text(String s)
 		{
-			return Tiers.Select(x => x.Text).StringJoin(" "/*Igt.IgtCorpus.Delimiter*/);
+			return Lines.Select(x => x.Text).StringJoin(" "/*Igt.IgtCorpus.Delimiter*/);
 		}
 
-		//public TextTierSet Lines { get { return (TextTierSet)GetValue(LinesProperty); } }
-		//Iset<TextTier> Iitems<TextTier>.Items { get { return Lines; } }
-		//IList IListSource.GetList() { return Lines; }
-		//bool IListSource.ContainsListCollection { get { return false; } }
-
-		//public TextTier this[int index]
-		//{
-		//	get { return Lines[index]; }
-		//	set { Lines[index] = value; }
-		//}
-
-		//public int Count { get { return Lines.Count; } }
-
-		//public IEnumerator<TextTier> GetEnumerator() { return Lines.GetEnumerator(); }
-
-		//IEnumerator IEnumerable.GetEnumerator() { return Lines.GetEnumerator(); }
-
-		public TierSet Tiers { get { return (TierSet)GetValue(dps.TiersProperty); } }
-		Iset<ITier> Iitems<ITier>.Items { get { return this.Tiers; } }
-		IList IListSource.GetList() { return this.Tiers; }
+		public TextTierSet Lines { get { return (TextTierSet)GetValue(LinesProperty); } }
+		Iset<ITextTier> Iitems<ITextTier>.Items { get { return this.Lines; } }
+		IList IListSource.GetList() { return this.Lines; }
 		bool IListSource.ContainsListCollection { get { return true; } }
 
-		public ITier this[int index]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public new String Text
 		{
-			get { return Tiers[index]; }
-			set { Tiers[index] = value; }
+			get { return base.Text; }
+			set { }
 		}
 
-		public int Count { get { return Tiers.Count; } }
+		public ITextTier this[int index]
+		{
+			get { return Lines[index]; }
+			set { Lines[index] = value; }
+		}
 
-		public IEnumerator<ITier> GetEnumerator() { return Tiers.GetEnumerator(); }
+		public int Count { get { return Lines.Count; } }
 
-		IEnumerator IEnumerable.GetEnumerator() { return Tiers.GetEnumerator(); }
+		public IEnumerator<ITextTier> GetEnumerator() { return Lines.GetEnumerator(); }
+
+		IEnumerator IEnumerable.GetEnumerator() { return Lines.GetEnumerator(); }
 
 		public CompoundTextTier()
 			: base("#D6E8B0".ToColor())
 		{
-			var _lines = new TierSet(this);
+			var _lines = new TextTierSet();
 			_lines.CollectionChanged += (o, e) => CoerceValue(dps.TextProperty);
-			SetValue(dps.TiersPropertyKey, _lines);
+			SetValue(LinesPropertyKey, _lines);
 
 			//	if (lines.Any(x => x.Igt != this.Igt || !this.Igt.Contains(x)))
 			//		throw new Exception();
@@ -325,7 +313,7 @@ namespace xigt2
 		public parts_tier_base(Color tier_color)
 			: base(tier_color)
 		{
-			SetValue(PartsPropertyKey, new _PartsSet(this));
+			SetValue(PartsPropertyKey, new OwnerPartsSet(this));
 		}
 		public parts_tier_base(Color tier_color, Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
 			: base(tier_color)

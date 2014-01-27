@@ -31,7 +31,7 @@
                 <MenuItem Header="Reset app settings" Click="Menu_ResetSettings" />
                 <MenuItem Header="Reload last session" IsCheckable="True" IsChecked="{Binding Source={x:Static x2:App.settings},Path=ReloadLastSession}" />
                 <MenuItem Header="Escape key exits app" IsCheckable="True" IsChecked="{Binding Source={x:Static x2:App.settings},Path=EscapeKeyExit}" />
-                <!--<MenuItem Header="Save on exit" IsCheckable="True" IsChecked="{Binding Source={x:Static x2:App.settings},Path=SaveOnExit}" />-->
+                <MenuItem Header="Save on exit" IsCheckable="True" IsChecked="{Binding Source={x:Static x2:App.settings},Path=SaveOnExit}" />
             </MenuItem>
 
             <MenuItem x:Name="mi_font_families" Header="Fonts" >
