@@ -24,6 +24,7 @@ namespace xigt2
 			dps.PartsHostProperty.AddOwner(typeof(Part));
 		}
 
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public IParts PartsHost
 		{
 			get { return (IParts)this.GetValue(dps.PartsHostProperty); }

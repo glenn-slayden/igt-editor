@@ -25,12 +25,13 @@ namespace xigt2
 		public IgtCorpora()
 			: base(null)
 		{
+			FrameworkElement.NameProperty.AddOwner(typeof(IgtCorpora));
 		}
 
 		public String Name
 		{
-			get { return (String)this.GetValue(dps.NameProperty); }
-			set { this.SetValue(dps.NameProperty, value); }
+			get { return (String)this.GetValue(FrameworkElement.NameProperty); }
+			set { this.SetValue(FrameworkElement.NameProperty, value); }
 		}
 
 		public new Iset<IgtCorpus> Items { get { return this; } }

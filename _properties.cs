@@ -13,8 +13,8 @@ namespace xigt2
 {
 	public class dps
 	{
-		public static DependencyProperty NameProperty =
-			DependencyProperty.RegisterAttached("Name", typeof(String), typeof(dps), new PropertyMetadata(default(String)));
+		//public static DependencyProperty NameProperty =
+		//	DependencyProperty.RegisterAttached("Name", typeof(String), typeof(dps), new PropertyMetadata(default(String)));
 
 		public static DependencyProperty FilenameProperty =
 			DependencyProperty.RegisterAttached("Filename", typeof(String), typeof(dps), new PropertyMetadata(String.Empty));
@@ -118,7 +118,7 @@ namespace xigt2
 	{
 		static name_dp_base()
 		{
-			dps.NameProperty.AddOwner(typeof(name_dp_base));
+			FrameworkElement.NameProperty.AddOwner(typeof(name_dp_base));
 		}
 
 		public name_dp_base()
@@ -128,8 +128,8 @@ namespace xigt2
 
 		public String Name
 		{
-			get { return (String)this.GetValue(dps.NameProperty); }
-			set { this.SetValue(dps.NameProperty, value); }
+			get { return (String)this.GetValue(FrameworkElement.NameProperty); }
+			set { this.SetValue(FrameworkElement.NameProperty, value); }
 		}
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]

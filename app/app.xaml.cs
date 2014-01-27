@@ -18,7 +18,7 @@ namespace xigt2
 		{
 			ctx = new XamlSchemaContext(new XamlSchemaContextSettings
 			{
-				SupportMarkupExtensionsWithDuplicateArity = true
+				SupportMarkupExtensionsWithDuplicateArity = true,
 			});
 
 			settings = Settings.Load();

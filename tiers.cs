@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Controls.Primitives;
+using System.Windows.Markup;
 
 using alib.Debugging;
 using alib.Enumerable;
@@ -17,6 +18,7 @@ namespace xigt2
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
+	[UsableDuringInitialization(true)]
 	public abstract class tier_base : text_dp_base, ITier
 	{
 		static tier_base()

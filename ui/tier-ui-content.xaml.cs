@@ -265,7 +265,7 @@ namespace xigt2
 
 	public class DepItemsControl : ItemsControl
 	{
-
+#if false
 		protected override void OnTemplateChanged(ControlTemplate oldTemplate, ControlTemplate newTemplate)
 		{
 			Debug.Print("1");
@@ -289,7 +289,7 @@ namespace xigt2
 			Debug.Print("4");
 			base.OnItemTemplateChanged(oldItemTemplate, newItemTemplate);
 		}
-
+#endif
 		protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
 		{
 			base.PrepareContainerForItemOverride(element, item);
