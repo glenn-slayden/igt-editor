@@ -11,11 +11,12 @@ For more information on .NET 4.5:
 
 http://msdn.microsoft.com/en-us/library/5a4x27ek(v=vs.110).aspx
 
-igt-convert
-===========
-This program batch-converts an entire directory of igt-text (e.g. ODIN) 
-files into the XAML format used by the editor. This conversion only
-needs to be done once; the editor reads and writes the XAML IGT format.
+igt-convert (igt-convert.exe)
+=============================
+This console mode program batch-converts an entire directory of 
+igt-text (e.g. ODIN) files into the XAML format used by the editor.
+This conversion only needs to be done once; the editor reads and 
+writes the XAML IGT format.
 
 The conversion includes a few pre-configured conversion operations:
 - A single TextTier is created to preserve the original source text.
@@ -86,8 +87,8 @@ line=2766 tag=T:               `Juan is eating.'
 The output file format is a XAML serialization of the object graph for the
 in-memory object model of the WPF IGT editor.
 
-igt-edit
-========
+igt-edit (igt-edit.exe)
+=======================
 The editor is a graphical application which allows free-form, random
 access editing of multiple IGT corpora, each containing multiple IGT 
 instances.
