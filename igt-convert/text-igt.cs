@@ -11,7 +11,6 @@ using alib.Enumerable;
 
 namespace xigt2
 {
-
 	public class SourceFileInfo
 	{
 		public String Filename { get; set; }
