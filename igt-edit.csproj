@@ -89,10 +89,17 @@
     <Compile Include="app\misc.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ui\align_ctrl.xaml.cs">
+      <DependentUpon>align_ctrl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="_old\lattice-version.cs" />
     <Compile Include="_old\ui-objs %28old%29.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="ui\align_ctrl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="__main.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
