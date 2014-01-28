@@ -54,9 +54,10 @@ namespace xigt2
 			}
 		}
 
+		bool f_nosave;
 		protected override void OnClosing(CancelEventArgs e)
 		{
-			if (App.settings.SaveOnExit && App.settings.LastDirectory != null && System.IO.Directory.Exists(App.settings.LastDirectory))
+			if (!f_nosave && App.settings.SaveOnExit && App.settings.LastDirectory != null && System.IO.Directory.Exists(App.settings.LastDirectory))
 			{
 				cmd_SaveAll(App.settings.LastDirectory);
 			}
@@ -79,7 +80,6 @@ namespace xigt2
 				App.settings.SelectedCorpusFilename = null;
 				App.settings.SelectedIgtIndex = -1;
 			}
-
 			base.OnClosing(e);
 		}
 

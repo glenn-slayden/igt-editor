@@ -7,7 +7,6 @@
              xmlns:aw="clr-namespace:alib.Wpf;assembly=alib-wpf"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             Background="AliceBlue"
             Orientation="Horizontal"
              d:DesignHeight="92" d:DesignWidth="790">
 

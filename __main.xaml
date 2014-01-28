@@ -24,6 +24,7 @@
                 <Separator />
                 <MenuItem Header="Close all" Click="Menu_CloseAll" />
                 <MenuItem Header="Exit" Click="Menu_Exit" />
+                <MenuItem Header="Exit without saving" Click="Menu_Exit_nosave" />
             </MenuItem>
 
             <MenuItem Header="Options">

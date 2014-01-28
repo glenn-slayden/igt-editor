@@ -26,6 +26,13 @@ namespace xigt2
 		public align_ctrl()
 		{
 			InitializeComponent();
+
+			Loaded += (o, e) =>
+				{
+					var at = (AlignmentTier)DataContext;
+
+					at.Parts.CollectionChanged += (oo, ee) => InvalidateVisual();
+				};
 		}
 
 		private void ToggleButton_Click(object sender, RoutedEventArgs e)

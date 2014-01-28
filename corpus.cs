@@ -146,9 +146,13 @@ namespace xigt2
 			}))
 			{
 				using (var xr = new XamlObjectReader(this, App.ctx))
-				using (var xw = new XamlXmlWriter(sw, App.ctx))
 				{
-					XamlServices.Transform(xr, xw);
+					using (var xw = new XamlXmlWriter(sw, App.ctx))
+					{
+						XamlServices.Transform(xr, xw);
+						xw.Close();
+					}
+					xr.Close();
 				}
 				sw.Close();
 			}
@@ -167,12 +171,20 @@ namespace xigt2
 		public static IgtCorpus LoadXaml(String fn)
 		{
 			IgtCorpus ret;
-			using (var xr = new XamlXmlReader(fn, App.ctx))
-			using (var xw = new XamlObjectWriter(App.ctx))
+			using (var sr = XmlReader.Create(fn))
 			{
-				XamlServices.Transform(xr, xw);
+				using (var xr = new XamlXmlReader(sr, App.ctx))
+				{
+					using (var xw = new XamlObjectWriter(App.ctx))
+					{
+						XamlServices.Transform(xr, xw);
 
-				ret = (IgtCorpus)xw.Result;
+						ret = (IgtCorpus)xw.Result;
+						xw.Close();
+					}
+					xr.Close();
+				}
+				sr.Close();
 			}
 			return ret;
 		}
