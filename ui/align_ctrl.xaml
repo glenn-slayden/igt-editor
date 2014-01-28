@@ -22,8 +22,8 @@
             </ItemsControl.Template>
 
             <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type x2:CopyPart}">
-                    <ToggleButton Margin="0 0 10 30"
+                <DataTemplate DataType="{x:Type x2:AlignPart}">
+                    <ToggleButton Margin="5 0 5 00"
                               HorizontalAlignment="Left"
                               Click="ToggleButton_Click">
                         <TextBlock Text="{Binding Source.Text, Mode=OneWay}" />
@@ -32,6 +32,8 @@
             </ItemsControl.ItemTemplate>
 
         </ItemsControl>
+        
+        <Grid Height="50" />
 
         <ItemsControl x:Name="w_alignwith" 
                       ItemsSource="{Binding Path=AlignWith}">
@@ -47,7 +49,7 @@
 
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type x2:CopyPart}">
-                    <Button Margin="0 0 10 0"
+                    <Button Margin="5 0 5 0"
                               HorizontalAlignment="Left"
                             Click="Button_Click">
                         <TextBlock Text="{Binding Text, Mode=OneWay}" />

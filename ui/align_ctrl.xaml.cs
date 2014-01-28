@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,29 +28,25 @@ namespace xigt2
 			InitializeComponent();
 		}
 
-		protected override void OnRender(DrawingContext dc)
+		private void ToggleButton_Click(object sender, RoutedEventArgs e)
 		{
-			base.OnRender(dc);
-
-			var r = new Rect(base.RenderSize);
-
-			dc.DrawLine(new Pen(Brushes.Black, 2), r.TopLeft, r.BottomRight);
+			clear_toggles((ToggleButton)sender);
 		}
 
-		private void ToggleButton_Click(object sender, RoutedEventArgs e)
+		void clear_toggles(ToggleButton except)
 		{
 			foreach (var item in w_parts.Items)
 			{
 				var cp = (ContentPresenter)w_parts.ItemContainerGenerator.ContainerFromItem(item);
 				var but_item = VisualTreeHelper.GetChild(cp, 0) as ToggleButton;
 
-				if (but_item == null || but_item == sender)
+				if (but_item == except || but_item == null)
 					continue;
 				but_item.IsChecked = false;
 			}
 		}
 
-		IPart get_selected_part()
+		AlignPart get_selected_part()
 		{
 			foreach (var item in w_parts.Items)
 			{
@@ -57,14 +54,58 @@ namespace xigt2
 				var but_item = VisualTreeHelper.GetChild(cp, 0) as ToggleButton;
 
 				if (but_item.IsChecked == true)
-					return (IPart)cp.Content;
+					return (AlignPart)cp.Content;
 			}
 			return null;
 		}
 
 		private void Button_Click(object sender, RoutedEventArgs e)
 		{
-			var ip = get_selected_part();
+			var ap1 = get_selected_part();
+			if (ap1 == null)
+			{
+				return;
+			}
+			var p2 = (IPart)((Button)sender).DataContext;
+
+			clear_toggles(null);
+
+			if (ap1.AlignedParts.Contains(p2))
+			{
+				ap1.AlignedParts.Remove(p2);
+				Debug.Print("Removed {0} to {1}", p2, ap1);
+			}
+			else
+			{
+				ap1.AlignedParts.Add(p2);
+				Debug.Print("Added {0} to {1}", p2, ap1);
+			}
+			InvalidateVisual();
+		}
+
+		protected override void OnRender(DrawingContext dc)
+		{
+			base.OnRender(dc);
+
+			foreach (AlignPart it1 in w_parts.Items)
+			{
+				var cp1 = (ContentPresenter)w_parts.ItemContainerGenerator.ContainerFromItem(it1);
+				var bi1 = VisualTreeHelper.GetChild(cp1, 0) as ToggleButton;
+				var r1 = new Rect(bi1.DesiredSize);
+				var pt1 = bi1.TransformToAncestor(this).Transform(r1.BottomCenter());
+
+				foreach (var it2 in it1.AlignedParts)
+				{
+					var cp2 = (ContentPresenter)w_alignwith.ItemContainerGenerator.ContainerFromItem(it2);
+					var bi2 = VisualTreeHelper.GetChild(cp2, 0) as Button;
+					var r2 = new Rect(bi2.DesiredSize);
+					var pt2 = bi2.TransformToAncestor(this).Transform(r2.TopCenter());
+
+					dc.DrawLine(new Pen(Brushes.Black, 2), pt1, pt2);
+
+				}
+			}
+
 		}
 	};
 }

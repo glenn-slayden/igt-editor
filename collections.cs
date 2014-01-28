@@ -74,6 +74,14 @@ namespace xigt2
 		}
 	};
 
+	public class PartRefSet : _set_of<IPart>
+	{
+		public PartRefSet()
+			: base()
+		{
+		}
+	};
+
 	public class OwnerPartsSet : _take_ownership_set<IPart>
 	{
 		public OwnerPartsSet(Iitems<IPart> owner)

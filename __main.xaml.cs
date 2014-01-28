@@ -33,6 +33,8 @@ namespace xigt2
 		{
 			InitializeComponent();
 
+			this.WindowState = App.settings.WindowMaximized ? WindowState.Maximized : WindowState.Normal;
+
 			w_items.mw = w_corpora.mw = this;
 
 			Loaded += OnLoaded;
@@ -58,6 +60,8 @@ namespace xigt2
 			{
 				cmd_SaveAll(App.settings.LastDirectory);
 			}
+
+			App.settings.WindowMaximized = this.WindowState == WindowState.Maximized;
 
 			App.settings.SessionFiles =
 							w_corpora

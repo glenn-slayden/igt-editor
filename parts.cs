@@ -285,20 +285,51 @@ namespace xigt2
 	/// Alignment: a CopyPart/Dependency which includes a reference to a 'Target', which is another part from some other 
 	/// tier. The text of this AlignPart itself is inherited from the target, but the source might have different text,
 	/// which can be displayed in some modes.
-	//[DebuggerDisplay("{ToString(),nq}")]
-	//public class AlignPart : CopyPart
-	//{
-	//	//static AlignPart()
-	//	//{
-	//	//	dps.TargetProperty.AddOwner(typeof(AlignPart));
-	//	//}
+	[DebuggerDisplay("{ToString(),nq}")]
+	public class AlignPart : CopyPart //, IParts
+	{
+		static DependencyPropertyKey AlignedPartsPropertyKey;
+		public static DependencyProperty AlignedPartsProperty { get { return AlignedPartsPropertyKey.DependencyProperty; } }
 
-	//	//public IPart Target
-	//	//{
-	//	//	get { return (IPart)GetValue(dps.TargetProperty); }
-	//	//	set { SetValue(dps.TargetProperty, value); }
-	//	//}
-	//};
+		static AlignPart()
+		{
+			AlignedPartsPropertyKey = DependencyProperty.RegisterReadOnly("AlignedParts", typeof(PartRefSet), typeof(AlignPart),
+				new PropertyMetadata(default(PartRefSet),
+				(o, e) =>
+				{
+					var _this = (AlignPart)o;
+					//_this.CoerceValue(dps.TextProperty);
+				}));
+		}
+
+		public PartRefSet AlignedParts
+		{
+			get { return (PartRefSet)GetValue(AlignedPartsPropertyKey.DependencyProperty); }
+		}
+
+		//public Iset<IPart> AlignedParts { get { return (Iset<IPart>)GetValue(AlignedPartsProperty); } }
+		//Iset<IPart> Iitems<IPart>.Items { get { return this.AlignedParts; } }
+		//IList IListSource.GetList() { return this.AlignedParts; }
+		//bool IListSource.ContainsListCollection { get { return false; } }
+
+		//public IPart this[int index]
+		//{
+		//	get { return AlignedParts[index]; }
+		//	set { AlignedParts[index] = value; }
+		//}
+
+		//public int Count { get { return AlignedParts.Count; } }
+
+		//public IEnumerator<IPart> GetEnumerator() { return AlignedParts.GetEnumerator(); }
+
+		//IEnumerator IEnumerable.GetEnumerator() { return AlignedParts.GetEnumerator(); }
+
+		public AlignPart()
+		{
+			SetValue(AlignedPartsPropertyKey, new PartRefSet());
+		}
+
+	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 

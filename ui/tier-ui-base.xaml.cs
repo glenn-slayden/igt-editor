@@ -97,12 +97,14 @@ namespace xigt2
 
 				var host = stier.TiersHost;
 
+				var hst = new HashSet<ITier>(host.Tiers);
 				ITier pt;
 				while ((pt = host as ITier) != null)
 					host = pt.TiersHost;
+				hst.UnionWith(host.Tiers);
 
 				MenuItem m = null;
-				foreach (var t in host.Tiers)
+				foreach (var t in hst)
 				{
 					if (t == stier)
 						continue;
@@ -121,7 +123,7 @@ namespace xigt2
 					{
 						var at = new AlignmentTier(stier.Parts, p =>
 							{
-								return new CopyPart { Source = p };
+								return new AlignPart { Source = p };
 							}, p =>
 							{
 								throw new Exception("");
@@ -131,7 +133,7 @@ namespace xigt2
 							TierType = "Align",
 						};
 						//at.AddParts(stier, stier2);
-						host.Add(at);
+						stier.TiersHost.Add(at);
 					};
 					m.Items.Add(mi);
 				}

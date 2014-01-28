@@ -104,9 +104,6 @@ namespace xigt2
 		public static DependencyProperty SourceProperty =
 			DependencyProperty.RegisterAttached("Source", typeof(IPart), typeof(dps), new PropertyMetadata(default(IPart)));
 
-		public static DependencyProperty TargetProperty =
-		   DependencyProperty.RegisterAttached("Target", typeof(IPart), typeof(dps), new PropertyMetadata(default(IPart)));
-
 		public static DependencyPropertyKey TiersPropertyKey =
 			DependencyProperty.RegisterAttachedReadOnly("Tiers", typeof(TierSet), typeof(dps), new PropertyMetadata(default(TierSet)));
 

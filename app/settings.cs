@@ -129,5 +129,17 @@ namespace xigt2
 			DependencyProperty.Register("EscapeKeyExit", typeof(bool), typeof(Settings), new PropertyMetadata(false));
 
 
+		public bool WindowMaximized
+		{
+			get { return (bool)GetValue(WindowMaximizedProperty); }
+			set { SetValue(WindowMaximizedProperty, value); }
+		}
+
+		public static readonly DependencyProperty WindowMaximizedProperty =
+			DependencyProperty.Register("WindowMaximized", typeof(bool), typeof(Settings), new PropertyMetadata(false));
+
+		
+		
+
 	};
 }
