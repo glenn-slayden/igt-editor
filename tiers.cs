@@ -384,59 +384,6 @@ namespace xigt2
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public class AlignmentTier : parts_tier_base
-	{
-		public static readonly DependencyProperty AlignWithProperty =
-			DependencyProperty.Register("AlignWith", typeof(IParts), typeof(AlignmentTier),
-				new PropertyMetadata(default(IParts), (o, e) => ((AlignmentTier)o).alignwith_change()));
-
-
-		public AlignmentTier()
-			: base("#FCD9CC".ToColor())
-		{
-		}
-		public AlignmentTier(Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
-			: base("#FCD9CC".ToColor(), src, f_newU, f_newT)
-		{
-		}
-
-		public IParts AlignWith
-		{
-			get { return (IParts)GetValue(AlignWithProperty); }
-			set { SetValue(AlignWithProperty, value); }
-		}
-
-		void alignwith_change()
-		{
-			var rgp = this.AlignWith;
-			if (rgp == null)
-				return;
-
-		}
-
-		//public void AddParts(IParts src_tier, IParts tgt_tier)
-		//{
-		//	var rgt = tgt_tier;
-		//	if (rgt.Count > 0)
-		//	{
-		//		int i = 0;
-		//		foreach (var p in src_tier)
-		//		{
-		//			Parts.Add(new AlignPart
-		//			{
-		//				Source = p,
-		//				Target = rgt[i++],
-		//			});
-		//			if (i == rgt.Count)
-		//				i = 0;
-		//		}
-		//	}
-		//}
-	};
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/// 
-	[DebuggerDisplay("{ToString(),nq}")]
 	public class PosTagTier : parts_tier_base
 	{
 		public PosTagTier()
@@ -492,7 +439,57 @@ namespace xigt2
 			: base("#FAFA9E".ToColor(), src, f_newU, f_newT)
 		{
 		}
+	};
 
 
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// 
+	[DebuggerDisplay("{ToString(),nq}")]
+	public class AlignmentTier : parts_tier_base
+	{
+		public static readonly DependencyProperty AlignWithProperty =
+			DependencyProperty.Register("AlignWith", typeof(IParts), typeof(AlignmentTier),
+				new PropertyMetadata(default(IParts), (o, e) => ((AlignmentTier)o).alignwith_change()));
+
+		public AlignmentTier()
+			: base("#FCD9CC".ToColor())
+		{
+		}
+		public AlignmentTier(Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
+			: base("#FCD9CC".ToColor(), src, f_newU, f_newT)
+		{
+		}
+
+		public IParts AlignWith
+		{
+			get { return (IParts)GetValue(AlignWithProperty); }
+			set { SetValue(AlignWithProperty, value); }
+		}
+
+		void alignwith_change()
+		{
+			var rgp = this.AlignWith;
+			if (rgp == null)
+				return;
+		}
+
+		//public void AddParts(IParts src_tier, IParts tgt_tier)
+		//{
+		//	var rgt = tgt_tier;
+		//	if (rgt.Count > 0)
+		//	{
+		//		int i = 0;
+		//		foreach (var p in src_tier)
+		//		{
+		//			Parts.Add(new AlignPart
+		//			{
+		//				Source = p,
+		//				Target = rgt[i++],
+		//			});
+		//			if (i == rgt.Count)
+		//				i = 0;
+		//		}
+		//	}
+		//}
 	};
 }

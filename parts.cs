@@ -285,20 +285,20 @@ namespace xigt2
 	/// Alignment: a CopyPart/Dependency which includes a reference to a 'Target', which is another part from some other 
 	/// tier. The text of this AlignPart itself is inherited from the target, but the source might have different text,
 	/// which can be displayed in some modes.
-	[DebuggerDisplay("{ToString(),nq}")]
-	public class AlignPart : CopyPart
-	{
-		//static AlignPart()
-		//{
-		//	dps.TargetProperty.AddOwner(typeof(AlignPart));
-		//}
+	//[DebuggerDisplay("{ToString(),nq}")]
+	//public class AlignPart : CopyPart
+	//{
+	//	//static AlignPart()
+	//	//{
+	//	//	dps.TargetProperty.AddOwner(typeof(AlignPart));
+	//	//}
 
-		//public IPart Target
-		//{
-		//	get { return (IPart)GetValue(dps.TargetProperty); }
-		//	set { SetValue(dps.TargetProperty, value); }
-		//}
-	};
+	//	//public IPart Target
+	//	//{
+	//	//	get { return (IPart)GetValue(dps.TargetProperty); }
+	//	//	set { SetValue(dps.TargetProperty, value); }
+	//	//}
+	//};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 

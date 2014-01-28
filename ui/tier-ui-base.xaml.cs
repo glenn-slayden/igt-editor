@@ -121,7 +121,7 @@ namespace xigt2
 					{
 						var at = new AlignmentTier(stier.Parts, p =>
 							{
-								return new AlignPart { Source = p };
+								return new CopyPart { Source = p };
 							}, p =>
 							{
 								throw new Exception("");

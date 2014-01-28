@@ -185,13 +185,12 @@ namespace xigt2
 			tb_info.Text = String.Empty;
 		}
 
-		private void btn_set_align(object sender, RoutedEventArgs e)
-		{
-			var align_tier = (AlignmentTier)this.Tier;
-			var align_part = (AlignPart)((FrameworkElement)e.Source).DataContext;
-			var src_part = align_part.Source;
-
-		}
+		//private void btn_set_align(object sender, RoutedEventArgs e)
+		//{
+		//	var align_tier = (AlignmentTier)this.Tier;
+		//	var align_part = (AlignPart)((FrameworkElement)e.Source).DataContext;
+		//	var src_part = align_part.Source;
+		//}
 
 		private void MenuItem_Click(object sender, RoutedEventArgs e)
 		{
