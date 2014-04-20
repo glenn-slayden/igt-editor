@@ -71,7 +71,9 @@ in-memory object model of the WPF IGT editor.
 
 				var corpus = xigt_config.LoadTxtFile(fn);
 
-				corpus.Save(xigtdir);
+				corpus.ChangeTargetDirectory(xigtdir);
+
+				corpus.Save();
 			}
 
 			return 0;

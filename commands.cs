@@ -86,7 +86,15 @@ namespace xigt2
 		//	//cmd_SaveFile();
 		//}
 
-		private void Menu_SaveAll(Object sender, RoutedEventArgs e)
+		private void Menu_SaveAllFiles(Object sender, RoutedEventArgs e)
+		{
+			int c_saved = save_all_files();
+
+			var msg = String.Format("Saved {0} XAML-IGT files", c_saved);
+			MessageBox.Show(this, msg, "Saved XAML-IGT files", MessageBoxButton.OK, MessageBoxImage.Information);
+		}
+
+		private void Menu_SaveAllFilesTo(Object sender, RoutedEventArgs e)
 		{
 			var dlg = new CommonOpenFileDialog
 			{
@@ -100,10 +108,14 @@ namespace xigt2
 			{
 				var fn = dlg.FileName;
 				App.settings.LastDirectory = fn;
-				int c_saved = cmd_SaveAll(fn);
 
-				var msg = String.Format("{0} items saved to '{1}'", c_saved, fn);
-				MessageBox.Show(this, msg, "Saved items", MessageBoxButton.OK, MessageBoxImage.Information);
+				if (retarget_all_files_to(fn))
+				{
+					int c_saved = save_all_files();
+
+					var msg = String.Format("{0} XAML-IGT files saved to '{1}'", c_saved, fn);
+					MessageBox.Show(this, msg, "Saved XAML-IGT files", MessageBoxButton.OK, MessageBoxImage.Information);
+				}
 			}
 		}
 
@@ -142,7 +154,7 @@ namespace xigt2
 		void _clear_data_context()
 		{
 			this.DataContext = null;
-			w_opened.Content = null;
+			w_opened.SetCurrentValue(TextBlock.TextProperty, null);
 		}
 
 
@@ -155,8 +167,6 @@ namespace xigt2
 				return false;
 
 			var corpus = IgtCorpus.LoadXaml(fn);
-
-			corpus.Filename = fn;
 
 			ccc.Add(corpus);
 
@@ -178,12 +188,13 @@ namespace xigt2
 
 			Mouse.SetCursor(Cursors.Wait);
 
-			foreach (var filename in Directory.GetFiles(dirname, "*.xml"))
+			var files = Directory.GetFiles(dirname, "*.xml");
+			foreach (var filename in files)
 				_load_xaml_file(filename);
 
 			Mouse.SetCursor(Cursors.Arrow);
 
-			w_opened.Content = dirname;
+			w_opened.SetCurrentValue(TextBlock.TextProperty, String.Format("opened {0} files from '{1}'.", files.Length, dirname));
 		}
 
 		public void cmd_OpenXamlIgtFile(String filename)
@@ -208,10 +219,31 @@ namespace xigt2
 				return;
 			}
 
-			w_opened.Content = filename;
+			w_opened.SetCurrentValue(TextBlock.TextProperty, String.Format("opened '{0}'.", filename));
 		}
 
-		private bool cmd_SaveFile(IgtCorpus corp, String xigtdir)
+		private int save_all_files()
+		{
+			var ccc = _ensure_data_context();
+
+			int c_saved = 0;
+			foreach (IgtCorpus c in ccc)
+			{
+				Exception ex = c.Save();
+
+				if (ex == null)
+					c_saved++;
+				else
+				{
+					throw ex;
+				}
+			}
+
+			Mouse.SetCursor(Cursors.Arrow);
+			return c_saved;
+		}
+
+		private bool retarget_all_files_to(String xigtdir)
 		{
 			if (!Directory.Exists(xigtdir))
 			{
@@ -219,31 +251,19 @@ namespace xigt2
 				if (!Directory.Exists(xigtdir))
 				{
 					var msg = String.Format("The directory:\r\r{0}\r\rcould not be found or created.", xigtdir);
-					MessageBox.Show(this, msg, "Directory not found", MessageBoxButton.OK, MessageBoxImage.Error);
+					MessageBox.Show(this, msg, "Cannot create directory", MessageBoxButton.OK, MessageBoxImage.Error);
 					return false;
 				}
 			}
 
-			corp.Save(xigtdir);
-
-			return true;
-		}
-
-		private int cmd_SaveAll(String xigtdir)
-		{
 			Mouse.SetCursor(Cursors.Wait);
-
 			var ccc = _ensure_data_context();
 
-			int c_saved = 0;
 			foreach (IgtCorpus c in ccc)
-			{
-				if (cmd_SaveFile(c, xigtdir))
-					c_saved++;
-			}
+				c.ChangeTargetDirectory(xigtdir);
 
 			Mouse.SetCursor(Cursors.Arrow);
-			return c_saved;
+			return true;
 		}
 
 		public void cmd_CloseAll()

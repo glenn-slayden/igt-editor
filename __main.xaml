@@ -19,8 +19,8 @@
                 <MenuItem Header="Open xaml-IGT directory..." Click="Menu_OpenXamlIgtDir" />
                 <MenuItem Header="Open xaml-IGT file..." Click="Menu_OpenXamlIgtFile" />
                 <Separator />
-                <!--<MenuItem Header="Save" Click="Menu_SaveFile" />-->
-                <MenuItem Header="Save all..." Click="Menu_SaveAll" />
+                <MenuItem Header="Save all files" Click="Menu_SaveAllFiles" />
+                <MenuItem Header="Save all files to..." Click="Menu_SaveAllFilesTo" />
                 <Separator />
                 <MenuItem Header="Close all" Click="Menu_CloseAll" />
                 <MenuItem Header="Exit" Click="Menu_Exit" />
@@ -55,7 +55,9 @@
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem x:Name="w_status" Width="90">Ready</StatusBarItem>
             <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
-            <StatusBarItem x:Name="w_opened" Width="350" HorizontalAlignment="Left"></StatusBarItem>
+            <StatusBarItem Width="350" HorizontalAlignment="Left">
+                <TextBlock x:Name="w_opened" Text="{Binding ElementName=w_corpora,Path=SelectedItem.Filename}" />
+            </StatusBarItem>
             <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
             <StatusBarItem></StatusBarItem>
         </StatusBar>

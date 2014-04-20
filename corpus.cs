@@ -125,6 +125,17 @@ namespace xigt2
 		public static readonly DependencyProperty ShortFilenameProperty =
 			DependencyProperty.Register("ShortFilename", typeof(String), typeof(IgtCorpus), new PropertyMetadata(default(String)));
 
+#if false
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public String LoadDirectory
+		{
+			get { return (String)GetValue(LoadDirectoryProperty); }
+			set { SetValue(LoadDirectoryProperty, value); }
+		}
+
+		public static readonly DependencyProperty LoadDirectoryProperty =
+			DependencyProperty.Register("LoadDirectory", typeof(String), typeof(IgtCorpus), new PropertyMetadata(default(String)));
+#endif
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public String FilenameWithoutExtension
@@ -132,62 +143,79 @@ namespace xigt2
 			get { return Path.GetFileNameWithoutExtension(this.Filename); }
 		}
 
-		public void Save(String xigtdir)
+		public void ChangeTargetDirectory(String dir)
 		{
-			var temp_fn = Path.GetTempFileName();
-			using (var sw = XmlWriter.Create(temp_fn, new XmlWriterSettings
+			dir = Path.GetFullPath(dir);
+			var fn = Path.GetFileNameWithoutExtension(this.Filename) + ".xml";
+			this.Filename = Path.Combine(dir, fn);
+		}
+
+		public Exception Save()
+		{
+			try
 			{
-				Indent = true,
-				NewLineOnAttributes = true,
-				NamespaceHandling = NamespaceHandling.OmitDuplicates,
-				OmitXmlDeclaration = true,
-				Encoding = Encoding.UTF8,
-				CloseOutput = true,
-			}))
-			{
-				using (var xr = new XamlObjectReader(this, App.ctx))
+				var fn = Path.ChangeExtension(this.Filename, "xml");
+
+				var temp_fn = Path.GetTempFileName();
+
+				using (var sw = XmlWriter.Create(temp_fn, new XmlWriterSettings
 				{
-					using (var xw = new XamlXmlWriter(sw, App.ctx))
+					Indent = true,
+					NewLineOnAttributes = true,
+					NamespaceHandling = NamespaceHandling.OmitDuplicates,
+					OmitXmlDeclaration = true,
+					Encoding = Encoding.UTF8,
+					CloseOutput = true,
+				}))
+				{
+					using (var xr = new XamlObjectReader(this, App.ctx))
 					{
-						XamlServices.Transform(xr, xw);
-						xw.Close();
+						using (var xw = new XamlXmlWriter(sw, App.ctx))
+						{
+							XamlServices.Transform(xr, xw);
+							xw.Close();
+						}
+						xr.Close();
 					}
-					xr.Close();
+					sw.Close();
 				}
-				sw.Close();
-			}
 
-			var fn = this.Filename;
-			if (Path.GetExtension(fn).ToLower() == ".txt")
-			{
-				fn = Path.Combine(Path.GetFullPath(xigtdir), Path.GetFileNameWithoutExtension(fn) + ".xml");
 				this.Filename = fn;
+				File.Copy(temp_fn, fn, true);
+				File.Delete(temp_fn);
 			}
-
-			File.Copy(temp_fn, fn, true);
-			File.Delete(temp_fn);
+			catch (Exception ex)
+			{
+				return ex;
+			}
+			return null;
 		}
 
 		public static IgtCorpus LoadXaml(String fn)
 		{
 			IgtCorpus ret;
-			using (var sr = XmlReader.Create(fn))
-			{
-				using (var xr = new XamlXmlReader(sr, App.ctx))
-				{
-					using (var xw = new XamlObjectWriter(App.ctx))
-					{
-						XamlServices.Transform(xr, xw);
 
-						ret = (IgtCorpus)xw.Result;
-						xw.Close();
+			FileInfo fi;
+			using (var str = (fi = new FileInfo(fn)).OpenRead())
+			{
+				using (var sr = XmlReader.Create(str))
+				{
+					using (var xr = new XamlXmlReader(sr, App.ctx))
+					{
+						using (var xw = new XamlObjectWriter(App.ctx))
+						{
+							XamlServices.Transform(xr, xw);
+
+							ret = (IgtCorpus)xw.Result;
+							xw.Close();
+						}
+						xr.Close();
 					}
-					xr.Close();
+					sr.Close();
 				}
-				sr.Close();
+				ret.Filename = fi.FullName;
 			}
 			return ret;
 		}
-
 	};
 }

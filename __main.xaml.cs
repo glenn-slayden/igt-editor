@@ -51,15 +51,16 @@ namespace xigt2
 				{
 					cmd_OpenXamlIgtFile(f);
 				}
+				w_opened.SetCurrentValue(TextBlock.TextProperty, String.Format("opened {0} file(s).", _tmp.Length));
 			}
 		}
 
 		bool f_nosave;
 		protected override void OnClosing(CancelEventArgs e)
 		{
-			if (!f_nosave && App.settings.SaveOnExit && App.settings.LastDirectory != null && System.IO.Directory.Exists(App.settings.LastDirectory))
+			if (!f_nosave && App.settings.SaveOnExit)
 			{
-				cmd_SaveAll(App.settings.LastDirectory);
+				save_all_files();
 			}
 
 			App.settings.WindowMaximized = this.WindowState == WindowState.Maximized;
