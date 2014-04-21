@@ -105,9 +105,7 @@ object graph.
 
 Sources
 =======
-You can build both projects from source with Visual Studio 2013 Professional, 
-which is available as a free download to current UW students at 
-https://www.dreamspark.com/Student/Default.aspx
+
 
 github source repository for igt-edit and igt-convert: 
 
