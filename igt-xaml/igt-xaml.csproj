@@ -64,6 +64,13 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>cmd /k "copy $(SolutionDir)alib\$(OutDir)alib.dll $(SolutionDir)bin-external"
+cmd /k "copy $(SolutionDir)alib\$(OutDir)alib.pdb $(SolutionDir)bin-external"
+cmd /k "copy $(SolutionDir)alib-wpf\$(OutDir)alib-wpf.dll $(SolutionDir)bin-external"
+cmd /k "copy $(SolutionDir)alib-wpf\$(OutDir)alib-wpf.pdb $(SolutionDir)bin-external"
+</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

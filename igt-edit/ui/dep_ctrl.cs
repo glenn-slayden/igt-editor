@@ -50,7 +50,7 @@ namespace xie
 		protected override Size ArrangeOverride(Size sz)
 		{
 			double x = 0.0;
-			double y = 0.0;
+			//double y = 0.0;
 			foreach (UIElement el in InternalChildren)
 			{
 				if (x > 0.0)
@@ -69,6 +69,5 @@ namespace xie
 		//{
 		//	base.OnRender(dc);
 		//}
-
 	};
 }
