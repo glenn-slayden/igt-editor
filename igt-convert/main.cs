@@ -5,9 +5,13 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace xigt2
+using alib.Collections;
+using alib.Debugging;
+using alib.Enumerable;
+
+namespace xie
 {
-	public class IgtConvert
+	public static class IgtConvert
 	{
 		const String s_usage = @"Usage:
 
@@ -33,8 +37,6 @@ in-memory object model of the WPF IGT editor.
 
 		static void Main(String[] args)
 		{
-			xigt_config = config.XigtConfig.Load();
-
 			if (args.Length != 2)
 			{
 				var s_app = typeof(IgtConvert).Assembly.Location;
@@ -47,8 +49,20 @@ in-memory object model of the WPF IGT editor.
 			convert_igt_dir(Path.GetFullPath(args[0]), args[1]);
 		}
 
-		public static config.XigtConfig xigt_config;
+		public static IgtCorpus LoadTxtFile(String filename)
+		{
+			var corp = new IgtCorpus { Filename = filename };
 
+			foreach (var item in File.ReadAllLines(filename)
+							.Select(s => String.IsNullOrWhiteSpace(s) ? String.Empty : s)
+							.Partition(String.Empty)
+							.Select(raw => new TextIgt(filename, ((RefList<String>)raw).GetTrimmed()))
+							.Select(TextIgt.ToIgt))
+			{
+				corp.Add(item);
+			}
+			return corp;
+		}
 
 		public static int convert_igt_dir(String dirname, String xigtdir)
 		{
@@ -66,10 +80,10 @@ in-memory object model of the WPF IGT editor.
 			foreach (var filename in Directory.GetFiles(dirname, "*.txt"))
 			{
 				var fn = Path.GetFullPath(filename);
-				
+
 				Console.Error.WriteLine(fn);
 
-				var corpus = xigt_config.LoadTxtFile(fn);
+				var corpus = LoadTxtFile(fn);
 
 				corpus.ChangeTargetDirectory(xigtdir);
 

@@ -1,0 +1,63 @@
+﻿<StackPanel x:Class="xie.align_ctrl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:aw="clr-namespace:alib.Wpf;assembly=alib-wpf"
+             xmlns:xl="clr-namespace:xie;assembly=igt-xaml"
+             xmlns:xe="clr-namespace:xie;assembly=igt-edit"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+            Orientation="Horizontal"
+             d:DesignHeight="92" d:DesignWidth="790">
+
+    <StackPanel Orientation="Vertical">
+        <ItemsControl x:Name="w_parts" ItemsSource="{Binding Mode=OneWay}">
+
+            <ItemsControl.Template>
+                <ControlTemplate>
+                    <StackPanel Orientation="Horizontal"
+                            IsItemsHost="True" />
+                </ControlTemplate>
+            </ItemsControl.Template>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type xl:AlignPart}">
+                    <ToggleButton Margin="5 0 5 00"
+                              HorizontalAlignment="Left"
+                              Click="ToggleButton_Click">
+                        <TextBlock Text="{Binding Source.Text, Mode=OneWay}" />
+                    </ToggleButton>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+
+        </ItemsControl>
+        
+        <Grid Height="50" />
+
+        <ItemsControl x:Name="w_alignwith" 
+                      ItemsSource="{Binding Path=AlignWith}">
+
+            <ItemsControl.Template>
+                <ControlTemplate>
+
+                    <StackPanel Orientation="Horizontal"
+                            IsItemsHost="True" />
+
+                </ControlTemplate>
+            </ItemsControl.Template>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type xl:CopyPart}">
+                    <Button Margin="5 0 5 0"
+                              HorizontalAlignment="Left"
+                            Click="Button_Click">
+                        <TextBlock Text="{Binding Text, Mode=OneWay}" />
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+
+    <!--<Button VerticalAlignment="Bottom" Content="Done" />-->
+</StackPanel>

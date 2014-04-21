@@ -1,13 +1,9 @@
-odin-xaml/
 alib/
 alib-wpf/
-x1/
-x2/
-x3/
-x4/
-test/
-train/
+__test-in/
+__test-out/
 app-settings.xaml
+*.*__
 
 #################
 ## Eclipse

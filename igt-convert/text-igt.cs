@@ -9,7 +9,7 @@ using alib;
 using alib.Debugging;
 using alib.Enumerable;
 
-namespace xigt2
+namespace xie
 {
 	public class SourceFileInfo
 	{

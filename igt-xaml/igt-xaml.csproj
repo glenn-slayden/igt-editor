@@ -4,18 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9D1BE1B9-BE70-42EA-8D10-3D9D8CB01742}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{40F4792F-F470-406F-839C-5A6C7301DDAD}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>xie</RootNamespace>
-    <AssemblyName>igt-convert</AssemblyName>
+    <AssemblyName>igt-xaml</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -25,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -34,6 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -44,12 +42,16 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="main.cs" />
+    <Compile Include="collections.cs" />
+    <Compile Include="corpus.cs" />
+    <Compile Include="_igt-xaml.cs" />
+    <Compile Include="igt.cs" />
+    <Compile Include="parts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="text-igt.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Properties\App.config" />
+    <Compile Include="tiers.cs" />
+    <Compile Include="_interface.cs" />
+    <Compile Include="_promoter.cs" />
+    <Compile Include="_properties.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\alib-wpf\alib-wpf.csproj">
@@ -59,10 +61,6 @@
     <ProjectReference Include="..\alib\alib.csproj">
       <Project>{2d69be1a-2d60-4eff-8d0c-607f0c3448df}</Project>
       <Name>alib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\igt-xaml\igt-xaml.csproj">
-      <Project>{40f4792f-f470-406f-839c-5a6c7301ddad}</Project>
-      <Name>igt-xaml</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

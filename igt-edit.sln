@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "igt-edit", "igt-edit.csproj", "{F3C4D521-2860-457C-8153-AEF2214AFE78}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "igt-edit", "igt-edit\igt-edit.csproj", "{F3C4D521-2860-457C-8153-AEF2214AFE78}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2D69BE1A-2D60-4EFF-8D0C-607F0C3448DF} = {2D69BE1A-2D60-4EFF-8D0C-607F0C3448DF}
 		{16BB8296-90EB-4E15-99C2-0EA6FD44FB6C} = {16BB8296-90EB-4E15-99C2-0EA6FD44FB6C}
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "alib", "alib\alib.csproj", "{2D69BE1A-2D60-4EFF-8D0C-607F0C3448DF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "alib-wpf", "alib-wpf\alib-wpf.csproj", "{16BB8296-90EB-4E15-99C2-0EA6FD44FB6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "igt-xaml", "igt-xaml\igt-xaml.csproj", "{40F4792F-F470-406F-839C-5A6C7301DDAD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +39,10 @@ Global
 		{16BB8296-90EB-4E15-99C2-0EA6FD44FB6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{16BB8296-90EB-4E15-99C2-0EA6FD44FB6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{16BB8296-90EB-4E15-99C2-0EA6FD44FB6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40F4792F-F470-406F-839C-5A6C7301DDAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40F4792F-F470-406F-839C-5A6C7301DDAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40F4792F-F470-406F-839C-5A6C7301DDAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40F4792F-F470-406F-839C-5A6C7301DDAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,218 @@
+﻿<ContentControl x:Class="xie.tier_ui_content"
+             x:Name="w_cc"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:aw="clr-namespace:alib.Wpf;assembly=alib-wpf"
+             xmlns:xl="clr-namespace:xie;assembly=igt-xaml"
+             xmlns:xe="clr-namespace:xie"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             Margin="4 3 0 3"
+             d:DesignHeight="60"
+             d:DesignWidth="600">
+
+    <ContentControl.Resources>
+
+        <DataTemplate DataType="{x:Type xl:TextTier}" >
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Text="{Binding Text, Mode={x:Static BindingMode.TwoWay}}"
+                    
+                     Background="{Binding Path=(xl:dps.IsReadOnly), Converter={x:Static xe:IsReadOnlyToBrushConverter.Instance}, ConverterParameter=#F9D0D0}"
+                     HorizontalAlignment="Left"
+                     VerticalAlignment="Center"
+                     SelectionChanged="TextBox_SelectionChanged"
+                     PreviewMouseUp="TextBox_PreviewMouseUp" />
+
+                <TextBlock Grid.Column="1"
+                           x:Name="w_selection_info" 
+                           Padding="10 0 0 0"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type xl:TierGroupTier}" >
+            <Expander IsExpanded="True">
+                <Expander.Header>
+                    <ItemsControl ItemsSource="{Binding Mode=OneWay}">
+                        <ItemsControl.Template>
+                            <ControlTemplate>
+                                <StackPanel Orientation="Horizontal"
+                                            IsItemsHost="True" >
+                                    <StackPanel.RenderTransform>
+                                        <ScaleTransform ScaleX=".9" ScaleY=".9" />
+                                    </StackPanel.RenderTransform>
+                                </StackPanel>
+                            </ControlTemplate>
+                        </ItemsControl.Template>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="xl:tier_base">
+                                <ToggleButton Margin="4 0 0 0" 
+                                              MinWidth="35"
+                                              Content="{Binding TierType}"
+                                              IsChecked="{Binding IsVisible}"
+                                              BorderThickness="0" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Expander.Header>
+                <xe:TiersControl ItemsSource="{Binding Mode=OneWay}" />
+            </Expander>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type xl:CompoundTextTier}" >
+            <Grid>
+                <TextBox Text="{Binding Text, Mode=TwoWay}"
+                     IsReadOnly="{Binding Path=(xl:dps.IsReadOnly)}"
+                     Background="{Binding Path=(xl:dps.IsReadOnly), Converter={x:Static xe:IsReadOnlyToBrushConverter.Instance}, ConverterParameter=#E6F8C0}"
+                     HorizontalAlignment="Left"
+                     VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type xl:SegTier}" >
+
+            <ItemsControl ItemsSource="{Binding Mode=OneWay}">
+                <ItemsControl.Template>
+                    <ControlTemplate>
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal"
+                                        IsItemsHost="True"
+                                        HorizontalAlignment="Left" />
+                            <Button Content="T…"
+                                    FontWeight="Bold"
+                                    Background="Transparent"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Padding="1.5"
+                                    Margin="4 0 0 0" 
+                                    Command="{x:Static xe:Cmd_AddTextPart.Instance}"
+                                    CommandParameter="{Binding ElementName=w_cc, Path=Tier}" />
+                        </StackPanel>
+                    </ControlTemplate>
+                </ItemsControl.Template>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <xe:ui_part_base />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+
+            </ItemsControl>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type xl:PosTagTier}" >
+            <ItemsControl ItemsSource="{Binding Mode=OneWay}">
+                <ItemsControl.Template>
+                    <ControlTemplate>
+                        <StackPanel Orientation="Horizontal"
+                                    IsItemsHost="True"
+                                    HorizontalAlignment="Left" />
+                    </ControlTemplate>
+                </ItemsControl.Template>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <xe:ui_part Content="{Binding}"
+                                    Margin="1 1 1 1" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+
+            </ItemsControl>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type xl:DependenciesTier}" >
+            <StackPanel Orientation="Vertical" >
+                <xe:DepItemsControl ItemsSource="{Binding Mode=OneWay}">
+                    <xe:DepItemsControl.Template>
+                        <ControlTemplate>
+                            <aw:TreeLayoutPanel 
+                                         x:Name="w_dep_tree"
+                                         IsItemsHost="True"
+                                         Margin="4 4 4 4"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top"
+                                         VerticalBuffer="70"
+                                         HorizontalBuffer="50" />
+                        </ControlTemplate>
+                    </xe:DepItemsControl.Template>
+                    <xe:DepItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type xl:DepPart}">
+                            <Border BorderBrush="Black"
+                                    Padding="4 2 4 5"
+                                    Background="#FCFCCE"
+                                    BorderThickness="1"
+                                    CornerRadius="2.5">
+
+                                <xe:DepNode 
+                                    MinWidth="30"
+                                    Text="{Binding Text, Mode=OneWay}"
+                                    TextAlignment="Center">
+                                    <xe:DepNode.Resources>
+                                        <MenuItem x:Key="dep_types_menu"
+                                                  Header="Select dependency type"
+                                                  Click="MenuItem_Click">
+                                            <MenuItem Header="Arg">
+                                                <MenuItem Header="comp">
+                                                    <sys:String>Acomp</sys:String>
+                                                    <sys:String>Ccomp</sys:String>
+                                                    <MenuItem Header="obj">
+                                                        <sys:String>Dobj</sys:String>
+                                                        <sys:String>Iobj</sys:String>
+                                                        <sys:String>Pobj</sys:String>
+                                                    </MenuItem>
+                                                </MenuItem>
+                                                <MenuItem Header="subj">
+                                                    <MenuItem Header="nsubj" />
+                                                    <MenuItem Header="csubj" />
+                                                </MenuItem>
+                                            </MenuItem>
+
+                                            <MenuItem Header="mod">
+                                                <sys:String>Appos</sys:String>
+                                                <sys:String>Acomp</sys:String>
+                                                <sys:String>MWE</sys:String>
+                                                <sys:String>Rcmod</sys:String>
+                                                <sys:String>Prt</sys:String>
+                                            </MenuItem>
+
+                                            <MenuItem Header="marker">
+                                                <sys:String>Case</sys:String>
+                                            </MenuItem>
+                                        </MenuItem>
+                                    </xe:DepNode.Resources>
+                                    <!--<TextBlock.ContextMenu>
+                                        <ContextMenu ItemsSource="{Binding AvailableHeads}">
+                                            <ContextMenu.ItemContainerStyle>
+                                                <Style TargetType="MenuItem">
+                                                    <Setter Property="CommandParameter" Value="{Binding RelativeSource={RelativeSource AncestorType=Border},Path=DataContext}" />
+                                                    <Setter Property="Header" Value="{Binding Text}" />
+                                                    <Setter Property="TextBlock.TextAlignment" Value="Left" />
+                                                    <EventSetter Event="Click" Handler="MenuItem_Click" />
+                                                </Style>
+                                            </ContextMenu.ItemContainerStyle>
+                                        </ContextMenu>
+                                    </TextBlock.ContextMenu>-->
+                                </xe:DepNode>
+                            </Border>
+
+                        </DataTemplate>
+                    </xe:DepItemsControl.ItemTemplate>
+                </xe:DepItemsControl>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type xl:AlignmentTier}" >
+            <xe:align_ctrl HorizontalAlignment="Left" />
+        </DataTemplate>
+
+    </ContentControl.Resources>
+
+</ContentControl>
