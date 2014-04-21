@@ -105,8 +105,6 @@ object graph.
 
 Sources
 =======
-
-
 github source repository for igt-edit and igt-convert: 
 
 https://github.com/glenn-slayden/igt-editor/
