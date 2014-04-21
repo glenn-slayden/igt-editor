@@ -65,11 +65,15 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>cmd /k "copy $(SolutionDir)alib\$(OutDir)alib.dll $(SolutionDir)bin-external"
-cmd /k "copy $(SolutionDir)alib\$(OutDir)alib.pdb $(SolutionDir)bin-external"
-cmd /k "copy $(SolutionDir)alib-wpf\$(OutDir)alib-wpf.dll $(SolutionDir)bin-external"
-cmd /k "copy $(SolutionDir)alib-wpf\$(OutDir)alib-wpf.pdb $(SolutionDir)bin-external"
+    <PreBuildEvent>cmd /k "copy $(SolutionDir)alib\$(OutDir)alib.dll $(SolutionDir)bin"
+cmd /k "copy $(SolutionDir)alib\$(OutDir)alib.pdb $(SolutionDir)bin"
+cmd /k "copy $(SolutionDir)alib-wpf\$(OutDir)alib-wpf.dll $(SolutionDir)bin"
+cmd /k "copy $(SolutionDir)alib-wpf\$(OutDir)alib-wpf.pdb $(SolutionDir)bin"
 </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>cmd /k "copy $(TargetPath) $(SolutionDir)bin"
+cmd /k "copy $(TargetDir)$(TargetName).pdb $(SolutionDir)bin"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
