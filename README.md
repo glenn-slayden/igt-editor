@@ -38,38 +38,54 @@ The following is a sample of the XAML-igt format which the igt-edit
 program reads and writes. This example shows the results of the 
 built-in conversion operations mentioned above.
 
-<IgtCorpus xmlns="clr-namespace:xe;assembly=xigt-edit"
-           Delimiter=" " 
-		   Filename="x2\eng.xml" 
-		   ShortFilename="x2/eng.xml">
+<IgtCorpus xmlns="clr-namespace:xie;assembly=igt-xaml"
+           Name="_44e4ed39704741aaba1aee6da3099b28"
+           Delimiter=" ">
   <IgtCorpus.Items>
-    <Igt DocId="444" FromLine="11" Language="english (eng)" ToLine="16">
+    <Igt Name="_7f5d8be3165c475f86dd39638237fa47"
+         DocId="342"
+         Language="french (fra)"
+         FromLine="1193"
+         ToLine="1195">
       <Igt.Tiers>
-        <TextTier
-          Text="doc_id=444 11 16 T+LN T L+LN L L+LN+AL L+AL&#xD;&#xA;language: english (eng)&#xD;&#xA;line=11 tag=T+LN:  (1) a. The wind broke the window (English)&#xD;&#xA;line=12 tag=T:           b.     The window broke&#xD;&#xA;line=13 tag=L+LN:  (2)      a.     Il vento ha rotto la finestra                (Italian)&#xD;&#xA;line=14 tag=L:           b.     La finestra è rotta&#xD;&#xA;line=15 tag=L+LN+AL:  (3)      a.     Der Wind zerbricht das Fenster  (German)&#xD;&#xA;line=16 tag=L+AL:  b.  Das Fenster zerbricht"
-          TierType="odin-txt" />
-        <TierGroupTier TierType="Lang">
+        <TextTier Name="_2b0453acfed14dbfb3e9bb2f35f308c4"
+                  Text="doc_id=342 1193 1195 L G T&#xD;&#xA;language: french (fra)&#xD;&#xA;line=1193 tag=L: (i) Le livre  a eu été publié.&#xD;&#xA;line=1194 tag=G: the book has had been  published&#xD;&#xA;line=1195 tag=T: `The book has had been published'"
+                  TierType="odin-txt" />
+        <TierGroupTier Name="_dda8249bd2b244cc860ae08db11ec885"
+                       TierType="Lang">
           <TierGroupTier.Tiers>
-            <TextTier Text="  (2) a. Il vento ha rotto la finestra     (Italian)" TierType="L+LN-13" />
-            <TextTier Text="      b. La finestra è rotta" TierType="L-14" />
-            <TextTier Text="  (3) a. Der Wind zerbricht das Fenster               (German)" TierType="L+LN+AL-15" />
-            <TextTier Text="      b. Das Fenster zerbricht" TierType="L+AL-16" />
+            <TextTier Name="_6ab947a639214e7e9b0a0c3597467a23"
+                      Text=" (i) Le livre  a eu été publié."
+                      TierType="L-1193" />
           </TierGroupTier.Tiers>
         </TierGroupTier>
-        <TierGroupTier TierType="Transl.">
+        <TierGroupTier Name="_9471e64c3e3f44b0b96accf440dd18c5"
+                       TierType="Gloss">
           <TierGroupTier.Tiers>
-            <TextTier Text="  (1) a.     The wind broke the window     (English)" TierType="T+LN-11" />
-            <TextTier Text="      b.     The window broke" TierType="T-12" />
+            <TextTier Name="_a83b81a3b313413da4942cabaceb11f8"
+                      Text=" the book has had been  published"
+                      TierType="G-1194" />
+          </TierGroupTier.Tiers>
+        </TierGroupTier>
+        <TierGroupTier Name="_d1e89f9001ff4ce8a6493c0b2d1f725d"
+                       TierType="Transl.">
+          <TierGroupTier.Tiers>
+            <TextTier Name="_6b82effdadd04c899c1f9d390b58474c"
+                      Text=" `The book has had been published'"
+                      TierType="T-1195" />
           </TierGroupTier.Tiers>
         </TierGroupTier>
       </Igt.Tiers>
     </Igt>
-	<!-- ... any number of additional IGT instances ... -->
+    <!-- ... any number of additional IGT instances ... -->
   </IgtCorpus.Items>
 </IgtCorpus>
-
+  
 The 'xmlns' (namespace) directive on the root element of the document is 
 required in every XAML-igt file as shown.
+
+Support for the XAML-IGT format is provided by the igt-xaml.dll class
+library.
 
 igt-convert usage
 =================
@@ -110,7 +126,7 @@ github source repository for igt-edit and igt-convert:
 https://github.com/glenn-slayden/igt-editor/
 
 The editor is a .NET/WPF (Windows Presentation Foundation) graphical 
-application which requires Windows and .NET 4.5.
+application which requires Windows and .NET 4.5.1
 
 Although the converter is a console application, it also cannot be built 
 under Mono since it depends on the WPF objects used by the editor app.
