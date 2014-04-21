@@ -38,6 +38,7 @@ The following is a sample of the XAML-igt format which the igt-edit
 program reads and writes. This example shows the results of the 
 built-in conversion operations mentioned above.
 
+<![CDATA[
 <IgtCorpus xmlns="clr-namespace:xie;assembly=igt-xaml"
            Name="_44e4ed39704741aaba1aee6da3099b28"
            Delimiter=" ">
@@ -80,6 +81,7 @@ built-in conversion operations mentioned above.
     <!-- ... any number of additional IGT instances ... -->
   </IgtCorpus.Items>
 </IgtCorpus>
+]]>
   
 The 'xmlns' (namespace) directive on the root element of the document is 
 required in every XAML-igt file as shown.
