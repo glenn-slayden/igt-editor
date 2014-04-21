@@ -38,48 +38,50 @@ The following is a sample of the XAML-igt format which the igt-edit
 program reads and writes. This example shows the results of the 
 built-in conversion operations mentioned above.
 
-&lt;IgtCorpus xmlns="clr-namespace:xie;assembly=igt-xaml"
+<pre>
+<IgtCorpus xmlns="clr-namespace:xie;assembly=igt-xaml"
            Name="_44e4ed39704741aaba1aee6da3099b28"
-           Delimiter=" "&gt;
-  &lt;IgtCorpus.Items&gt;
-    &lt;Igt Name="_7f5d8be3165c475f86dd39638237fa47"
+           Delimiter=" ">
+  <IgtCorpus.Items>
+    <Igt Name="_7f5d8be3165c475f86dd39638237fa47"
          DocId="342"
          Language="french (fra)"
          FromLine="1193"
-         ToLine="1195"&gt;
-      &lt;Igt.Tiers&gt;
-        &lt;TextTier Name="_2b0453acfed14dbfb3e9bb2f35f308c4"
+         ToLine="1195">
+      <Igt.Tiers>
+        <TextTier Name="_2b0453acfed14dbfb3e9bb2f35f308c4"
                   Text="doc_id=342 1193 1195 L G T&#xD;&#xA;language: french (fra)&#xD;&#xA;line=1193 tag=L: (i) Le livre  a eu été publié.&#xD;&#xA;line=1194 tag=G: the book has had been  published&#xD;&#xA;line=1195 tag=T: `The book has had been published'"
-                  TierType="odin-txt" /&gt;
-        &lt;TierGroupTier Name="_dda8249bd2b244cc860ae08db11ec885"
-                       TierType="Lang"&gt;
-          &lt;TierGroupTier.Tiers&gt;
-            &lt;TextTier Name="_6ab947a639214e7e9b0a0c3597467a23"
+                  TierType="odin-txt" />
+        <TierGroupTier Name="_dda8249bd2b244cc860ae08db11ec885"
+                       TierType="Lang">
+          <TierGroupTier.Tiers>
+            <TextTier Name="_6ab947a639214e7e9b0a0c3597467a23"
                       Text=" (i) Le livre  a eu été publié."
-                      TierType="L-1193" /&gt;
-          &lt;/TierGroupTier.Tiers&gt;
-        &lt;/TierGroupTier&gt;
-        &lt;TierGroupTier Name="_9471e64c3e3f44b0b96accf440dd18c5"
-                       TierType="Gloss"&gt;
-          &lt;TierGroupTier.Tiers&gt;
-            &lt;TextTier Name="_a83b81a3b313413da4942cabaceb11f8"
+                      TierType="L-1193" />
+          </TierGroupTier.Tiers>
+        </TierGroupTier>
+        <TierGroupTier Name="_9471e64c3e3f44b0b96accf440dd18c5"
+                       TierType="Gloss">
+          <TierGroupTier.Tiers>
+            <TextTier Name="_a83b81a3b313413da4942cabaceb11f8"
                       Text=" the book has had been  published"
-                      TierType="G-1194" /&gt;
-          &lt;/TierGroupTier.Tiers&gt;
-        &lt;/TierGroupTier&gt;
-        &lt;TierGroupTier Name="_d1e89f9001ff4ce8a6493c0b2d1f725d"
-                       TierType="Transl."&gt;
-          &lt;TierGroupTier.Tiers&gt;
-            &lt;TextTier Name="_6b82effdadd04c899c1f9d390b58474c"
+                      TierType="G-1194" />
+          </TierGroupTier.Tiers>
+        </TierGroupTier>
+        <TierGroupTier Name="_d1e89f9001ff4ce8a6493c0b2d1f725d"
+                       TierType="Transl.">
+          <TierGroupTier.Tiers>
+            <TextTier Name="_6b82effdadd04c899c1f9d390b58474c"
                       Text=" `The book has had been published'"
-                      TierType="T-1195" /&gt;
-          &lt;/TierGroupTier.Tiers&gt;
-        &lt;/TierGroupTier&gt;
-      &lt;/Igt.Tiers&gt;
-    &lt;/Igt&gt;
-    &lt;!-- ... any number of additional IGT instances ... --&gt;
-  &lt;/IgtCorpus.Items&gt;
-&lt;/IgtCorpus&gt;
+                      TierType="T-1195" />
+          </TierGroupTier.Tiers>
+        </TierGroupTier>
+      </Igt.Tiers>
+    </Igt>
+    <!-- ... any number of additional IGT instances ... -->
+  </IgtCorpus.Items>
+</IgtCorpus>
+</pre>
   
 The 'xmlns' (namespace) directive on the root element of the document is 
 required in every XAML-igt file as shown.
