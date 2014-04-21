@@ -1,0 +1,120 @@
+IGT Editor
+==========
+
+Editor for IGT instances and corpora (WPF)
+
+
+There are two executables related to IGT editing, the converter
+(igt-convert) and the editor (igt-edit). Both require a version
+of Windows compatible with .NET 4.5 (that is, Vista or later, Windows XP 
+is not supported). Windows 8 and later include the required version. For 
+Windows 7 and Vista you may need to install .NET 4.5.1 from:
+
+http://www.microsoft.com/en-us/download/details.aspx?id=30653
+
+For more information on .NET 4.5.1:
+
+http://msdn.microsoft.com/en-us/library/5a4x27ek(v=vs.110).aspx
+
+igt-convert (igt-convert.exe)
+=============================
+This console mode program batch-converts an entire directory of 
+igt-text (e.g. ODIN) files into the XAML format used by the editor.
+This conversion only needs to be done once; the editor reads and 
+writes the XAML IGT format.
+
+The conversion includes a few pre-configured conversion operations:
+- A single TextTier is created to preserve the original source text.
+- Tiers are grouped according to tier type, such that one TierGroupTier
+is created for each distinct type. Source lines tagged with multiple
+tier types are repeated (copied) and placed into each indicated group.
+
+ODIN test and train data from the aggregation project has been pre-
+converted and can be found in the odin-xaml directory.
+
+XAML-IGT format
+===============
+The following is a sample of the XAML-igt format which the igt-edit
+program reads and writes. This example shows the results of the 
+built-in conversion operations mentioned above.
+
+<IgtCorpus xmlns="clr-namespace:xe;assembly=xigt-edit"
+           Delimiter=" " 
+		   Filename="x2\eng.xml" 
+		   ShortFilename="x2/eng.xml">
+  <IgtCorpus.Items>
+    <Igt DocId="444" FromLine="11" Language="english (eng)" ToLine="16">
+      <Igt.Tiers>
+        <TextTier
+          Text="doc_id=444 11 16 T+LN T L+LN L L+LN+AL L+AL&#xD;&#xA;language: english (eng)&#xD;&#xA;line=11 tag=T+LN:  (1) a. The wind broke the window (English)&#xD;&#xA;line=12 tag=T:           b.     The window broke&#xD;&#xA;line=13 tag=L+LN:  (2)      a.     Il vento ha rotto la finestra                (Italian)&#xD;&#xA;line=14 tag=L:           b.     La finestra è rotta&#xD;&#xA;line=15 tag=L+LN+AL:  (3)      a.     Der Wind zerbricht das Fenster  (German)&#xD;&#xA;line=16 tag=L+AL:  b.  Das Fenster zerbricht"
+          TierType="odin-txt" />
+        <TierGroupTier TierType="Lang">
+          <TierGroupTier.Tiers>
+            <TextTier Text="  (2) a. Il vento ha rotto la finestra     (Italian)" TierType="L+LN-13" />
+            <TextTier Text="      b. La finestra è rotta" TierType="L-14" />
+            <TextTier Text="  (3) a. Der Wind zerbricht das Fenster               (German)" TierType="L+LN+AL-15" />
+            <TextTier Text="      b. Das Fenster zerbricht" TierType="L+AL-16" />
+          </TierGroupTier.Tiers>
+        </TierGroupTier>
+        <TierGroupTier TierType="Transl.">
+          <TierGroupTier.Tiers>
+            <TextTier Text="  (1) a.     The wind broke the window     (English)" TierType="T+LN-11" />
+            <TextTier Text="      b.     The window broke" TierType="T-12" />
+          </TierGroupTier.Tiers>
+        </TierGroupTier>
+      </Igt.Tiers>
+    </Igt>
+	<!-- ... any number of additional IGT instances ... -->
+  </IgtCorpus.Items>
+</IgtCorpus>
+
+The 'xmlns' (namespace) directive on the root element of the document is 
+required in every XAML-igt file as shown.
+
+igt-convert usage
+=================
+igt-convert.exe [input-dir] [output-dir]
+
+Converts each ODIN text format IGT file (*.txt) in the input directory to a
+XAML IGT file (*.xml) in the output directory. Existing files with a
+conflicting name in the output directory are overwritten.
+
+ODIN text files are UTF-8 files containing zero or more IGT instances which
+adhere to the (e.g.) following format. Instances must be separated by a
+blank line. Line feed format can be either Unix or DOS/Windows.
+
+doc_id=807 2764 2766 L G T
+language: spanish (spa) + english (eng)
+line=2764 tag=L:         (77a) *Juan está eat-iendo
+line=2765 tag=G:               Juan be/1Ss eat-DUR
+line=2766 tag=T:               `Juan is eating.'
+
+The output file format is a XAML serialization of the object graph for the
+in-memory object model of the WPF IGT editor.
+
+igt-edit (igt-edit.exe)
+=======================
+The editor is a graphical application which allows free-form, random
+access editing of multiple IGT corpora, each containing multiple IGT 
+instances.
+
+The editor reads and writes XAML-igt files. This hierarchical XML file 
+format is human readable and can be edited by hand or with scripts,
+although care must be taken to adhere to maintain readability of the
+object graph.
+
+Sources
+=======
+You can build both projects from source with Visual Studio 2013 Professional, 
+which is available as a free download to current UW students at 
+https://www.dreamspark.com/Student/Default.aspx
+
+github source repository for igt-edit and igt-convert: 
+
+https://github.com/glenn-slayden/igt-editor/
+
+The editor is a .NET/WPF (Windows Presentation Foundation) graphical 
+application which requires Windows and .NET 4.5.
+
+Although the converter is a console application, it also cannot be built 
+under Mono since it depends on the WPF objects used by the editor app.
