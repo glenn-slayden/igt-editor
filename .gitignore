@@ -68,6 +68,8 @@ build/
 *.obj
 *.pch
 *.pdb
+!alib.pdb
+!alib-wpf.pdb
 *.pgc
 *.pgd
 *.rsp
