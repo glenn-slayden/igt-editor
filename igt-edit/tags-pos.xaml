@@ -1,0 +1,32 @@
+﻿<sc:ArrayList
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sc="clr-namespace:System.Collections;assembly=mscorlib"
+    xmlns:xl="clr-namespace:xie;assembly=igt-xaml">
+
+    <x:String>unk</x:String>
+    <Separator MinWidth="100" />
+    <x:String>N</x:String>
+    <x:String>V</x:String>
+    <x:String>A</x:String>
+    <x:String>Adj</x:String>
+    <x:String>Aux</x:String>
+    <Separator />
+    <x:String>PN</x:String>
+    <x:String>Det</x:String>
+    <x:String>Num</x:String>
+    <x:String>Adp</x:String>
+    <x:String>Conj</x:String>
+    <x:String>SC</x:String>
+    <x:String>Pun</x:String>
+    <x:String>Sym</x:String>
+    <x:String>Comp</x:String>
+    <Separator />
+    <x:String>CaseM</x:String>
+    <x:String>ASP</x:String>
+    <x:String>CL</x:String>
+    <x:String>Expl</x:String>
+    <x:String>SP</x:String>
+    <x:String>PossM</x:String>
+
+</sc:ArrayList>

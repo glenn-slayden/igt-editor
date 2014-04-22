@@ -41,10 +41,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.WindowsAPICodePack">
-      <HintPath>..\bin-external\Microsoft.WindowsAPICodePack.dll</HintPath>
+      <HintPath>..\bin\Microsoft.WindowsAPICodePack.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAPICodePack.Shell">
-      <HintPath>..\bin-external\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+      <HintPath>..\bin\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
@@ -55,53 +55,58 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <ProjectReference Include="..\alib-wpf\alib-wpf.csproj">
+      <Project>{16bb8296-90eb-4e15-99c2-0ea6fd44fb6c}</Project>
+      <Name>alib-wpf</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\alib\alib.csproj">
+      <Project>{2d69be1a-2d60-4eff-8d0c-607f0c3448df}</Project>
+      <Name>alib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\igt-xaml\igt-xaml.csproj">
+      <Project>{40f4792f-f470-406f-839c-5a6c7301ddad}</Project>
+      <Name>igt-xaml</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="_images\Pencil.png" />
   </ItemGroup>
   <ItemGroup>
+    <AppDesigner Include="Properties\" />
     <None Include="Properties\app.config" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="app\app.xaml">
-      <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
     <Compile Include="app\app.xaml.cs">
       <DependentUpon>app.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="app\main.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="app\main.xaml.cs">
+      <DependentUpon>main.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="app\commands.cs" />
     <Compile Include="app\settings.cs" />
     <Compile Include="app\converters.cs" />
     <Compile Include="app\drag-canvas.cs" />
     <Compile Include="app\misc.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ui\align_ctrl.xaml.cs">
-      <DependentUpon>align_ctrl.xaml</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Page Include="ui\align_ctrl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="__main.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="__main.xaml.cs">
-      <DependentUpon>__main.xaml</DependentUpon>
-      <SubType>Code</SubType>
+    <Compile Include="ui\align_ctrl.xaml.cs">
+      <DependentUpon>align_ctrl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="commands.cs">
-      <DependentUpon>__main.xaml</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="ui\dep_ctrl.cs" />
     <Page Include="ui\IgtControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -151,25 +156,24 @@
     <Compile Include="ui\ui-part-controls.xaml.cs">
       <DependentUpon>ui-part-controls.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ui\dep_ctrl.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\alib-wpf\alib-wpf.csproj">
-      <Project>{16bb8296-90eb-4e15-99c2-0ea6fd44fb6c}</Project>
-      <Name>alib-wpf</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\alib\alib.csproj">
-      <Project>{2d69be1a-2d60-4eff-8d0c-607f0c3448df}</Project>
-      <Name>alib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\igt-xaml\igt-xaml.csproj">
-      <Project>{40f4792f-f470-406f-839c-5a6c7301ddad}</Project>
-      <Name>igt-xaml</Name>
-    </ProjectReference>
+    <None Include="tags-dep.xaml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="tags-pos.xaml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>cmd /k "copy $(TargetPath) $(SolutionDir)bin"
-cmd /k "copy $(TargetDir)$(TargetName).pdb $(SolutionDir)bin"</PostBuildEvent>
+cmd /k "copy $(TargetDir)$(TargetName).pdb $(SolutionDir)bin"
+cmd /k "copy $(ProjectDir)tags-pos.xaml $(SolutionDir)bin"
+cmd /k "copy $(ProjectDir)tags-dep.xaml $(SolutionDir)bin"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

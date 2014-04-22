@@ -55,8 +55,15 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public class IgtCorpus : name_dp_base, Iitems<Igt>, IHostedItem
 	{
+		static readonly XamlSchemaContext xsch;
+
 		static IgtCorpus()
 		{
+			xsch = new XamlSchemaContext(new XamlSchemaContextSettings
+			{
+				SupportMarkupExtensionsWithDuplicateArity = true,
+			});
+
 			dps.FilenameProperty.AddOwner(typeof(IgtCorpus), new PropertyMetadata(default(String)
 				, (o, e) =>
 				{
@@ -168,9 +175,9 @@ namespace xie
 					CloseOutput = true,
 				}))
 				{
-					using (var xr = new XamlObjectReader(this, IgtXaml.ctx))
+					using (var xr = new XamlObjectReader(this, xsch))
 					{
-						using (var xw = new XamlXmlWriter(sw, IgtXaml.ctx))
+						using (var xw = new XamlXmlWriter(sw, xsch))
 						{
 							XamlServices.Transform(xr, xw);
 							xw.Close();
@@ -200,9 +207,9 @@ namespace xie
 			{
 				using (var sr = XmlReader.Create(str))
 				{
-					using (var xr = new XamlXmlReader(sr, IgtXaml.ctx))
+					using (var xr = new XamlXmlReader(sr, xsch))
 					{
-						using (var xw = new XamlObjectWriter(IgtXaml.ctx))
+						using (var xw = new XamlObjectWriter(xsch))
 						{
 							XamlServices.Transform(xr, xw);
 

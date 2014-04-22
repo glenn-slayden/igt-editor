@@ -44,7 +44,6 @@
   <ItemGroup>
     <Compile Include="collections.cs" />
     <Compile Include="corpus.cs" />
-    <Compile Include="_igt-xaml.cs" />
     <Compile Include="igt.cs" />
     <Compile Include="parts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

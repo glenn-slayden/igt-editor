@@ -1,4 +1,4 @@
-﻿<Window x:Class="xie.__main"
+﻿<Window x:Class="xie.main"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:aw="clr-namespace:alib.Wpf;assembly=alib-wpf"

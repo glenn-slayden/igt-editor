@@ -36,9 +36,9 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public class Settings : DependencyObject
 	{
-		static String filename()
+		public static String filename()
 		{
-			return Path.Combine(Environment.CurrentDirectory, "app-settings.xaml");
+			return App.FindConfigFile("app-settings.xaml");
 		}
 
 		public static void Reset()
@@ -47,25 +47,6 @@ namespace xie
 			var fn = filename();
 			if (File.Exists(fn))
 				File.Delete(fn);
-		}
-
-		public static Settings Load()
-		{
-			var fn = filename();
-			if (!File.Exists(fn))
-				return new Settings();
-
-			Settings ret;
-
-			using (var sr = new StreamReader(fn))
-			using (var xr = new XamlXmlReader(sr, IgtXaml.ctx))
-			using (var xw = new XamlObjectWriter(IgtXaml.ctx))
-			{
-				XamlServices.Transform(xr, xw);
-
-				ret = (Settings)xw.Result;
-			}
-			return ret;
 		}
 
 		public Settings()
@@ -82,8 +63,8 @@ namespace xie
 				NamespaceHandling = NamespaceHandling.OmitDuplicates,
 				OmitXmlDeclaration = true,
 			}))
-			using (var xr = new XamlObjectReader(this, IgtXaml.ctx))
-			using (var xw = new XamlXmlWriter(sw, IgtXaml.ctx))
+			using (var xr = new XamlObjectReader(this, App.xsch))
+			using (var xw = new XamlXmlWriter(sw, App.xsch))
 			{
 				XamlServices.Transform(xr, xw);
 			}
@@ -138,8 +119,8 @@ namespace xie
 		public static readonly DependencyProperty WindowMaximizedProperty =
 			DependencyProperty.Register("WindowMaximized", typeof(bool), typeof(Settings), new PropertyMetadata(false));
 
-		
-		
+
+
 
 	};
 }

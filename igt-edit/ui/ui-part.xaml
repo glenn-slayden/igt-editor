@@ -143,79 +143,26 @@
         </DataTemplate>-->
 
         <DataTemplate DataType="{x:Type xl:DepPart}">
-            <Menu>
-                <MenuItem Header="Arg">
-                    <MenuItem Header="comp">
-                        <sys:String>acomp</sys:String>
-                        <sys:String>ccomp</sys:String>
-                        <MenuItem Header="obj">
-                            <sys:String>dobj</sys:String>
-                            <sys:String>iobj</sys:String>
-                            <sys:String>pobj</sys:String>
-                        </MenuItem>
-                    </MenuItem>
-                    <MenuItem Header="subj">
-                        <MenuItem Header="nsubj" />
-                        <MenuItem Header="csubj" />
-                    </MenuItem>
-                </MenuItem>
-
-                <MenuItem Header="mod">
-                    <sys:String>appos</sys:String>
-                    <sys:String>acomp</sys:String>
-                    <sys:String>mwe</sys:String>
-                    <sys:String>rcmod</sys:String>
-                    <sys:String>prt</sys:String>
-                </MenuItem>
-
-                <MenuItem Header="marker">
-                    <sys:String>case</sys:String>
-                </MenuItem>
-            </Menu>
+            <!--<FrameworkElement Loaded="ContentControl_Loaded" />-->
+            <Rectangle Width="10" Height="10" Fill="Blue" />
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type xl:TagPart}">
             <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
 
-                <!--<ContentControl Content="{Binding Path=Source}" Margin="0 0 0 5" />-->
-                <!--<xe:ui_part_base DataContext="{Binding Path=Source}" />-->
+                <ContentControl Content="{Binding Path=Source}" Margin="0 0 0 5" />
+                <xe:ui_part_base DataContext="{Binding Path=Source}" />
                 <TextBlock 
                             Text="{Binding Path=Source.Text, Mode=OneWay}"
                                 HorizontalAlignment="Left"
                                 Margin="2 2 0 4"
-                                Background="#FCFCF0"
-                                 />
+                                Background="#FCFCF0" />
 
                 <ComboBox SelectedItem="{Binding Path=Text}" 
                                   TextBlock.FontWeight="SemiBold"
-                                  HorizontalAlignment="Left">
-                    <ComboBox.Items>
-                        <sys:String>unk</sys:String>
-                        <Separator MinWidth="100" />
-                        <sys:String>N</sys:String>
-                        <sys:String>V</sys:String>
-                        <sys:String>A</sys:String>
-                        <sys:String>Adj</sys:String>
-                        <sys:String>Aux</sys:String>
-                        <Separator />
-                        <sys:String>PN</sys:String>
-                        <sys:String>Det</sys:String>
-                        <sys:String>Num</sys:String>
-                        <sys:String>Adp</sys:String>
-                        <sys:String>Conj</sys:String>
-                        <sys:String>SC</sys:String>
-                        <sys:String>Pun</sys:String>
-                        <sys:String>Sym</sys:String>
-                        <sys:String>Comp</sys:String>
-                        <Separator />
-                        <sys:String>CaseM</sys:String>
-                        <sys:String>ASP</sys:String>
-                        <sys:String>CL</sys:String>
-                        <sys:String>Expl</sys:String>
-                        <sys:String>SP</sys:String>
-                        <sys:String>PossM</sys:String>
-                    </ComboBox.Items>
-                </ComboBox>
+                                  HorizontalAlignment="Left"
+                                 Loaded="ComboBox_Loaded" />
+
             </StackPanel>
         </DataTemplate>
 

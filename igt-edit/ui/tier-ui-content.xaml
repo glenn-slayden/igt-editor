@@ -154,53 +154,8 @@
                                 <xe:DepNode 
                                     MinWidth="30"
                                     Text="{Binding Text, Mode=OneWay}"
-                                    TextAlignment="Center">
-                                    <xe:DepNode.Resources>
-                                        <MenuItem x:Key="dep_types_menu"
-                                                  Header="Select dependency type"
-                                                  Click="MenuItem_Click">
-                                            <MenuItem Header="Arg">
-                                                <MenuItem Header="comp">
-                                                    <sys:String>Acomp</sys:String>
-                                                    <sys:String>Ccomp</sys:String>
-                                                    <MenuItem Header="obj">
-                                                        <sys:String>Dobj</sys:String>
-                                                        <sys:String>Iobj</sys:String>
-                                                        <sys:String>Pobj</sys:String>
-                                                    </MenuItem>
-                                                </MenuItem>
-                                                <MenuItem Header="subj">
-                                                    <MenuItem Header="nsubj" />
-                                                    <MenuItem Header="csubj" />
-                                                </MenuItem>
-                                            </MenuItem>
+                                    TextAlignment="Center" />
 
-                                            <MenuItem Header="mod">
-                                                <sys:String>Appos</sys:String>
-                                                <sys:String>Acomp</sys:String>
-                                                <sys:String>MWE</sys:String>
-                                                <sys:String>Rcmod</sys:String>
-                                                <sys:String>Prt</sys:String>
-                                            </MenuItem>
-
-                                            <MenuItem Header="marker">
-                                                <sys:String>Case</sys:String>
-                                            </MenuItem>
-                                        </MenuItem>
-                                    </xe:DepNode.Resources>
-                                    <!--<TextBlock.ContextMenu>
-                                        <ContextMenu ItemsSource="{Binding AvailableHeads}">
-                                            <ContextMenu.ItemContainerStyle>
-                                                <Style TargetType="MenuItem">
-                                                    <Setter Property="CommandParameter" Value="{Binding RelativeSource={RelativeSource AncestorType=Border},Path=DataContext}" />
-                                                    <Setter Property="Header" Value="{Binding Text}" />
-                                                    <Setter Property="TextBlock.TextAlignment" Value="Left" />
-                                                    <EventSetter Event="Click" Handler="MenuItem_Click" />
-                                                </Style>
-                                            </ContextMenu.ItemContainerStyle>
-                                        </ContextMenu>
-                                    </TextBlock.ContextMenu>-->
-                                </xe:DepNode>
                             </Border>
 
                         </DataTemplate>

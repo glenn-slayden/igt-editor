@@ -209,6 +209,8 @@ namespace xie
 			tree.InvalidateVisual();
 		}
 
+
+
 		//private void MenuItem_Click(object sender, RoutedEventArgs e)
 		//{
 
@@ -394,10 +396,14 @@ namespace xie
 			if (Part.Head != null)
 			{
 				cm.Add(new Separator());
-				var xx = (MenuItem)this.Resources["dep_types_menu"];
-				if (xx.Parent != null)
-					((ItemsControl)xx.Parent).Items.Remove(xx);
-				cm.Add(xx);
+
+				//var xx = (MenuItem)this.Resources["dep_types_menu"];
+				//if (xx.Parent != null)
+				//	((ItemsControl)xx.Parent).Items.Remove(xx);
+
+				var mnu = App.Load<MenuItem>(App.FindConfigFile("tags-dep.xaml"));
+
+				cm.Add(mnu);
 			}
 			//cm.Add(new MenuItem
 			//{

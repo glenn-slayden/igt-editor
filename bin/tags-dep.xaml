@@ -1,0 +1,34 @@
+﻿<MenuItem Header="Select dependency type"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <MenuItem Header="Arg">
+        <MenuItem Header="comp">
+            <x:String>Acomp</x:String>
+            <x:String>Ccomp</x:String>
+            <MenuItem Header="obj">
+                <x:String>Dobj</x:String>
+                <x:String>Iobj</x:String>
+                <x:String>Pobj</x:String>
+            </MenuItem>
+        </MenuItem>
+        <MenuItem Header="subj">
+            <MenuItem Header="nsubj" />
+            <MenuItem Header="csubj" />
+        </MenuItem>
+    </MenuItem>
+
+    <MenuItem Header="mod">
+        <x:String>Appos</x:String>
+        <x:String>Acomp</x:String>
+        <x:String>MWE</x:String>
+        <x:String>Rcmod</x:String>
+        <x:String>Prt</x:String>
+    </MenuItem>
+
+    <MenuItem Header="marker">
+        <x:String>Case</x:String>
+    </MenuItem>
+
+</MenuItem>
+
