@@ -31,14 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="alib, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\alib.dll</HintPath>
-    </Reference>
-    <Reference Include="alib-wpf, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\alib-wpf.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -60,5 +52,33 @@
     <Compile Include="_promoter.cs" />
     <Compile Include="_properties.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\alib-wpf\alib-wpf.csproj">
+      <Project>{16bb8296-90eb-4e15-99c2-0ea6fd44fb6c}</Project>
+      <Name>alib-wpf</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\alib\alib.csproj">
+      <Project>{2d69be1a-2d60-4eff-8d0c-607f0c3448df}</Project>
+      <Name>alib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>cmd /k "copy $(SolutionDir)alib\$(OutDir)alib.dll $(SolutionDir)bin"
+cmd /k "copy $(SolutionDir)alib\$(OutDir)alib.pdb $(SolutionDir)bin"
+cmd /k "copy $(SolutionDir)alib-wpf\$(OutDir)alib-wpf.dll $(SolutionDir)bin"
+cmd /k "copy $(SolutionDir)alib-wpf\$(OutDir)alib-wpf.pdb $(SolutionDir)bin"
+</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>cmd /k "copy $(TargetPath) $(SolutionDir)bin"
+cmd /k "copy $(TargetDir)$(TargetName).pdb $(SolutionDir)bin"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
 </Project>
