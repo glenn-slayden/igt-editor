@@ -128,13 +128,6 @@
     <Compile Include="ui\tier-ui-base.xaml.cs">
       <DependentUpon>tier-ui-base.xaml</DependentUpon>
     </Compile>
-    <Page Include="ui\tier-ui-content.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Compile Include="ui\tier-ui-content.xaml.cs">
-      <DependentUpon>tier-ui-content.xaml</DependentUpon>
-    </Compile>
     <Page Include="ui\ui-part.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

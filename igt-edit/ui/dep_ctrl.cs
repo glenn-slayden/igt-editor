@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,55 +20,162 @@ using alib.Wpf;
 
 namespace xie
 {
-	public class dep_ctrl : Panel
+	public class DepItemsControl : ItemsControl
 	{
-		public dep_ctrl()
+		protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
 		{
-		}
+			base.PrepareContainerForItemOverride(element, item);
 
-		protected override Size MeasureOverride(Size sz)
-		{
-			double x = 0.0;
+			var fe = (FrameworkElement)element;
+			var dp = (DepPart)item;
 
-			Rect r_all = util.zero_rect;
-
-			foreach (UIElement el in InternalChildren)
+			fe.SetBinding(TreeLayoutPanel.LinkTextProperty, new Binding
 			{
-				if (!el.IsMeasureValid)
-					el.Measure(sz);
+				Source = dp,
+				Path = new PropertyPath(DepPart.DependencyTypeProperty),
+			});
 
-				if (x > 0.0)
-					x += 10.0;
-
-				var r = new Rect(new Point(x, 0.0), el.DesiredSize);
-				r_all.Union(r);
-
-				x += r.Width;
+			if (dp.Head != null)
+			{
+				var fe_head = ItemContainerGenerator.ContainerFromItem(dp.Head);
+				if (fe_head != null)
+					fe.SetValue(TreeLayoutPanel.TreeParentProperty, fe_head);
 			}
-			return r_all.Size;
-		}
-
-		protected override Size ArrangeOverride(Size sz)
-		{
-			double x = 0.0;
-			//double y = 0.0;
-			foreach (UIElement el in InternalChildren)
+			else
 			{
-				if (x > 0.0)
-					x += 10.0;
-
-				var r = new Rect(new Point(x, 0.0), el.DesiredSize);
-				el.Arrange(r);
-
-				x += r.Width;
+				fe.ClearValue(TreeLayoutPanel.TreeParentProperty);
 			}
 
-			return sz;
+			foreach (var dp_dep in dp.Children())
+			{
+				var fe_dep = ItemContainerGenerator.ContainerFromItem(dp_dep);
+				if (fe_dep != null)
+					fe_dep.SetValue(TreeLayoutPanel.TreeParentProperty, fe);
+			}
 		}
 
-		//protected override void OnRender(DrawingContext dc)
-		//{
-		//	base.OnRender(dc);
-		//}
+		public TreeLayoutPanel ItemsHost
+		{
+			get
+			{
+				return (TreeLayoutPanel)
+							this.GetType()
+							.GetProperty("ItemsHost", BindingFlags.Instance | BindingFlags.NonPublic)
+							.GetValue(this);
+			}
+		}
 	};
+
+	public class DepNode : TextBlock
+	{
+		public DepPart Part { get { return (DepPart)DataContext; } }
+
+		public DependenciesTier Tier { get { return (DependenciesTier)Part.PartsHost; } }
+
+		public DepItemsControl ic { get { return (DepItemsControl)this.Tag; } }
+
+		public FrameworkElement fe
+		{
+			get { return (FrameworkElement)ic.ItemContainerGenerator.ContainerFromItem(this.Part); }
+		}
+
+		public TreeLayoutPanel tlp { get { return (TreeLayoutPanel)ic.ItemsHost; } }
+
+		protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
+		{
+			var cm = new ContextMenu();
+			TextBlock.SetTextAlignment(cm, TextAlignment.Left);
+
+			cm.Add(new MenuItem
+			{
+				IsEnabled = false,
+				Header = "Select dependency head",
+				Background = Brushes.Silver,
+				Foreground = Brushes.White,
+			});
+
+			cm.Add<MenuItem>(new MenuItem
+			{
+				Header = "(none)",
+				IsChecked = Part.Head == null,
+
+			}).Click += (o, e1) =>
+			{
+				Part.Head = null;
+
+				fe.ClearValue(TreeLayoutPanel.TreeParentProperty);
+
+				tlp.InvalidateVisual();
+			};
+
+			foreach (var dp_head in Part.AvailableHeads)
+			{
+				cm.Add<MenuItem>(new MenuItem
+				{
+					Header = dp_head.Text,
+					IsChecked = Part.Head == dp_head,
+
+				}).Click += (o, e2) =>
+				{
+					Part.Head = dp_head;
+
+					var fe_head = (FrameworkElement)ic.ItemContainerGenerator.ContainerFromItem(dp_head);
+
+					fe.SetValue(TreeLayoutPanel.TreeParentProperty, fe_head);
+
+					tlp.InvalidateVisual();
+				};
+			}
+
+			if (Part.Head != null)
+			{
+				cm.Add(new Separator());
+
+				MenuItem mnu;
+				String fn = "tags-dep.xaml";
+				if (!App.FindConfigFile(ref fn))
+					mnu = new MenuItem();
+				else
+					mnu = App.Load<MenuItem>(fn);
+
+				cm.Add<MenuItem>(mnu).Click += (o, e3) =>
+				{
+					String s_dep_type = ((MenuItem)e3.OriginalSource).DataContext as String;
+					if (s_dep_type == null)
+						return;
+
+					Part.DependencyType = s_dep_type;
+
+					tlp.InvalidateVisual();
+				};
+			}
+			//cm.Add(new MenuItem
+			//{
+			//	IsEnabled = false,
+			//	Header = "Select dependency type",
+			//	Background = Brushes.Silver,
+			//	Foreground = Brushes.White,
+			//});
+
+			this.ContextMenu = cm;
+
+			base.OnMouseRightButtonDown(e);
+		}
+	};
+
+	//public class DepToggleButton : ToggleButton
+	//{
+	//	public DepPart Part { get { return (DepPart)DataContext; } }
+
+	//	public DependenciesTier Tier { get { return (DependenciesTier)Part.PartsHost; } }
+
+	//	protected override void OnClick()
+	//	{
+	//		base.OnClick();
+
+	//		var mnu = (ContextMenu)this.Resources["ctx_menu"];
+
+	//		Nop.X();
+	//	}
+	//}
 }

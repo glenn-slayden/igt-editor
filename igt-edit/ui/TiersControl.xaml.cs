@@ -45,8 +45,6 @@ namespace xie
 			var cm = (ContextMenu)mi.Parent;
 			var uib = (tier_ui_base)cm.PlacementTarget;
 			var tier = (tier_base)uib.Tier;
-			//if (tier == ActiveSegmentation)
-			//	ActiveSegmentation = null;
 
 			tier.SetValue(dps.IsVisibleProperty, false);
 		}
@@ -90,7 +88,7 @@ namespace xie
 			var src_tier = (IPartsTier)uib.Tier;
 			var igti = src_tier.TiersHost;
 
-			var uic = uib.UiContent;
+			//var uic = uib.w_cc;
 
 			var dep_tier = new DependenciesTier(src_tier.Parts, p => new DepPart { Source = p }, u =>
 			{
