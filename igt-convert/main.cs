@@ -57,7 +57,9 @@ in-memory object model of the WPF IGT editor.
 							.Select(s => String.IsNullOrWhiteSpace(s) ? String.Empty : s)
 							.Partition(String.Empty)
 							.Select(raw => new TextIgt(filename, ((RefList<String>)raw).GetTrimmed()))
-							.Select(TextIgt.ToIgt))
+							//.Select(TextIgt.ToIgt1)
+							.Select(TextIgt.ToIgt2)
+							)
 			{
 				corp.Add(item);
 			}

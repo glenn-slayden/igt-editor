@@ -43,6 +43,20 @@ namespace xie
 			}
 
 			base.OnCollectionChanged(e);
+
+			if (e.Action == NotifyCollectionChangedAction.Remove)
+			{
+				foreach (IHostedItem hi in e.OldItems)
+				{
+					hi.Host = null;
+				}
+				Nop.X();
+			}
+
+			if (e.Action == NotifyCollectionChangedAction.Replace)
+			{
+				Nop.X();
+			}
 		}
 	};
 

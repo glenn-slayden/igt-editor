@@ -102,8 +102,54 @@ namespace xie
 
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-		public static Igt ToIgt(TextIgt tigt) { return tigt.ToIgt(); }
-		Igt ToIgt()
+		static List<String> ParseTags(String _s_tags)
+		{
+			var ret = new List<String>();
+			var s_tags = new StringBuilder(_s_tags);
+
+			if (s_tags.Length != s_tags.Replace("+AC", String.Empty).Length)	// citation
+				ret.Add("+AC");
+			if (s_tags.Length != s_tags.Replace("+AL", String.Empty).Length)	// alteratives
+				ret.Add("+AL");
+			if (s_tags.Length != s_tags.Replace("+CR", String.Empty).Length)	// corrupted
+				ret.Add("+CR");
+			if (s_tags.Length != s_tags.Replace("+CN", String.Empty).Length)	// citation
+				ret.Add("+CN");
+			if (s_tags.Length != s_tags.Replace("+DB", String.Empty).Length)	// double column
+				ret.Add("+DB");
+			if (s_tags.Length != s_tags.Replace("+EX", String.Empty).Length)	// 
+				ret.Add("+EX");
+			if (s_tags.Length != s_tags.Replace("+LN", String.Empty).Length)	// language name
+				ret.Add("+LN");
+			if (s_tags.Length != s_tags.Replace("+LT", String.Empty).Length)	// literal translation
+				ret.Add("+LT");
+			if (s_tags.Length != s_tags.Replace("+SY", String.Empty).Length)	// syntactic construction
+				ret.Add("+SY");
+			if (s_tags.Length != s_tags.Replace("-G", String.Empty).Length)
+				ret.Add("-G");
+			if (s_tags.Length != s_tags.Replace("-T", String.Empty).Length)
+				ret.Add("-T");
+			if (s_tags.Length != s_tags.Replace("L", String.Empty).Length)
+				ret.Add("L");
+			if (s_tags.Length != s_tags.Replace("G", String.Empty).Length)
+				ret.Add("G");
+			if (s_tags.Length != s_tags.Replace("T", String.Empty).Length)
+				ret.Add("T");
+			if (s_tags.Length != s_tags.Replace("B", String.Empty).Length)		// blank
+				ret.Add("B");
+			if (s_tags.Length != s_tags.Replace("M", String.Empty).Length)		// misc
+				ret.Add("M");
+			if (s_tags.Length != s_tags.Replace("C", String.Empty).Length)		// continuation
+				ret.Add("C");
+
+			if (s_tags.Length > 0)
+				Debug.Print("unprocessed tag(s): {0} in {1}", s_tags, _s_tags);
+
+			return ret;
+		}
+
+		public static Igt ToIgt1(TextIgt tigt) { return tigt.ToIgt1(); }
+		Igt ToIgt1()
 		{
 			var ii = new Igt
 			{
@@ -194,51 +240,92 @@ namespace xie
 			return ii;
 		}
 
-		static List<String> ParseTags(String _s_tags)
+
+		public static Igt ToIgt2(TextIgt tigt) { return tigt.ToIgt2(); }
+		Igt ToIgt2()
 		{
-			var ret = new List<String>();
-			var s_tags = new StringBuilder(_s_tags);
+			var ii = new Igt
+			{
+				//Name = this.ToString(),
+				DocId = this.DocId,
+				FromLine = this.FromLine,
+				ToLine = this.ToLine,
+				Language = this.Language,
+			};
 
-			if (s_tags.Length != s_tags.Replace("+AC", String.Empty).Length)	// citation
-				ret.Add("+AC");
-			if (s_tags.Length != s_tags.Replace("+AL", String.Empty).Length)	// alteratives
-				ret.Add("+AL");
-			if (s_tags.Length != s_tags.Replace("+CR", String.Empty).Length)	// corrupted
-				ret.Add("+CR");
-			if (s_tags.Length != s_tags.Replace("+CN", String.Empty).Length)	// citation
-				ret.Add("+CN");
-			if (s_tags.Length != s_tags.Replace("+DB", String.Empty).Length)	// double column
-				ret.Add("+DB");
-			if (s_tags.Length != s_tags.Replace("+EX", String.Empty).Length)	// 
-				ret.Add("+EX");
-			if (s_tags.Length != s_tags.Replace("+LN", String.Empty).Length)	// language name
-				ret.Add("+LN");
-			if (s_tags.Length != s_tags.Replace("+LT", String.Empty).Length)	// literal translation
-				ret.Add("+LT");
-			if (s_tags.Length != s_tags.Replace("+SY", String.Empty).Length)	// syntactic construction
-				ret.Add("+SY");
-			if (s_tags.Length != s_tags.Replace("-G", String.Empty).Length)
-				ret.Add("-G");
-			if (s_tags.Length != s_tags.Replace("-T", String.Empty).Length)
-				ret.Add("-T");
-			if (s_tags.Length != s_tags.Replace("L", String.Empty).Length)
-				ret.Add("L");
-			if (s_tags.Length != s_tags.Replace("G", String.Empty).Length)
-				ret.Add("G");
-			if (s_tags.Length != s_tags.Replace("T", String.Empty).Length)
-				ret.Add("T");
-			if (s_tags.Length != s_tags.Replace("B", String.Empty).Length)		// blank
-				ret.Add("B");
-			if (s_tags.Length != s_tags.Replace("M", String.Empty).Length)		// misc
-				ret.Add("M");
-			if (s_tags.Length != s_tags.Replace("C", String.Empty).Length)		// continuation
-				ret.Add("C");
+			ii.Add(new TextTier
+			{
+				Text = this.s_raw,
+				TierType = "odin-txt",
+			});
 
-			if (s_tags.Length > 0)
-				Debug.Print("unprocessed tag(s): {0} in {1}", s_tags, _s_tags);
+			var tier_L = new List<TextTier>();
+			var tier_G = new List<TextTier>();
+			var tier_T = new List<TextTier>();
+			var tier_M = new List<TextTier>();
+			var tier_Other = new List<TextTier>();
 
-			return ret;
+			foreach (var raw in this)
+			{
+				var tags = ParseTags(raw.Tag);
+
+				int c_no = 0;
+
+				String prev_tag = null;
+				foreach (var _tag in tags)
+				{
+					String tag = prev_tag != null && _tag == "C" ? prev_tag : _tag;
+					switch (tag)
+					{
+						case "L":
+							tier_L.Add(new TextTier { Text = raw.Content, TierType = raw.Tag + "-" + raw.Line });
+							break;
+						case "-G":
+						case "G":
+							tier_G.Add(new TextTier { Text = raw.Content, TierType = raw.Tag + "-" + raw.Line });
+							break;
+						case "-T":
+						case "T":
+							tier_T.Add(new TextTier { Text = raw.Content, TierType = raw.Tag + "-" + raw.Line });
+							break;
+						case "M":
+							tier_M.Add(new TextTier { Text = raw.Content, TierType = raw.Tag + "-" + raw.Line });
+							break;
+						case "B":
+							break;
+						default:
+							c_no++;
+							break;
+					}
+					prev_tag = tag;
+				}
+
+				if (c_no == tags.Count)
+					tier_Other.Add(new TextTier { Text = raw.Content, TierType = raw.Tag });
+			}
+
+			foreach (var t in tier_L)
+				ii.Add(t);
+			foreach (var t in tier_G)
+				ii.Add(t);
+			foreach (var t in tier_T)
+				ii.Add(t);
+			foreach (var t in tier_M)
+				ii.Add(t);
+			foreach (var t in tier_Other)
+				ii.Add(t);
+
+			tier_L.Clear();
+			tier_G.Clear();
+			tier_T.Clear();
+			tier_M.Clear();
+			tier_Other.Clear();
+
+			return ii;
 		}
+
+
+
 
 		public override String ToString()
 		{

@@ -312,7 +312,7 @@ namespace xie
 				if (i_from != i_to)
 				{
 					SegTier seg = ActiveSegmentation;
-					if (seg == null)
+					if (seg == null || seg.Host == null)
 					{
 						ActiveSegmentation = seg = new SegTier { TierType = "Seg" };
 						igti.Add(seg);
