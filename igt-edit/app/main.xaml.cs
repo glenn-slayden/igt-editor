@@ -1,8 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -31,14 +34,13 @@ namespace xie
 	{
 		public main()
 		{
-			InitializeComponent();
-
 			this.WindowState = App.settings.WindowMaximized ? WindowState.Maximized : WindowState.Normal;
 
-			w_items.mw = w_corpora.mw = this;
+			InitializeComponent();
 
 			Loaded += OnLoaded;
 		}
+
 
 		void OnLoaded(Object o, RoutedEventArgs e)
 		{
@@ -46,12 +48,28 @@ namespace xie
 
 			String[] _tmp;
 			if (App.settings.ReloadLastSession && (_tmp = App.settings.SessionFiles) != null)
+				foo(_tmp);
+
+		}
+		void foo(String[] _tmp)
+		{
+			try
 			{
-				foreach (var f in _tmp)
-				{
-					cmd_OpenXamlIgtFile(f);
-				}
-				w_opened.SetCurrentValue(TextBlock.TextProperty, String.Format("opened {0} file(s).", _tmp.Length));
+				Mouse.SetCursor(Cursors.Wait);
+
+				open_files(_tmp);
+			}
+			catch (ErrorActionException mbe)
+			{
+				mbe.show();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(this, ex.Message, ex.GetType().Name, MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+			finally
+			{
+				Mouse.SetCursor(Cursors.Arrow);
 			}
 		}
 
@@ -120,7 +138,7 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public class CorporaListView : ListView, IReadOnlyList<IgtCorpus>
 	{
-		public main mw;
+		CorpusIgtsListView w_items { get { return ((main)App.Current.MainWindow).w_items; } }
 
 		protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
 		{
@@ -138,8 +156,8 @@ namespace xie
 				App.settings.SelectedCorpusFilename = null;
 				Focus();
 
-				if (mw.w_items.SelectedIndex != (ix = App.settings.SelectedIgtIndex) && (ix < mw.w_items.Count))
-					mw.w_items.SelectedIndex = ix;
+				if (w_items.SelectedIndex != (ix = App.settings.SelectedIgtIndex) && (ix < w_items.Count))
+					w_items.SelectedIndex = ix;
 
 #if false
 				var igt = mw.w_items.SelectedItem;
@@ -187,7 +205,7 @@ namespace xie
 			base.OnKeyDown(e);
 			if (!e.Handled && e.Key == Key.Right)
 			{
-				mw.w_items.Focus();
+				w_items.Focus();
 				e.Handled = true;
 			}
 		}
@@ -218,14 +236,17 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public class CorpusIgtsListView : ListView, IReadOnlyList<Igt>
 	{
-		public main mw;
+		CorporaListView w_corpora { get { return ((main)App.Current.MainWindow).w_corpora; } }
 
 		protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
 		{
-			base.OnItemsSourceChanged(oldValue, newValue);
+			App.Current.Dispatcher.Invoke(() =>
+			{
+				base.OnItemsSourceChanged(oldValue, newValue);
 
-			if (Count > 0 && SelectedIndex < 0)
-				SelectedIndex = 0;
+				if (Count > 0 && SelectedIndex < 0)
+					SelectedIndex = 0;
+			});
 		}
 
 		public new Igt SelectedItem { get { return (Igt)base.SelectedItem; } }
@@ -245,7 +266,7 @@ namespace xie
 			base.OnKeyDown(e);
 			if (!e.Handled && e.Key == Key.Left)
 			{
-				mw.w_corpora.Focus();
+				w_corpora.Focus();
 				e.Handled = true;
 			}
 		}

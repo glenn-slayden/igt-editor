@@ -401,7 +401,12 @@ namespace xie
 				//if (xx.Parent != null)
 				//	((ItemsControl)xx.Parent).Items.Remove(xx);
 
-				var mnu = App.Load<MenuItem>(App.FindConfigFile("tags-dep.xaml"));
+				MenuItem mnu;
+				String fn = "tags-dep.xaml";
+				if (!App.FindConfigFile(ref fn))
+					mnu = new MenuItem();
+				else
+					mnu = App.Load<MenuItem>(fn);
 
 				cm.Add(mnu);
 			}

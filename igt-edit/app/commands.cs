@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,6 +20,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 using System.Windows.Shapes;
 
 using Microsoft.Win32;
@@ -34,6 +36,11 @@ using alib.Debugging;
 namespace xie
 {
 	using Path = System.IO.Path;
+
+	class ErrorActionException : Exception
+	{
+		public Action show;
+	}
 
 	public partial class main : Window
 	{
@@ -133,7 +140,7 @@ namespace xie
 
 		private void Menu_ResetSettings(Object sender, RoutedEventArgs e)
 		{
-			Settings.Reset();
+			App.ResetSettings();
 		}
 
 		private void Menu_CloseAll(Object sender, RoutedEventArgs e)
@@ -155,106 +162,61 @@ namespace xie
 		/// 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		IgtCorpora _ensure_data_context()
+
+
+
+		public void cmd_OpenXamlIgtDir(String dirname)
 		{
-			var _tmp = (IgtCorpora)this.DataContext;
-			if (_tmp == null)
-				this.DataContext = _tmp = new IgtCorpora();
-			return _tmp;
+			try
+			{
+				Mouse.SetCursor(Cursors.Wait);
+
+				open_dir(dirname);
+			}
+			catch (ErrorActionException mbe)
+			{
+				mbe.show();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(this, ex.Message, ex.GetType().Name, MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+			finally
+			{
+				Mouse.SetCursor(Cursors.Arrow);
+			}
 		}
 
-		void _clear_data_context()
+		public void cmd_OpenXamlIgtFile(String filename)
 		{
-			this.DataContext = null;
+			try
+			{
+				Mouse.SetCursor(Cursors.Wait);
+
+				open_file(filename);
+			}
+			catch (ErrorActionException mbe)
+			{
+				mbe.show();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(this, ex.Message, ex.GetType().Name, MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+			finally
+			{
+				Mouse.SetCursor(Cursors.Arrow);
+			}
+		}
+
+		public void cmd_CloseAll()
+		{
+			ccc.Clear();
 			w_opened.SetCurrentValue(TextBlock.TextProperty, null);
-		}
-
-
-		bool _load_xaml_file(String fn)
-		{
-			fn = Path.GetFullPath(fn);
-
-			var ccc = _ensure_data_context();
-			if (ccc.ContainsFile(fn))
-				return false;
-
-			var corpus = IgtCorpus.LoadXaml(fn);
-
-			ccc.Add(corpus);
-
-			if (w_corpora.SelectedIndex == -1)
-				w_corpora.SelectedIndex = 0;
-
-			return true;
-		}
-
-		public bool cmd_OpenXamlIgtDir(String dirname)
-		{
-			dirname = Path.GetFullPath(dirname);
-			if (!Directory.Exists(dirname))
-			{
-				var msg = String.Format("The directory:\r\r{0}\r\rwas not found.", dirname);
-				MessageBox.Show(this, msg, "Directory not found", MessageBoxButton.OK, MessageBoxImage.Error);
-				return false;
-			}
-
-			Mouse.SetCursor(Cursors.Wait);
-
-			String s_existing = null;
-
-			var files = Directory.GetFiles(dirname, "*.xml");
-			foreach (var filename in files)
-			{
-				if (!_load_xaml_file(filename))
-				{
-					s_existing = filename;
-					break;
-				}
-			}
-
-			Mouse.SetCursor(Cursors.Arrow);
-
-			if (s_existing != null)
-			{
-				var msg = String.Format("A file named '{0}' is already open.", Path.GetFileNameWithoutExtension(s_existing));
-				MessageBox.Show(this, msg, "File already open", MessageBoxButton.OK, MessageBoxImage.Information);
-				return false;
-			}
-
-			w_opened.SetCurrentValue(TextBlock.TextProperty, String.Format("opened {0} files from '{1}'.", files.Length, dirname));
-			return true;
-		}
-
-		public bool cmd_OpenXamlIgtFile(String filename)
-		{
-			if (!File.Exists(filename))
-			{
-				var msg = String.Format("The file:\r\r{0}\r\rwas not found.", filename);
-				MessageBox.Show(this, msg, "File not found", MessageBoxButton.OK, MessageBoxImage.Error);
-				return false;
-			}
-
-			Mouse.SetCursor(Cursors.Wait);
-
-			var b = _load_xaml_file(filename);
-
-			Mouse.SetCursor(Cursors.Arrow);
-
-			if (!b)
-			{
-				var msg = String.Format("A file named '{0}' is already open.", Path.GetFileNameWithoutExtension(filename));
-				MessageBox.Show(this, msg, "File already open", MessageBoxButton.OK, MessageBoxImage.Information);
-				return false;
-			}
-
-			w_opened.SetCurrentValue(TextBlock.TextProperty, String.Format("opened '{0}'.", filename));
-			return true;
 		}
 
 		private int save_all_files()
 		{
-			var ccc = _ensure_data_context();
-
 			int c_saved = 0;
 			foreach (IgtCorpus c in ccc)
 			{
@@ -286,7 +248,6 @@ namespace xie
 			}
 
 			Mouse.SetCursor(Cursors.Wait);
-			var ccc = _ensure_data_context();
 
 			foreach (IgtCorpus c in ccc)
 				c.ChangeTargetDirectory(xigtdir);
@@ -295,9 +256,78 @@ namespace xie
 			return true;
 		}
 
-		public void cmd_CloseAll()
+
+		public void open_dir(String dirname)
 		{
-			_clear_data_context();
+			dirname = Path.GetFullPath(dirname);
+
+			if (!Directory.Exists(dirname))
+				throw new ErrorActionException
+				{
+					show = () =>
+					{
+						var msg = String.Format("The directory:\r\r{0}\r\rwas not found.", dirname);
+						MessageBox.Show(this, msg, "Directory not found", MessageBoxButton.OK, MessageBoxImage.Error);
+					}
+				};
+
+			var files = Directory.GetFiles(dirname, "*.xml");
+
+			if (files.Length == 0)
+				throw new ErrorActionException
+				{
+					show = () =>
+					{
+						MessageBox.Show(this, "There are no files to load", "File not found", MessageBoxButton.OK, MessageBoxImage.Error);
+					}
+				};
+
+			open_files(files);
+
+			w_opened.SetCurrentValue(TextBlock.TextProperty, String.Format("opened {0} files from '{1}'.", files.Length, dirname));
+		}
+
+		public void open_files(String[] rg)
+		{
+			foreach (var fn in rg)
+			{
+				this.Dispatcher.InvokeAsync(() => open_file(fn), DispatcherPriority.ApplicationIdle);
+			}
+		}
+
+		public void open_file(String fn)
+		{
+			fn = Path.GetFullPath(fn);
+			if (!File.Exists(fn))
+			{
+				throw new ErrorActionException
+				{
+					show = () =>
+					{
+						var msg = String.Format("The file:\r\r{0}\r\rwas not found.", fn);
+						MessageBox.Show(this, msg, "File not found", MessageBoxButton.OK, MessageBoxImage.Error);
+					}
+				};
+			}
+
+			if (ccc.ContainsFile(fn))
+				throw new ErrorActionException
+				{
+					show = () =>
+					{
+						var msg = String.Format("A file named '{0}' is already open.", Path.GetFileNameWithoutExtension(fn));
+						MessageBox.Show(this, msg, "File already open", MessageBoxButton.OK, MessageBoxImage.Information);
+					}
+				};
+
+			var corpus = IgtCorpus.LoadXaml(fn);
+
+			ccc.Add(corpus);
+
+			if (w_corpora.SelectedIndex == -1)
+				w_corpora.SelectedIndex = 0;
+
+			w_opened.SetCurrentValue(TextBlock.TextProperty, String.Format("opened '{0}'.", fn));
 		}
 	};
 }

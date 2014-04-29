@@ -10,6 +10,10 @@
         Title="IGT prototype"
         x:Name="w_main">
 
+    <Window.DataContext>
+        <xl:IgtCorpora x:Name="ccc" />
+    </Window.DataContext>
+
     <DockPanel LastChildFill="True" >
 
         <Menu DockPanel.Dock="Top">
@@ -113,6 +117,7 @@
                           Background="LightGray"
                           BorderThickness="0 0 1.5 0"
                           BorderBrush="DarkBlue" />
+
             <xe:CorpusIgtsListView x:Name="w_items" Grid.Column="2" 
                      VerticalAlignment="Stretch"
                      ItemsSource="{Binding ElementName=w_corpora,Path=SelectedItem,Mode=OneWay}"

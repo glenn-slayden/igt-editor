@@ -22,10 +22,19 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public class IgtCorpora : OwnerCorpusSet, Iitems<IgtCorpus>
 	{
+		static IgtCorpora()
+		{
+			FrameworkElement.NameProperty.AddOwner(typeof(IgtCorpora));
+		}
+
 		public IgtCorpora()
 			: base(null)
 		{
-			FrameworkElement.NameProperty.AddOwner(typeof(IgtCorpora));
+		}
+
+		public void Reset()
+		{
+			base.Clear();
 		}
 
 		public String Name

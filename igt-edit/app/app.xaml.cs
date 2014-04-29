@@ -22,33 +22,43 @@ namespace xie
 				SupportMarkupExtensionsWithDuplicateArity = true,
 			});
 
-			settings = Load<Settings>(Settings.filename());
+			settings = Settings.Load();
 		}
 
-		public static String FindConfigFile(String fn)
+		public static Settings settings;
+
+		public static void ResetSettings()
 		{
-			String path;
+			settings = settings.Reset();
+		}
+
+		public static bool FindConfigFile(ref String filename)
+		{
+			String fn1, fn2;
 
 			var dir1 = Environment.CurrentDirectory;
-			if (File.Exists(path = Path.Combine(dir1, fn)))
-				return path;
+			if (File.Exists(fn1 = Path.Combine(dir1, filename)))
+			{
+				filename = fn1;
+				return true;
+			}
 
 			var dir2 = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-			if (File.Exists(path = Path.Combine(dir2, fn)))
-				return path;
+			if (File.Exists(fn2 = Path.Combine(dir2, filename)))
+			{
+				filename = fn2;
+				return true;
+			}
 
-			return dir1;
+			filename = fn1;
+			return false;
 		}
 
+
 		public static T Load<T>(String fn)
-	where T : class, new()
+			where T : class
 		{
-			fn = Path.GetFullPath(fn);
-			if (!File.Exists(fn))
-				return new T();
-
 			T ret;
-
 			using (var sr = new StreamReader(fn))
 			using (var xr = new XamlXmlReader(sr, xsch))
 			using (var xw = new XamlObjectWriter(xsch))
@@ -69,7 +79,5 @@ namespace xie
 		{
 			settings.Save();
 		}
-
-		public static Settings settings;
 	};
 }

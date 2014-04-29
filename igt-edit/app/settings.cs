@@ -16,6 +16,7 @@ using System.Windows.Input;
 using System.Xml;
 using System.Windows.Markup;
 using System.Windows.Media;
+using System.Reflection;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -36,27 +37,43 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public class Settings : DependencyObject
 	{
-		public static String filename()
-		{
-			return App.FindConfigFile("app-settings.xaml");
-		}
+		const String settings_filename = "app-settings.xaml";
 
-		public static void Reset()
+		public static Settings Load()
 		{
-			App.settings = new Settings();
-			var fn = filename();
-			if (File.Exists(fn))
-				File.Delete(fn);
+			Settings _new;
+
+			var fn = settings_filename;
+			if (App.FindConfigFile(ref fn))
+			{
+				_new = App.Load<Settings>(fn);
+			}
+			else
+			{
+				_new = new Settings();
+			}
+			_new.filename = fn;
+			return _new;
 		}
 
 		public Settings()
 		{
 			this.LastDirectory = Environment.CurrentDirectory;
+			this.SaveOnExit = true;
+		}
+
+		public String filename;
+
+		public Settings Reset()
+		{
+			if (File.Exists(filename))
+				File.Delete(filename);
+			return Load();
 		}
 
 		public void Save()
 		{
-			using (var sw = XmlWriter.Create(filename(), new XmlWriterSettings
+			using (var sw = XmlWriter.Create(filename, new XmlWriterSettings
 			{
 				Indent = true,
 				NewLineOnAttributes = true,
@@ -118,9 +135,5 @@ namespace xie
 
 		public static readonly DependencyProperty WindowMaximizedProperty =
 			DependencyProperty.Register("WindowMaximized", typeof(bool), typeof(Settings), new PropertyMetadata(false));
-
-
-
-
 	};
 }

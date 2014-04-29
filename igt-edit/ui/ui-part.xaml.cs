@@ -27,7 +27,16 @@ namespace xie
 
 		static ui_part()
 		{
-			arr_pos_tags = App.Load<ArrayList>(App.FindConfigFile("tags-pos.xaml"));
+			var fn = "tags-pos.xaml";
+			if (!App.FindConfigFile(ref fn))
+			{
+				arr_pos_tags = new ArrayList();
+				arr_pos_tags.Add("missing tags-pos.xaml");
+			}
+			else
+			{
+				arr_pos_tags = App.Load<ArrayList>(fn);
+			}
 		}
 
 		public ui_part()
