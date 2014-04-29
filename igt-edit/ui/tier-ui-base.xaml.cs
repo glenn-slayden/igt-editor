@@ -252,4 +252,16 @@ namespace xie
 			}
 		}
 	};
+
+	public class TextUiTier : tier_ui_base
+	{
+		public SegTier ActiveSegmentation
+		{
+			get { return (SegTier)GetValue(ActiveSegmentationProperty); }
+			set { SetValue(ActiveSegmentationProperty, value); }
+		}
+
+		public static readonly DependencyProperty ActiveSegmentationProperty =
+			DependencyProperty.Register("ActiveSegmentation", typeof(SegTier), typeof(TextUiTier), new PropertyMetadata(null));
+	};
 }

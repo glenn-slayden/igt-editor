@@ -57,7 +57,7 @@ namespace xie
 			var dlg = new CommonOpenFileDialog
 			{
 				Title = "Select xaml-igt directory",
-				InitialDirectory = dir,
+				InitialDirectory = Path.GetDirectoryName(dir),
 				IsFolderPicker = true,
 				EnsureFileExists = true,
 			};
@@ -161,8 +161,6 @@ namespace xie
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/// 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 		public void cmd_OpenXamlIgtDir(String dirname)
@@ -291,11 +289,42 @@ namespace xie
 		{
 			foreach (var fn in rg)
 			{
-				this.Dispatcher.InvokeAsync(() => open_file(fn), DispatcherPriority.ApplicationIdle);
+				open_file(fn);
 			}
 		}
 
 		public void open_file(String fn)
+		{
+			fn = Path.GetFullPath(fn);
+			if (ccc.ContainsFile(fn))
+				throw new ErrorActionException
+				{
+					show = () =>
+					{
+						var msg = String.Format(@"A file named '{0}' is already open.
+
+To prevent this message, close all XIGT-corpus files first.", Path.GetFileNameWithoutExtension(fn));
+						MessageBox.Show(this, msg, "File already open", MessageBoxButton.OK, MessageBoxImage.Information);
+					}
+				};
+
+			var task = Task.Factory.StartNew(() =>
+			{
+				var xc = open_file_inner(fn);
+
+				ccc.Add(xc);
+
+				if (w_corpora.SelectedIndex == -1)
+					w_corpora.SelectedIndex = 0;
+
+				Dispatcher.InvokeAsync(() => w_opened.SetCurrentValue(TextBlock.TextProperty, String.Format("opened '{0}'.", fn)));
+			},
+			CancellationToken.None,
+			TaskCreationOptions.None,
+			TaskScheduler.FromCurrentSynchronizationContext());
+		}
+
+		public IgtCorpus open_file_inner(String fn)
 		{
 			fn = Path.GetFullPath(fn);
 			if (!File.Exists(fn))
@@ -310,24 +339,7 @@ namespace xie
 				};
 			}
 
-			if (ccc.ContainsFile(fn))
-				throw new ErrorActionException
-				{
-					show = () =>
-					{
-						var msg = String.Format("A file named '{0}' is already open.", Path.GetFileNameWithoutExtension(fn));
-						MessageBox.Show(this, msg, "File already open", MessageBoxButton.OK, MessageBoxImage.Information);
-					}
-				};
-
-			var corpus = IgtCorpus.LoadXaml(fn);
-
-			ccc.Add(corpus);
-
-			if (w_corpora.SelectedIndex == -1)
-				w_corpora.SelectedIndex = 0;
-
-			w_opened.SetCurrentValue(TextBlock.TextProperty, String.Format("opened '{0}'.", fn));
+			return IgtCorpus.LoadXaml(fn);
 		}
 	};
 }

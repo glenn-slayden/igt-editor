@@ -29,8 +29,6 @@ namespace xie
 
 		public StackPanel Panel { get { return (StackPanel)GetTemplateChild("w_panel"); } }
 
-		public SegTier ActiveSegmentation;
-
 		private void menu_tok_source_tier(object sender, RoutedEventArgs e)
 		{
 			var mi = (MenuItem)sender;
@@ -47,8 +45,8 @@ namespace xie
 			var cm = (ContextMenu)mi.Parent;
 			var uib = (tier_ui_base)cm.PlacementTarget;
 			var tier = (tier_base)uib.Tier;
-			if (tier == ActiveSegmentation)
-				ActiveSegmentation = null;
+			//if (tier == ActiveSegmentation)
+			//	ActiveSegmentation = null;
 
 			tier.SetValue(dps.IsVisibleProperty, false);
 		}

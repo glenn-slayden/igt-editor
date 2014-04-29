@@ -70,7 +70,7 @@
 
         <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="168" />
+                <ColumnDefinition Width="198" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="277" />
                 <ColumnDefinition Width="Auto" />
@@ -81,9 +81,10 @@
                      VerticalAlignment="Stretch"
                      ItemsSource="{Binding Mode=OneWay}"
                      BorderThickness="0">
+                
                 <xe:CorporaListView.View>
                     <GridView>
-                        <GridViewColumn Width="90" Header="Filename">
+                        <GridViewColumn Width="120" Header="Filename">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding ShortFilename}" TextAlignment="Left" />
@@ -99,10 +100,50 @@
                         </GridViewColumn>
                     </GridView>
                 </xe:CorporaListView.View>
+
                 <xe:CorporaListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
+                        
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         <Setter Property="VerticalContentAlignment" Value="Top" />
+                        <Setter Property="ContextMenu">
+                            <Setter.Value>
+                                <ContextMenu>
+                                    <MenuItem x:Name="fm_save" >
+                                        <MenuItem.Style>
+                                            <Style TargetType="MenuItem">
+                                                <EventSetter Event="Click" Handler="fm_Click" />
+                                            </Style>
+                                        </MenuItem.Style>
+                                        <MenuItem.Header>
+                                            <TextBlock Text="{Binding ShortFilename,StringFormat='Save {0}'}"  />
+                                        </MenuItem.Header>
+                                    </MenuItem>
+                                    <MenuItem x:Name="fm_save_close" Header="Save and Close">
+                                        <MenuItem.Style>
+                                            <Style TargetType="MenuItem">
+                                                <EventSetter Event="Click" Handler="fm_Click" />
+                                            </Style>
+                                        </MenuItem.Style>
+                                    </MenuItem>
+                                    <Separator />
+                                    <MenuItem x:Name="fm_revert" Header="Revert to saved">
+                                        <MenuItem.Style>
+                                            <Style TargetType="MenuItem">
+                                                <EventSetter Event="Click" Handler="fm_Click" />
+                                            </Style>
+                                        </MenuItem.Style>
+                                    </MenuItem>
+                                    <MenuItem x:Name="fm_close" Header="Close (discard changes)">
+                                        <MenuItem.Style>
+                                            <Style TargetType="MenuItem">
+                                                <EventSetter Event="Click" Handler="fm_Click" />
+                                            </Style>
+                                        </MenuItem.Style>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </Setter.Value>
+                        </Setter>
                     </Style>
                 </xe:CorporaListView.ItemContainerStyle>
 

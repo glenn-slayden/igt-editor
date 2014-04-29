@@ -130,6 +130,58 @@ namespace xie
 		{
 			this.FontFamily = new FontFamily((String)((MenuItem)sender).Header);
 		}
+
+		private void fm_Click(Object sender, RoutedEventArgs e)
+		{
+			var mi = sender as MenuItem;
+			var item = mi.DataContext as IgtCorpus;
+			if (item == null)
+			{
+				w_opened.SetCurrentValue(TextBlock.TextProperty, "No item selected.");
+				return;
+			}
+			String filename = item.Filename;
+			int ix;
+
+			switch (mi.Name)
+			{
+				case "fm_save":
+					item.Save();
+					w_opened.SetCurrentValue(TextBlock.TextProperty, String.Format("saved changes to file '{0}'.", filename));
+					break;
+				case "fm_save_close":
+					item.Save();
+					if ((ix = ccc.IndexOf(item)) != -1)
+					{
+						ccc.RemoveAt(ix);
+						while (ix >= ccc.Count)
+							ix--;
+						w_corpora.SelectedIndex = ix;
+					}
+					w_opened.SetCurrentValue(TextBlock.TextProperty, String.Format("saved changes and closed file '{0}'.", filename));
+					break;
+				case "fm_revert":
+					{
+						var _new = open_file_inner(filename);
+						if ((ix = ccc.IndexOf(item)) != -1)
+							ccc[ix] = _new;
+						w_corpora.SelectedIndex = ix;
+						w_opened.SetCurrentValue(TextBlock.TextProperty, String.Format("reverted file '{0}'.", filename));
+					}
+					break;
+				case "fm_close":
+					if ((ix = ccc.IndexOf(item)) != -1)
+					{
+						ccc.RemoveAt(ix);
+						while (ix >= ccc.Count)
+							ix--;
+						w_corpora.SelectedIndex = ix;
+					}
+					break;
+				default:
+					throw new Exception();
+			}
+		}
 	};
 
 
@@ -240,13 +292,10 @@ namespace xie
 
 		protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
 		{
-			App.Current.Dispatcher.Invoke(() =>
-			{
-				base.OnItemsSourceChanged(oldValue, newValue);
+			base.OnItemsSourceChanged(oldValue, newValue);
 
-				if (Count > 0 && SelectedIndex < 0)
-					SelectedIndex = 0;
-			});
+			if (Count > 0 && SelectedIndex < 0)
+				SelectedIndex = 0;
 		}
 
 		public new Igt SelectedItem { get { return (Igt)base.SelectedItem; } }

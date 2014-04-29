@@ -13,15 +13,15 @@
     <ItemsControl.Resources>
 
         <DataTemplate DataType="{x:Type xl:TextTier}" >
-            <xe:tier_ui_base >
-                <xe:tier_ui_base.ContextMenu>
+            <xe:TextUiTier >
+                <xe:TextUiTier.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Auto Tokenize..." Click="menu_tok_source_tier"  />
                         <!--<Separator />
                         <MenuItem Header="Hide" Click="menu_hide_tier"  />-->
                     </ContextMenu>
-                </xe:tier_ui_base.ContextMenu>
-            </xe:tier_ui_base>
+                </xe:TextUiTier.ContextMenu>
+            </xe:TextUiTier>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type xl:CompoundTextTier}" >

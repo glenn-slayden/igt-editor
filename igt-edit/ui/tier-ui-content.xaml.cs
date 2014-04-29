@@ -164,10 +164,11 @@ namespace xie
 				}
 				if (i_from != i_to)
 				{
-					var seg = TiersControl.ActiveSegmentation;
+					SegTier seg = null;// TiersControl.ActiveSegmentation;
 					if (seg == null)
 					{
-						TiersControl.ActiveSegmentation = seg = new SegTier { TierType = "Seg" };
+						//TiersControl.ActiveSegmentation = 
+							seg = new SegTier { TierType = "Seg" };
 						igti.Add(seg);
 					}
 
