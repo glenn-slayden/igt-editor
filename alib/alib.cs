@@ -23,16 +23,16 @@ namespace alib
 		public static readonly Func<T, T> func;
 	};
 
-	public sealed class ReferenceEqualityComparer<T> : IEqualityComparer<T>
+	public sealed class ReferenceEquality<T> : IEqualityComparer<T>
 		where T : class
 	{
-		public static readonly IEqualityComparer<T> Instance;
+		public static readonly IEqualityComparer<T> Comparer;
 
-		static ReferenceEqualityComparer() { Instance = new ReferenceEqualityComparer<T>(); }
+		static ReferenceEquality() { Comparer = new ReferenceEquality<T>(); }
 
-		ReferenceEqualityComparer() { }
+		ReferenceEquality() { }
 
-		public bool Equals(T x, T y) { return Object.ReferenceEquals(x, y); }
+		public bool Equals(T x, T y) { return (Object)x == (Object)y; }
 
 		public int GetHashCode(T obj) { return RuntimeHelpers.GetHashCode(obj); }
 	};
@@ -61,6 +61,9 @@ namespace alib
 			b = a;
 			a = _tmp;
 		}
+
+		public static T _<T>(this Exception ex) { throw ex; }
+		public static T _<T>(this Exception ex, T _dummy) { throw ex; }
 	};
 
 	public sealed class TVoid { TVoid() { } };
@@ -134,26 +137,74 @@ namespace alib
 		public void Dispose() { if (indent > 0) indent--; }
 	}
 
+	public static class must
+	{
+		static must()
+		{
+			reimplement = new InvalidOperationException("Derived class must re-implement the interface");
+		}
+		public static readonly InvalidOperationException reimplement;
+	};
+	public static class cannot
+	{
+		static cannot()
+		{
+			modify = new InvalidOperationException("Cannot modify this collection");
+			happen = new NotExpectedException("Should be impossible");
+		}
+		public static readonly InvalidOperationException modify;
+		public static readonly NotExpectedException happen;
+	};
+	public static class bad
+	{
+		static bad()
+		{
+			index = new IndexOutOfRangeException();
+			arg = new ArgumentOutOfRangeException();
+		}
+		public static readonly IndexOutOfRangeException index;
+		public static readonly ArgumentOutOfRangeException arg;
+	};
 	public static class not
 	{
-		public static NotImplementedException impl { get { return new NotImplementedException(); } }
-		public static InvalidOperationException valid { get { return new InvalidOperationException(); } }
-		public static NotExpectedException expected { get { return new NotExpectedException(); } }
-		public static NotTestedException tested { get { return new NotTestedException(); } }
-		public static class thread
+		static not()
 		{
-			public static InvalidOperationException safe { get { return new InvalidOperationException(); } }
+			impl = new NotImplementedException();
+			valid = new InvalidOperationException();
+			expected = new NotExpectedException();
+			tested = new NotTestedException();
+			threadsafe = new InvalidOperationException();
+			found = new KeyNotFoundException();
 		}
+		public static readonly NotImplementedException impl;
+		public static readonly InvalidOperationException valid;
+		public static readonly NotExpectedException expected;
+		public static readonly NotTestedException tested;
+		public static readonly InvalidOperationException threadsafe;
+		public static readonly KeyNotFoundException found;
+	};
+	public static class fix
+	{
+		static fix()
+		{
+			me = new Exception("fix me");
+		}
+		public static readonly Exception me;
 	};
 	public static class dont
 	{
-		public static InvalidOperationException use { get { return not.valid; } }
+		static dont()
+		{
+			use = not.valid;
+		}
+		public static readonly InvalidOperationException use;
 	};
 
 	public static class no
 	{
 		public static void Action() { }
-	}
+		public static void Action<T>(T t) { }
+	};
 
 	public static class Upcast
 	{

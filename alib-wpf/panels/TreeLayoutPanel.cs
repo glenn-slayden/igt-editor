@@ -1,6 +1,4 @@
-﻿//#define LEAF_HEIGHT_EXEMPT
-
-using System;
+﻿using System;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,7 +10,6 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 
 using alib.Enumerable;
-using alib.Collections.ReadOnly;
 using alib.Collections;
 
 namespace alib.Wpf
@@ -30,10 +27,7 @@ namespace alib.Wpf
 						FrameworkPropertyMetadataOptions.AffectsParentMeasure |
 						FrameworkPropertyMetadataOptions.AffectsParentArrange;
 
-		static TreeLayoutPanel FindPanel(FrameworkElement el)
-		{
-			return el == null ? null : el as TreeLayoutPanel ?? FindPanel(VisualTreeHelper.GetParent(el) as FrameworkElement);
-		}
+		static TreeLayoutPanel FindPanel(FrameworkElement el) { return el.FindAncestor<TreeLayoutPanel>(); }
 
 		///////////////////////////////////////////////////////
 		/// 
@@ -258,7 +252,7 @@ namespace alib.Wpf
 		///
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		Dictionary<FrameworkElement, NodeLayoutInfo> nli_dict = new Dictionary<FrameworkElement, NodeLayoutInfo>();
+		Dictionary<FrameworkElement, NodeLayoutInfo> nli_dict;
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		///
@@ -302,8 +296,8 @@ namespace alib.Wpf
 				var layer_heights = new List<Double>();
 				var nli = nli_dict[root];
 				nli.CalculateLayout(layer_heights, 0);
-				var sz2 = nli.DetermineFinalPositions(0, layer_heights[0], 0, x + nli.pxLeftPosRelativeToBoundingBox);
-				y_max = Math.Max(y_max, sz2.Height);
+				var sz2 = nli.DetermineFinalPositions(layer_heights, 0, 0, x + nli.pxLeftPosRelativeToBoundingBox);
+				math.Maximize(ref y_max, sz2.Height);
 				x += sz2.Width;
 
 				layer_heights = null;
@@ -320,13 +314,16 @@ namespace alib.Wpf
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		protected override Size ArrangeOverride(Size sz)
 		{
-			foreach (var nli in nli_dict.Values)
+			if (nli_dict != null)
 			{
-				var r_child = nli.r_final;
+				foreach (var nli in nli_dict.Values)
+				{
+					var r_child = nli.r_final;
 
-				r_child.Offset(Padding.Left, Padding.Top);
+					r_child.Offset(Padding.Left, Padding.Top);
 
-				nli.fe.Arrange(r_child);
+					nli.fe.Arrange(r_child);
+				}
 			}
 			return sz;
 		}
@@ -337,7 +334,7 @@ namespace alib.Wpf
 		protected override void OnRender(DrawingContext dc)
 		{
 			Rect r_render;
-			if ((r_render = new Rect(util.coord_origin, RenderSize)).IsZeroSize())
+			if (nli_dict == null || (r_render = new Rect(util.coord_origin, RenderSize)).IsZeroSize())
 				return;
 
 			bool f_pad = DrawBackground(dc, r_render);

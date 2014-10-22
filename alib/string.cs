@@ -13,7 +13,9 @@ using System.Web;
 using System.Security.Cryptography;
 #endif
 
+using alib.Debugging;
 using alib.Enumerable;
+using alib.Character;
 
 namespace alib.String
 {
@@ -22,7 +24,6 @@ namespace alib.String
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	///
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	[DebuggerDisplay("{ToString(),nq}")]
 	public struct RegexPair : IEquatable<RegexPair>
 	{
@@ -56,86 +57,22 @@ namespace alib.String
 		public static bool operator !=(RegexPair x, RegexPair y) { return !x.Equals(y); }
 	};
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	///
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	[DebuggerDisplay("{ToString(),nq}")]
-	public sealed class ImmutableStringArray : IList<String>, IEquatable<ImmutableStringArray>
-	{
-		readonly String[] arr;
-		readonly int hc = 0;
-		readonly IEqualityComparer<String> comparer;
-
-		public ImmutableStringArray(IEnumerable<String> rgs, IEqualityComparer<String> comparer)
-		{
-			this.arr = rgs as String[] ?? rgs.ToArray();
-			this.comparer = comparer ?? StringComparer.Ordinal;
-
-			hc = arr.Length;
-			for (int i = 0; i < arr.Length; i++)
-				hc ^= i + comparer.GetHashCode(arr[i]);
-		}
-
-		public String this[int index]
-		{
-			get { return arr[index]; }
-			set { throw new InvalidOperationException(); }
-		}
-
-		public int IndexOf(String item)
-		{
-			for (int i = 0; i < arr.Length; i++)
-				if (comparer.Equals(item, arr[i]))
-					return i;
-			return -1;
-		}
-		public bool Contains(String item) { return IndexOf(item) != -1; }
-		public void CopyTo(String[] array, int arrayIndex) { Array.Copy(arr, array, arr.Length); }
-		public int Count { get { return arr.Length; } }
-		public bool IsReadOnly { get { return true; } }
-
-		public IEnumerator<String> GetEnumerator() { return ((IEnumerable<String>)arr).GetEnumerator(); }
-		IEnumerator IEnumerable.GetEnumerator() { return arr.GetEnumerator(); }
-		public void Insert(int index, String item) { throw new InvalidOperationException(); }
-		public void RemoveAt(int index) { throw new InvalidOperationException(); }
-		public void Add(String item) { throw new InvalidOperationException(); }
-		public void Clear() { throw new InvalidOperationException(); }
-		public bool Remove(String item) { throw new InvalidOperationException(); }
-
-		public bool Equals(ImmutableStringArray other)
-		{
-			return hc == other.hc && arr.SequenceEqual(other.arr, comparer);
-		}
-
-		public override bool Equals(Object obj)
-		{
-			ImmutableStringArray o = obj as ImmutableStringArray;
-			return o != null && hc == o.hc && arr.SequenceEqual(o.arr, comparer);
-		}
-
-		public override int GetHashCode() { return hc; }
-
-		public override String ToString()
-		{
-			return String.Join(" ", arr.Select(s => s.SQRB()));
-		}
-	};
 
 	/// <summary>
 	/// note: This will never intern a string, that is the responsibility of the user of this comparer
 	/// </summary>
-	public sealed class StringInternEqualityComparer : IEqualityComparer<String>
+	public sealed class StringInternEquality : IEqualityComparer<String>
 	{
 		public const StringComparison Comparison = (StringComparison)99;
 
-		public static readonly IEqualityComparer<String> Instance;
+		public static readonly IEqualityComparer<String> Comparer;
 
-		static StringInternEqualityComparer()
+		static StringInternEquality()
 		{
-			Instance = new StringInternEqualityComparer();
+			Comparer = new StringInternEquality();
 		}
 
-		StringInternEqualityComparer() { }
+		StringInternEquality() { }
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Equals(String x, String y)
@@ -174,8 +111,8 @@ namespace alib.String
 					return StringComparer.Ordinal;
 				case StringComparison.OrdinalIgnoreCase:
 					return StringComparer.OrdinalIgnoreCase;
-				case StringInternEqualityComparer.Comparison:
-					return StringInternEqualityComparer.Instance;
+				case StringInternEquality.Comparison:
+					return StringInternEquality.Comparer;
 			}
 			throw new Exception();
 		}
@@ -193,8 +130,8 @@ namespace alib.String
 				return StringComparison.Ordinal;
 			if (cmp == StringComparer.OrdinalIgnoreCase)
 				return StringComparison.OrdinalIgnoreCase;
-			if (cmp == StringInternEqualityComparer.Instance)
-				return StringInternEqualityComparer.Comparison;
+			if (cmp == StringInternEquality.Comparer)
+				return StringInternEquality.Comparison;
 			throw new Exception();
 		}
 
@@ -308,6 +245,44 @@ namespace alib.String
 			return fmt_G;
 		}
 
+		public static String Strikeout(this String s)
+		{
+			int i, c;
+			Char[] rgch;
+
+			if ((c = s.Length) > 0)
+			{
+				rgch = new Char[c += (i = c)];
+				do
+				{
+					rgch[--c] = s[--i];
+					rgch[--c] = '\u0338';
+				}
+				while (i > 0);
+				s = new String(rgch);
+			}
+			return s;
+		}
+		public static String Underscore(this String s)
+		{
+			int i, c;
+			Char[] rgch;
+
+			if ((c = s.Length) > 0)
+			{
+				rgch = new Char[c += (i = c) /*+ 2*/];
+				//rgch[0] = rgch[--c] = '\u200b';
+				do
+				{
+					rgch[--c] = '\u0332';
+					rgch[--c] = s[--i];
+				}
+				while (i > 0);
+				s = new String(rgch);
+			}
+			return s;
+		}
+
 		public static String PadRightComb(this String s, int cch)
 		{
 			return s.PadRight(cch + s.Count(ch => ch == '\u035F'));
@@ -316,6 +291,10 @@ namespace alib.String
 		public static String NewString(this IEnumerable<Char> iech)
 		{
 			return new String(iech as Char[] ?? iech.ToArray());
+		}
+		public static String Truncate(this String s, int ix)
+		{
+			return ix == s.Length ? s : s.Remove(ix);
 		}
 
 		public static String Quotes(this String s)
@@ -412,7 +391,7 @@ namespace alib.String
 			if (s.Length < count)
 				throw new Exception();
 			if (count < s.Length)
-				s = s.Substring(0, count);
+				s = s.Remove(count);
 			return enc.GetByteCount(s);
 		}
 
@@ -455,11 +434,9 @@ namespace alib.String
 					s = s.Substring(j + 1, k - j - 1);
 			return s;
 		}
+
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// <summary>
 		/// 
-		/// </summary>
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static String RemoveParenthesized(this String s)
 		{
 			int j, k = 0;
@@ -474,10 +451,7 @@ namespace alib.String
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// <summary>
 		/// 
-		/// </summary>
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static String RemoveBracketed(this String s)
 		{
 			int j, k = 0;
@@ -499,10 +473,7 @@ namespace alib.String
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// <summary>
 		/// 
-		/// </summary>
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static String RemoveAngleTagged(this String s)
 		{
 			int j, k = 0;
@@ -517,10 +488,7 @@ namespace alib.String
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// <summary>
 		/// 
-		/// </summary>
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static String ExtractAngleTagged(this String s)
 		{
 			int j, k;
@@ -529,18 +497,15 @@ namespace alib.String
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// <summary>
 		/// 
-		/// </summary>
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		public static unsafe int CopyToNativeW(this String s, Char* pbuf, int cwch_max)
+		public static unsafe bool CopyToNativeW(this String s, Char* pbuf, int cwch_max)
 		{
 			int c = s.Length;
 			if (c + 1 > cwch_max)
-				return 0;
+				return false;
 			fixed (Char* p = s)
 				pbuf[Encoding.Unicode.GetBytes(p, c, (byte*)pbuf, cwch_max * sizeof(Char)) >> 1] = '\0';
-			return c + 1;
+			return true;
 		}
 
 		/// <summary>
@@ -573,12 +538,12 @@ namespace alib.String
 				String _l;
 				while ((_l = sr.ReadLine()) != null)
 				{
-					String L = _l.Trim();
+					String L = _l.Trim(0);
 					if (L.Length == 0 || L[0] == ';')
 						continue;
 					int ix = QuoteInsulatedIndexOf(L, ';');
 					if (ix != -1)
-						sb.AppendLine(L.Substring(0, ix).TrimEnd());//yield return L.Substring(ix).TrimEnd();
+						sb.AppendLine(L.Remove(ix).TrimEnd());//yield return L.Substring(ix).TrimEnd();
 					else
 						sb.AppendLine(L);
 				}
@@ -868,7 +833,7 @@ namespace alib.String
 		{
 			if (s == null || s.Length == 0)
 				return String.Empty;
-			return s.Length <= cch ? s : s.Substring(0, cch);
+			return s.Length <= cch ? s : s.Remove(cch);
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -879,7 +844,7 @@ namespace alib.String
 			if (s == null || s.Length == 0)
 				return String.Empty;
 			int ix;
-			return (ix = s.IndexOf(ch)) == -1 ? s : s.Substring(0, ix);
+			return (ix = s.IndexOf(ch)) == -1 ? s : s.Remove(ix);
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -920,9 +885,9 @@ namespace alib.String
 		public static bool IsTrimmedNonEmpty(this String s)
 		{
 			int c;
-			if ((c = s.Length) == 0 || Char.IsWhiteSpace(s[0]))
+			if ((c = s.Length) == 0 || s[0].IsWhiteSpace())
 				return false;
-			return c == 1 || !Char.IsWhiteSpace(s[c - 1]);
+			return c == 1 || !s[c - 1].IsWhiteSpace();
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -939,7 +904,7 @@ namespace alib.String
 		public static bool IsTrimmed(this String s)
 		{
 			int c;
-			return (c = s.Length) == 0 || (!Char.IsWhiteSpace(s[0]) && (c == 1 || !Char.IsWhiteSpace(s[c - 1])));
+			return (c = s.Length) == 0 || (!s[0].IsWhiteSpace() && (c == 1 || !s[c - 1].IsWhiteSpace()));
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -955,7 +920,44 @@ namespace alib.String
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static String TrimToNull(this String s)
 		{
-			return s == null || s.Length == 0 || (s = s.Trim()).Length == 0 ? null : s;
+			int i, j, c;
+			if (s == null || (c = s.Length - 1) < 0)
+				return null;
+
+			for (i = 0; s[i].IsWhiteSpace(); i++)
+				if (i == c)
+					return null;
+
+			for (j = c; j > i && s[j].IsWhiteSpace(); j--)
+				;
+
+			return
+				j - i == c ? s :
+					i == j ? String.Intern(new String(s[i], 1)) :
+						j == c ? s.Substring(i) :
+							i == 0 ? s.Remove(j + 1) :
+								s.Substring(i, j - i + 1);
+		}
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// 
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		public static String Trim(this String s)
+		{
+			return TrimToNull(s) ?? String.Empty;
+		}
+		public static String Trim(this String s, int _dummy)
+		{
+			return TrimToNull(s) ?? String.Empty;
+		}
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// 
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		public static String SpaceAppend(this String s, String s_append)
+		{
+			int c;
+			return s == null || (c = s.Length) == 0 || s[c - 1] <= ' ' ? s_append : (s + " " + s_append);
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -971,7 +973,7 @@ namespace alib.String
 			if ((c = s.Length) == cch)
 				return s;
 			if (c > 0)
-				return c < cch ? s.PadRight(cch) : s.Substring(0, cch);
+				return c < cch ? s.PadRight(cch) : s.Remove(cch);
 		full_empty:
 			return new String(' ', cch);
 		}
@@ -1006,7 +1008,7 @@ namespace alib.String
 		{
 			left = left.TrimEnd();
 			right = right.TrimStart();
-			if ((width -= (left.Length + right.Length + 1)) <= 0)
+			if ((width -= left.Length + right.Length) < 0)
 				return left + " " + right;
 			return left + new String(' ', width) + right;
 		}
@@ -1016,7 +1018,7 @@ namespace alib.String
 			right = right.TrimStart();
 			width += left.Count(ch => ch == '\u035F');
 
-			if ((width -= (left.Length + right.Length + 1)) <= 0)
+			if ((width -= left.Length + right.Length) < 0)
 				return left + " " + right;
 			return left + new String(' ', width) + right;
 		}
@@ -1032,15 +1034,33 @@ namespace alib.String
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// <summary>
 		/// 
-		/// </summary>
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static String PadCenter(this String s, int width, char pad_char)
 		{
 			if (s == null || width <= s.Length)
 				return s;
 			return s.PadLeft(s.Length + (width - s.Length) / 2, pad_char).PadRight(width, pad_char);
+		}
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// 
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		public static String CenterOrTrim(this String s, int cch, char pad_char)
+		{
+			int c;
+			if (cch <= 0)
+				return String.Empty;
+			if (s == null || (c = s.Length) == 0)
+				return new String(pad_char, cch);
+			if ((c = cch - c) == 0)
+				return s;
+			if (c > 0)
+			{
+				s = new String(pad_char, c / 2) + s;
+				return s + new String(pad_char, cch - s.Length);
+			}
+			return s.Substring(-c / 2, cch);
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1159,7 +1179,7 @@ namespace alib.String
 		/// 
 		public static String WhitespaceToSpace(this String s)
 		{
-			return new String(s.Select(e => Char.IsWhiteSpace(e) ? ' ' : e).ToArray());
+			return new String(s.Select(e => e.IsWhiteSpace() ? ' ' : e).ToArray());
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1443,6 +1463,22 @@ namespace alib.String.Thai
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/// 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		public static String TrimEndOrPadRightThai(this String s, int cch)
+		{
+			if (cch == 0)
+				return String.Empty;
+			StringInfo si;
+			int c = cch - (si = new StringInfo(s)).LengthInTextElements;
+			if (c == 0)
+				return s;
+			if (c < 0)
+				return si.SubstringByTextElements(0, cch);
+			return s + new String('\u2002', c);
+		}
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// 
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static String ToThin874(this String s)
 		{
 			return Encoding.GetEncoding(1252).GetString(enc_874.GetBytes(s));
@@ -1542,7 +1578,7 @@ namespace alib.String.Thai
 				}
 				return s_in;
 			yes_convert:
-				StringBuilder sb = new StringBuilder(norm.Substring(0, (int)(p - pin_s)), norm.Length);
+				StringBuilder sb = new StringBuilder(norm.Remove((int)(p - pin_s)), norm.Length);
 				p++;	// skip the one detected above
 				while (p < p_end)
 				{

@@ -67,7 +67,7 @@ namespace alib.Debugging
 			var _tmp = nop_hooks;
 			if (_tmp == null && (_tmp = Interlocked.CompareExchange(ref nop_hooks, rg = new[] { a }, null)) != null)
 				do
-					if (System.Array.IndexOf<Action>(_tmp, a) == -1)
+					if (System.Array.IndexOf(_tmp, a) == -1)
 					{
 						(rg = new Action[_tmp.Length + 1])[_tmp.Length] = a;
 						_tmp.CopyTo(rg, 0);
@@ -281,9 +281,9 @@ namespace alib.Debugging
 				}
 
 				if (over > 0)
-					pcts[alib.Enumerable._enumerable_ext.IndexOfMax(dpcts)] -= over;
+					pcts[alib.Enumerable.enum_ext.IndexOfMax(dpcts)] -= over;
 				else if (over < 0)
-					pcts[alib.Enumerable._enumerable_ext.IndexOfMin(dpcts)] -= over;
+					pcts[alib.Enumerable.enum_ext.IndexOfMin(dpcts)] -= over;
 
 				Console.ForegroundColor = ConsoleColor.Black;
 				String overflow = String.Empty;
@@ -343,7 +343,7 @@ namespace alib.Debugging
 		{
 			var z = args.Length > 0 ? String.Format(fmt, args) : fmt;
 
-			var ies = ((IEnumerable<String>)z.Split(alib.Character.Charset.dollar, StringSplitOptions.None)).GetEnumerator();
+			var ies = ((IEnumerable<String>)z.Split(Character.Charset.dollar, StringSplitOptions.None)).GetEnumerator();
 			if (!ies.MoveNext())
 				return;
 

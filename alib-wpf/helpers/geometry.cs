@@ -72,6 +72,10 @@ namespace alib.Wpf
 		{
 			return new Size(th.Left + th.Right, th.Top + th.Bottom);
 		}
+		public static Size UpperRight(this Thickness th)
+		{
+			return new Size(th.Left, th.Top);
+		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsFinite(this Point pt)
@@ -87,7 +91,7 @@ namespace alib.Wpf
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsInfinite(this Rect r)
 		{
-			return r.Size == infinite_size;
+			return r.Size.Equals(infinite_size);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -110,6 +114,8 @@ namespace alib.Wpf
 		}
 
 		public static Rect Divide(this Rect r, Double d) { return new Rect(r.X / d, r.Y / d, r.Width / d, r.Height / d); }
+
+		public static Size Add(this Size sz1, Size sz2) { return new Size(sz1.Width + sz2.Width, sz1.Height + sz2.Height); }
 
 		public static Size Divide(this Size sz, Double d) { return new Size(sz.Width / d, sz.Height / d); }
 
@@ -237,6 +243,10 @@ namespace alib.Wpf
 			tt.X = pt.X;
 			tt.Y = pt.Y;
 		}
+		public static bool IsNullOrIdentity(this Transform t)
+		{
+			return t == null || t == Transform.Identity;
+		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Point RectOriginForCenter(this Point center, Size size)
@@ -287,17 +297,17 @@ namespace alib.Wpf
 			return new Point(r.Left + r.Width / 2, r.Bottom);
 		}
 
-		public static Point Offset(this DrawingGroup dg) { return dg.Bounds.TopLeft; }
+		public static Point Offset(this DrawingGroup dxg) { return dxg.Bounds.TopLeft; }
 
-		public static Point Center(this DrawingGroup dg) { return dg.Bounds.Center(); }
+		public static Point Center(this DrawingGroup dxg) { return dxg.Bounds.Center(); }
 
-		public static Point LeftCenter(this DrawingGroup dg) { return dg.Bounds.LeftCenter(); }
+		public static Point LeftCenter(this DrawingGroup dxg) { return dxg.Bounds.LeftCenter(); }
 
-		public static Point TopCenter(this DrawingGroup dg) { return dg.Bounds.TopCenter(); }
+		public static Point TopCenter(this DrawingGroup dxg) { return dxg.Bounds.TopCenter(); }
 
-		public static Point RightCenter(this DrawingGroup dg) { return dg.Bounds.RightCenter(); }
+		public static Point RightCenter(this DrawingGroup dxg) { return dxg.Bounds.RightCenter(); }
 
-		public static Point BottomCenter(this DrawingGroup dg) { return dg.Bounds.BottomCenter(); }
+		public static Point BottomCenter(this DrawingGroup dxg) { return dxg.Bounds.BottomCenter(); }
 
 		public static IEnumerable<Point> Interpolate(this IEnumerable<Point> points)
 		{

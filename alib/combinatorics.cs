@@ -30,7 +30,7 @@ namespace alib.Combinatorics
 		/// <summary>
 		/// Returns the Cartesian product of the two sets as a set of pairings.
 		/// </summary>
-		public static IEnumerable<Pairing<T>> CrossProduct<T>(this ICollection<T> set1, ICollection<T> set2)
+		public static IEnumerable<Pairing<T>> CrossProduct<T>(this IReadOnlyCollection<T> set1, IReadOnlyCollection<T> set2)
 		{
 			return set1.SelectMany(t1 => set2.Select(t2 => new Pairing<T>(t1, t2)));
 		}
@@ -54,7 +54,7 @@ namespace alib.Combinatorics
 		/// will be empty</param>
 		/// <returns>The (distinct) set of all result sets. Each result set has exactly one element from each set in 
 		/// the input sequence. The result sets are considered ordered for the purpose of distinctness.</returns>
-		static IEnumerable<_ICollection<T>> _vcp<T>(this IEnumerable<ICollection<T>> sets, int i = 0)
+		static IEnumerable<_ICollection<T>> _vcp<T>(this IEnumerable<IReadOnlyCollection<T>> sets, int i = 0)
 		{
 			var ic = sets.ElementAtOrDefault(i);
 			if (ic == null)
@@ -71,9 +71,9 @@ namespace alib.Combinatorics
 		/// <returns>The (distinct) set of all result sets. Each result set has exactly one element from each set in 
 		/// the input sequence. The result sets are considered ordered for the purpose of distinctness.</returns>
 #if false
-		public static IEnumerable<_ICollection<T>> VariableCrossProduct<T>(params ICollection<T>[] sets)
+		public static IEnumerable<_ICollection<T>> VariableCrossProduct<T>(params IReadOnlyCollection<T>[] sets)
 #else
-		public static IEnumerable<_ICollection<T>> VariableCrossProduct<T>(this ICollection<T>[] sets)
+		public static IEnumerable<_ICollection<T>> VariableCrossProduct<T>(this IReadOnlyCollection<T>[] sets)
 #endif
 		{
 			if (sets.Length == 0)
@@ -127,20 +127,20 @@ namespace alib.Combinatorics
 
 #elif permutations_c
 
-		public static IEnumerable<ICollection<T>> Permutations<T>(this ICollection<T> seq)
+		public static IEnumerable<_ICollection<T>> Permutations<T>(this IEnumerable<T> seq)
 		{
 			foreach (var rr in seq.Rotations())
 			{
 				var e = rr.GetEnumerator();
 				if (!e.MoveNext())
-					yield return Collection<T>.None;
+					yield return Collection<T>._Empty;
 				else
 					foreach (var pp in _perm_inner(e))
 						yield return pp;
 			}
 		}
 
-		static IEnumerable<ICollection<T>> _perm_inner<T>(IEnumerator<T> e)
+		static IEnumerable<_ICollection<T>> _perm_inner<T>(IEnumerator<T> e)
 		{
 			T t = e.Current;
 			if (!e.MoveNext())
@@ -161,7 +161,7 @@ namespace alib.Combinatorics
 		/// <param name="coll">collection to form combinations from</param>
 		/// <param name="k">lower index, the number of elements that would be chosen</param>
 		/// <returns>the number of possible sets of size <paramref name="k"/>.</returns>
-		public static ulong BinomialCoefficient<T>(this ICollection<T> coll, uint k)
+		public static ulong BinomialCoefficient<T>(this IReadOnlyCollection<T> coll, uint k)
 		{
 			return alib.Math.math.BinomialCoefficient((uint)coll.Count, k);
 		}
@@ -176,11 +176,11 @@ namespace alib.Combinatorics
 		/// <param name="coll">collection to form combinations from.</param>
 		/// <param name="k">lower index, the number of elements to choose</param>
 #if false
-		public static IEnumerable<_ICollection<T>> Choose<T>(this ICollection<T> coll, int k)
+		public static IEnumerable<_ICollection<T>> Choose<T>(this IReadOnlyCollection<T> coll, int k)
 		{
 			int c;
 			if (k == 0)
-				yield return Collection<T>.NoneCollection;
+				yield return Collection<T>._Empty;
 			else if (k > (c = coll.Count))
 				yield break;
 			else if (c == 1 || k == c)
@@ -201,7 +201,7 @@ namespace alib.Combinatorics
 			}
 		}
 #else
-		public static IEnumerable<_ICollection<T>> Choose<T>(this ICollection<T> coll, int k)
+		public static IEnumerable<_ICollection<T>> Choose<T>(this IReadOnlyCollection<T> coll, int k)
 		{
 			int c;
 			if (k == 0)
@@ -226,10 +226,10 @@ namespace alib.Combinatorics
 		/// </summary>
 		/// <param name="coll">collection to form combinations from.</param>
 		/// <param name="k">lower index, the number of elements to choose, with replacement</param>
-		public static IEnumerable<ICollection<T>> ChooseWithRepetition<T>(this ICollection<T> coll, int k)
+		public static IEnumerable<_ICollection<T>> ChooseWithRepetition<T>(this IReadOnlyCollection<T> coll, int k)
 		{
 			if (k == 0)
-				yield return Collection<T>.None;
+				yield return Collection<T>._Empty;
 			else if (k == 1)
 				foreach (var x in coll)
 					yield return new UnaryCollection<T>(x);
@@ -250,10 +250,10 @@ namespace alib.Combinatorics
 		/// Returns all permutations of the sets which can be formed by choosing, without replacement,
 		/// <paramref name="k"/> elements from the collection.
 		/// </summary>
-		public static IEnumerable<ICollection<T>> Variations<T>(this IReadOnlyCollection<T> coll, int k)
+		public static IEnumerable<_ICollection<T>> Variations<T>(this IReadOnlyCollection<T> coll, int k)
 		{
 			if (k == 0)
-				yield return Collection<T>.None;
+				yield return Collection<T>._Empty;
 			else if (k > coll.Count)
 				yield break;
 			else if (k == 1)
@@ -276,10 +276,10 @@ namespace alib.Combinatorics
 		/// Returns all permutations of the sets which can be formed by choosing, with replacement,
 		/// <paramref name="k"/> elements from the collection.
 		/// </summary>
-		public static IEnumerable<ICollection<T>> VariationsWithRepetion<T>(this ICollection<T> coll, int k)
+		public static IEnumerable<_ICollection<T>> VariationsWithRepetion<T>(this IReadOnlyCollection<T> coll, int k)
 		{
 			if (k == 0)
-				yield return Collection<T>.None;
+				yield return Collection<T>._Empty;
 			else if (k == 1)
 				foreach (var x in coll)
 					yield return new UnaryCollection<T>(x);
@@ -330,7 +330,7 @@ namespace alib.Combinatorics
 			return new _fwd_rots<T>(coll);
 		}
 
-		sealed class _fwd_rots<T> : _ICollection<_ICollection<T>>
+		sealed class _fwd_rots<T> : coll_redirect_base<_ICollection<T>>, _ICollection<_ICollection<T>>
 		{
 			public _fwd_rots(_ICollection<T> seq) { this.seq = seq; }
 			readonly _ICollection<T> seq;
@@ -347,28 +347,6 @@ namespace alib.Combinatorics
 					r = r.RotateForward();
 				}
 			}
-
-			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-			void ICollection<_ICollection<T>>.CopyTo(_ICollection<T>[] array, int arrayIndex)
-			{
-				var e = GetEnumerator();
-				while (e.MoveNext())
-					array[arrayIndex++] = e.Current;
-			}
-			void ICollection.CopyTo(System.Array array, int index)
-			{
-				var e = GetEnumerator();
-				while (e.MoveNext())
-					array.SetValue(e.Current, index++);
-			}
-			bool ICollection<_ICollection<T>>.Contains(_ICollection<T> item) { throw not.impl; }
-			void ICollection<_ICollection<T>>.Add(_ICollection<T> item) { throw not.valid; }
-			void ICollection<_ICollection<T>>.Clear() { throw not.valid; }
-			bool ICollection<_ICollection<T>>.Remove(_ICollection<T> item) { throw not.valid; }
-			bool ICollection<_ICollection<T>>.IsReadOnly { get { return true; } }
-			bool ICollection.IsSynchronized { get { return false; } }
-			Object ICollection.SyncRoot { get { return this; } }
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -382,7 +360,7 @@ namespace alib.Combinatorics
 		{
 			IEnumerable<T> rot_cur = seq;
 			int c;
-			if ((c = seq.CountIfAvail<T>()) != -1)
+			if ((c = seq.CountIfAvail()) != -1)
 				for (int i = 0; i < c; i++)
 				{
 					yield return rot_cur;
@@ -409,7 +387,7 @@ namespace alib.Combinatorics
 		/// <returns>All possible mappings. Each of these mappings contains between 1 and 
 		/// Min(<paramref name="count_x"/>,<paramref name="count_y"/>) pairings</returns> each.
 #if false
-		public static IEnumerable<ICollection<Pairing<T>>> SetMappings<T>(ICollection<T> set1, ICollection<T> set2, IEqualityComparer<T> cmp)
+		public static IEnumerable<IReadOnlyCollection<Pairing<T>>> SetMappings<T>(IReadOnlyCollection<T> set1, IReadOnlyCollection<T> set2, IEqualityComparer<T> cmp)
 		{
 			int k_max = System.Math.Min(set1.Count, set2.Count);
 			for (int k = 1; k <= k_max; k++)
@@ -442,7 +420,7 @@ namespace alib.Combinatorics
 			}
 		}
 #else
-		public static IEnumerable<IReadOnlyCollection<Pairing<T>>> SetMappings<T>(_ICollection<T> set1, _ICollection<T> set2, IEqualityComparer<T> cmp)
+		public static IEnumerable<IReadOnlyCollection<Pairing<T>>> SetMappings<T>(IReadOnlyCollection<T> set1, IReadOnlyCollection<T> set2, IEqualityComparer<T> cmp)
 		{
 			int k_max = System.Math.Min(set1.Count, set2.Count);
 			for (int k = 1; k <= k_max; k++)
@@ -471,7 +449,7 @@ namespace alib.Combinatorics
 		}
 #endif
 
-		public static IEnumerable<IReadOnlyCollection<Pairing<T>>> SetMappings<T>(_ICollection<T> set1, _ICollection<T> set2)
+		public static IEnumerable<IReadOnlyCollection<Pairing<T>>> SetMappings<T>(IReadOnlyCollection<T> set1, IReadOnlyCollection<T> set2)
 		{
 			return SetMappings(set1, set2, EqualityComparer<T>.Default);
 		}
@@ -503,29 +481,6 @@ namespace alib.Combinatorics
 			return tot;
 		}
 #endif
-
-
-		[ThreadStatic]
-		static Random rnd;
-
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// <summary>
-		/// You need to store the result
-		/// </summary>
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		public static IList<T> Shuffle<T>(this IEnumerable<T> source)
-		{
-			if (source == null)
-				throw new ArgumentNullException("source");
-
-			if (rnd == null)
-				rnd = new Random();
-			List<T> result = source.ToList();
-			int c = result.Count;
-			for (int i = 0; i < c; i++)
-				alib.Array.arr.Swap<T>(result, i, rnd.Next(c));
-			return result;
-		}
 	};
 
 #if perm_set_1
@@ -534,7 +489,7 @@ namespace alib.Combinatorics
 	/// Representing the set of all possible permutation sets of an input set.
 	/// </summary>
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	public sealed class PermutationSet<T> : _ICollection<_ICollection<T>>
+	public sealed class PermutationSet<T> : ro_coll_base<_ICollection<T>>, _ICollection<_ICollection<T>>
 	{
 		public PermutationSet(IEnumerable<T> src, int n)
 		{
@@ -545,7 +500,7 @@ namespace alib.Combinatorics
 			if (ul == 1)
 				throw new Exception();
 		}
-		public PermutationSet(ICollection<T> src)
+		public PermutationSet(IReadOnlyCollection<T> src)
 			: this(src, src.Count)
 		{
 		}
@@ -557,13 +512,7 @@ namespace alib.Combinatorics
 		//[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		//public ICollection<T>[] _dbg_display { get { return this.ToArray(); } }
 
-		int ICollection<_ICollection<T>>.Count { get { return ((ICollection)this).Count; } }
-
-		int IReadOnlyCollection<_ICollection<T>>.Count { get { return ((ICollection)this).Count; } }
-
-		int _ICollection<_ICollection<T>>.Count { get { return ((ICollection)this).Count; } }
-
-		int ICollection.Count
+		public int Count
 		{
 			get
 			{
@@ -573,7 +522,7 @@ namespace alib.Combinatorics
 			}
 		}
 
-		public ulong Count { get { return ul; } }
+		public ulong LongCount { get { return ul; } }
 
 		/// You can change the order of the result set from forward to reverse by changing .Prepend to .Append
 		static IEnumerable<_ICollection<T>> _perm_inner(IEnumerator<T> e)
@@ -597,33 +546,7 @@ namespace alib.Combinatorics
 					yield return pp;
 			}
 		}
-
-		public void CopyTo(_ICollection<T>[] array, int arrayIndex)
-		{
-			foreach (_ICollection<T> t in this)
-				array[arrayIndex++] = t;
-		}
-
-		void ICollection.CopyTo(System.Array array, int index)
-		{
-			foreach (_ICollection<T> t in this)
-				array.SetValue(t, index++);
-		}
-
-		public void Add(_ICollection<T> item) { throw alib.not.impl; }
-		public void Clear() { throw alib.not.impl; }
-		public bool Contains(_ICollection<T> item) { throw alib.not.impl; }
-		public bool Remove(_ICollection<T> item) { throw alib.not.impl; }
-		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public bool IsReadOnly { get { return true; } }
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		bool ICollection.IsSynchronized { get { return false; } }
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		object ICollection.SyncRoot { get { return this; } }
 	};
-
 #else
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -650,7 +573,7 @@ namespace alib.Combinatorics
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public abstract class permutation_base<T> : IMetaCollection<T>
 	{
-		protected permutation_base(ICollection<T> src_items, GenerateOption type, int lower_index)
+		protected permutation_base(IReadOnlyCollection<T> src_items, GenerateOption type, int lower_index)
 		{
 			this.type = type;
 			this.lower_index = lower_index;
@@ -732,14 +655,14 @@ namespace alib.Combinatorics
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public sealed class PermutationSet<T> : permutation_base<T>
 	{
-		PermutationSet(ICollection<T> src_items, GenerateOption type)
+		PermutationSet(IReadOnlyCollection<T> src_items, GenerateOption type)
 			: base(src_items, type, src_items.Count)
 		{
 			lex_orders = new int[src_items.Count];
 		}
 
 		/// <summary> (with repetition) </summary>
-		public PermutationSet(ICollection<T> src_items)
+		public PermutationSet(IReadOnlyCollection<T> src_items)
 			: this(src_items, GenerateOption.WithRepetition)
 		{
 			for (int i = 0; i < lex_orders.Length; i++)
@@ -747,7 +670,7 @@ namespace alib.Combinatorics
 		}
 
 		/// <summary> (without repetition) </summary>
-		public PermutationSet(ICollection<T> src_items, IComparer<T> comparer)
+		public PermutationSet(IReadOnlyCollection<T> src_items, IComparer<T> comparer)
 			: this(src_items, GenerateOption.WithoutRepetition)
 		{
 			if (comparer == null)
@@ -874,7 +797,7 @@ namespace alib.Combinatorics
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public sealed class CombinationSet<T> : permutation_base<T>
 	{
-		public CombinationSet(ICollection<T> src_items, int lower_index, GenerateOption type = GenerateOption.WithoutRepetition)
+		public CombinationSet(IReadOnlyCollection<T> src_items, int lower_index, GenerateOption type = GenerateOption.WithoutRepetition)
 			: base(src_items, type, lower_index)
 		{
 			var map = new RefList<bool>();
@@ -1115,7 +1038,7 @@ namespace alib.Combinatorics
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/// 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		public static ICollection<IExclusionPair<T>> GroupExclusionPairs<T>(
+		public static IReadOnlyCollection<IExclusionPair<T>> GroupExclusionPairs<T>(
 						IReadOnlyList<EqualitySet<T>> left_grp,
 						IReadOnlyList<EqualitySet<T>> righ_grp,
 						IEqualityComparer<T> ceq)
@@ -1207,16 +1130,16 @@ namespace alib.Combinatorics
 	/// 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public interface IEqualitySet<out T> : IGrouping<T, T>, _IList<T>
+	public interface IEqualitySet<out T> : _IGrouping<T, T>
 	{
 	};
 
-	public interface IEqualityGroup<out T> : IGrouping<IEqualitySet<T>, T>
+	public interface IEqualityGroup<out T> : _IGrouping<IEqualitySet<T>, T>
 	{
 	};
 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public class EqualitySet<T> : List<T>, IEqualitySet<T>, IAddRangeList<T>, _IList<T>
+	public class EqualitySet<T> : RefList<T>, IEqualitySet<T>
 	{
 		public EqualitySet(T a) : base(5) { base.Add(a); }
 		public T Key { get { return base[0]; } }
@@ -1248,7 +1171,7 @@ namespace alib.Combinatorics
 			this.max_idx = a.Index;
 		}
 
-		public new void Add(T item)
+		public void Add(T item)
 		{
 			base.Add(item);
 			if (item.Index > max_idx)

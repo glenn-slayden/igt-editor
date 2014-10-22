@@ -91,7 +91,7 @@ namespace alib.Wpf.pathref
 					return;
 				if (result != UnsetValue)
 					throw new ArgumentException("Path");
-				this.Arg1 = value.Trim();
+				this.Arg1 = value.Trim(0);
 			}
 		}
 

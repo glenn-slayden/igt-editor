@@ -81,32 +81,44 @@ namespace alib.Math
 		public const Double PiRad = 180 / Math.PI;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Double Maximize(ref Double x, Double y)
+		public static int Max(int x, int y)
 		{
-			if (y > x)
-				x = y;
-			return x;
+			return y > x ? y : x;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int Maximize(ref int x, int y)
 		{
-			if (y > x)
-				x = y;
-			return x;
+			return y > x ? (x = y) : x;
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ushort Maximize(ref ushort x, ushort y)
+		{
+			return y > x ? (x = y) : x;
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint Maximize(ref uint x, uint y)
+		{
+			return y > x ? (x = y) : x;
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Double Maximize(ref Double x, Double y)
+		{
+			return y > x ? (x = y) : x;
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int Min(int x, int y)
+		{
+			return y < x ? y : x;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Double Minimize(ref Double x, Double y)
 		{
-			if (y < x)
-				x = y;
-			return x;
+			return y < x ? (x = y) : x;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int Minimize(ref int x, int y)
 		{
-			if (y < x)
-				x = y;
-			return x;
+			return y < x ? (x = y) : x;
 		}
 
 		public static Double Min(params Double[] arr)
@@ -436,7 +448,7 @@ namespace alib.Math
 			return Math.Sqrt(Variance(rg));
 		}
 
-		public static Double StandardDeviation<T>(this IEnumerable<T> rg, Converter<T, Double> fn)
+		public static Double StandardDeviation<T>(this IEnumerable<T> rg, Func<T, Double> fn)
 		{
 			int n = 0;
 			Double mx = 0, mean = 0;
@@ -473,7 +485,7 @@ namespace alib.Math
 		/// <summary> Returns the entropy of the strings </summary>
 		public static Double Entropy(this IEnumerable<String> ie)
 		{
-			int c = alib.Enumerable._enumerable_ext._Count(ie);
+			int c = alib.Enumerable.enum_ext._Count(ie);
 			return -ie.GroupBy(_identity<String>.func).Sum(e =>
 			{
 				var p = (Double)e.Count() / c;
@@ -649,7 +661,7 @@ namespace alib.Math
 			int i;
 			if (c <= 65521)
 			{
-				if ((i = System.Array.BinarySearch<ushort>(cache, (ushort)c)) < 0)
+				if ((i = System.Array.BinarySearch(cache, (ushort)c)) < 0)
 					i = ~i;
 				return cache[i];
 			}

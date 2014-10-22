@@ -7,7 +7,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+
 using alib.Math;
+using alib.Enumerable;
 
 namespace alib.Wpf
 {
@@ -18,8 +20,6 @@ namespace alib.Wpf
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public static class PNG
 	{
-		const Double Prescale = 2.0;
-
 		public static RenderTargetBitmap GetImage(UIElement el, Brush bkgnd, Double dpi)
 		{
 			if (!el.IsMeasureValid)
@@ -27,39 +27,32 @@ namespace alib.Wpf
 
 			var sz = el.DesiredSize;
 			if (sz.Width < math.ε || sz.Height < math.ε)
-			{
 				throw new Exception();
-				//return new RenderTargetBitmap(1, 1, dpi, dpi, PixelFormats.Pbgra32);
-			}
-
-			var dv = new DrawingVisual();
-
-			dv.Transform = new ScaleTransform(Prescale, Prescale);
-
-			TextOptions.SetTextHintingMode(dv, TextHintingMode.Fixed);
-			TextOptions.SetTextRenderingMode(dv, TextRenderingMode.Aliased);
-			RenderOptions.SetEdgeMode(dv, EdgeMode.Unspecified);
-
-			using (DrawingContext ctx = dv.RenderOpen())
-			{
-				Rect r = new Rect(0, 0, sz.Width + 1, sz.Height + 1);
-
-				if (bkgnd != null && bkgnd != Brushes.Transparent)
-					ctx.DrawRectangle(bkgnd, null, r);
-
-				VisualBrush br = new VisualBrush(el);
-				br.AutoLayoutContent = true;
-				ctx.DrawRectangle(br, null, r);
-			}
 
 			Double f = dpi / 96.0;
 
-			RenderTargetBitmap bitmap = new RenderTargetBitmap(
-				(int)(sz.Width * f),
-				(int)(sz.Height * f),
-				dpi / Prescale,
-				dpi / Prescale,
-				PixelFormats.Pbgra32);
+			sz.Width = (sz.Width + 1) * f;
+			sz.Height = (sz.Height + 1) * f;
+
+			var dv = new DrawingVisual { Transform = new ScaleTransform(f, f) };
+
+			TextOptions.SetTextHintingMode(dv, TextHintingMode.Fixed);
+			TextOptions.SetTextRenderingMode(dv, TextRenderingMode.Grayscale);
+			TextOptions.SetTextFormattingMode(dv, TextFormattingMode.Ideal);
+			RenderOptions.SetEdgeMode(dv, EdgeMode.Aliased);
+			RenderOptions.SetBitmapScalingMode(dv, BitmapScalingMode.HighQuality);
+			dv.SetValue(Window.UseLayoutRoundingProperty, true);
+
+			using (DrawingContext ctx = dv.RenderOpen())
+			{
+				if (bkgnd != null && bkgnd != Brushes.Transparent)
+					ctx.DrawRectangle(bkgnd, null, new Rect(sz));
+
+				ctx.DrawAllDrawings(el);
+			}
+
+			var bitmap = new RenderTargetBitmap((int)(sz.Width * f), (int)(sz.Height * f), dpi, dpi, PixelFormats.Pbgra32);
+
 			bitmap.Render(dv);
 
 			return bitmap;
@@ -73,9 +66,51 @@ namespace alib.Wpf
 			return writable;
 		}
 
-		public static void CopyToClipboard(UIElement fe, Brush background, int dpi)
+		public static void CopyToClipboard(UIElement uie, Brush br, int dpi)
 		{
-			Clipboard.SetImage(GetImage(fe, background, dpi));
+			var sv = uie.AllDescendants()
+						.OfType<ScrollViewer>()
+						.FirstOrDefault(x => x.Content.GetType().FullName.Contains(".Wpf."));	// hack alert: alib.Wpf., agree.Wpf.
+
+			if (sv != null)
+			{
+				uie = (UIElement)sv.Content;
+				sv.Content = null;
+
+				uie.InvalidateVisual();
+
+				if (sv.HorizontalOffset != 0 || sv.VerticalOffset != 0)
+				{
+					if (uie.RenderTransform != null && uie.RenderTransform != Transform.Identity)
+						throw not.impl;
+					uie.RenderTransform = new TranslateTransform(sv.HorizontalOffset, sv.VerticalOffset);
+				}
+			}
+
+#if adjust_for_scale_form
+			FrameworkElement fe;
+			Transform lx = null;
+			if ((fe = uie as FrameworkElement) != null && (lx = fe.LayoutTransform) != null)
+			{
+				fe.RenderTransform = lx;
+			}
+#endif
+
+			Clipboard.SetImage(GetImage(uie, br ?? Brushes.White, dpi));
+
+			if (sv != null)
+			{
+				uie.RenderTransform = null;
+				sv.Content = uie;
+			}
+
+#if adjust_for_scale_form
+			if (lx != null)
+			{
+				fe.RenderTransform = null;
+				fe.LayoutTransform = lx;
+			}
+#endif
 		}
 
 		public static void Save(String fn, UIElement fe, Brush background, int dpi)
@@ -86,9 +121,6 @@ namespace alib.Wpf
 
 		public static void Write(this Stream stream, UIElement fe, Brush background, int dpi)
 		{
-			//fe.Measure(util.infinite_size);
-			//fe.UpdateLayout();
-
 			var bitmap = GetImage(fe, null, dpi);
 
 			var encoder = new PngBitmapEncoder();
@@ -201,9 +233,9 @@ namespace alib.Wpf
 
 		public static Size ToSize(this PageResolution res) { return new Size(res.X.Value, res.Y.Value); }
 
-		public static String FmtDi(this Size sz) { return util.szFmt(sz).PadRight(12) + " (" + util.szFmt(sz.Divide(96.0)) + ")"; }
+		public static String FmtDi(this Size sz) { return sz.szFmt().PadRight(12) + " (" + sz.Divide(96.0).szFmt() + ")"; }
 
-		public static String FmtDi(this Rect r) { return util.rFmt(r) + "  (" + util.rFmt(r.Divide(96.0)) + ")"; }
+		public static String FmtDi(this Rect r) { return r.rFmt() + "  (" + r.Divide(96.0).rFmt() + ")"; }
 
 		public static Size DpiScaleFactor(this Visual visual)
 		{

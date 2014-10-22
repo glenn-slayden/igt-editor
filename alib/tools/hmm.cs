@@ -153,7 +153,7 @@ namespace alib.Hmm
 		{
 			return (tag << 16) ^ item;
 		}
-		public override bool Equals(object obj)
+		public override bool Equals(Object obj)
 		{
 			Emission other = (Emission)obj;
 			return this.item == other.item && this.tag == other.tag;
@@ -180,7 +180,7 @@ namespace alib.Hmm
 		{
 			return (tag << 16) ^ item.GetHashCode();
 		}
-		public override bool Equals(object obj)
+		public override bool Equals(Object obj)
 		{
 			StringEmission other = (StringEmission)obj;
 			return this.item == other.item && this.tag == other.tag;
@@ -211,7 +211,7 @@ namespace alib.Hmm
 		{
 			return (T1 << 16) ^ T2;
 		}
-		public override bool Equals(object obj)
+		public override bool Equals(Object obj)
 		{
 			Bitag other = (Bitag)obj;
 			return this.T2 == other.T2 && this.T1 == other.T1;
@@ -251,7 +251,7 @@ namespace alib.Hmm
 		{
 			return _data;
 		}
-		public override bool Equals(object obj)
+		public override bool Equals(Object obj)
 		{
 			return this._data == ((Tritag)obj)._data;
 		}
@@ -321,7 +321,7 @@ namespace alib.Hmm
 			if (cur == null || cur.Length == 0)
 				cur = new[] { this };
 			else if ((ix = find(cur, this.i_tag)) < 0)
-				cur = arr.InsertAt(cur, ~ix, this);
+				arr.InsertAt(ref cur, ~ix, this);
 			else
 				cur[ix].p += p;
 		}
@@ -354,7 +354,7 @@ namespace alib.Hmm
 		{
 			return this.i_tag == other.i_tag && this.p == other.p;
 		}
-		public override bool Equals(object obj)
+		public override bool Equals(Object obj)
 		{
 			return this.Equals((PosProb)obj);
 		}
@@ -779,6 +779,7 @@ namespace alib.Hmm
 			else
 				τ_unitag[tag]++;
 
+#warning items is already a hash so this isn't necessary. or use tally set?
 			if (!items.Contains(s_item))
 			{
 				items.Add(s_item);

@@ -4,8 +4,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
+using alib.Collections;
+using alib.Enumerable;
+using alib.Dictionary;
+
 namespace alib.Tally
 {
+	using Array = System.Array;
+
 	[DebuggerDisplay("{ToString(),nq}")]
 	public struct Tally<T>
 	{
@@ -20,11 +26,6 @@ namespace alib.Tally
 		{
 			return System.String.Format("[{0}] Tally:{1}", Item.ToString(), Count);
 		}
-	};
-
-	public interface ITallySet<T> : IEnumerable<Tally<T>>, alib.Enumerable._ICollection<T>//, alib.Enumerable._IList<T>
-	{
-		int this[T item] { get; }
 	};
 
 	[DebuggerDisplay("count={Count}")]
@@ -42,14 +43,12 @@ namespace alib.Tally
 			int i;
 			if (base.TryGetValue(item, out i))
 			{
-				base[item] = i + 1;
+				base[item]++;
 				return false;
 			}
 			base.Add(item, 1);
 			return true;
 		}
-
-		void ICollection<T>.Add(T item) { Add(item); }
 
 		public new bool Remove(T item)
 		{
@@ -64,43 +63,27 @@ namespace alib.Tally
 			return base.ContainsKey(item);
 		}
 
-		public void CopyTo(T[] array, int arrayIndex)
-		{
-			Keys.CopyTo(array, arrayIndex);
-		}
-
-		void ICollection.CopyTo(System.Array array, int index)
-		{
-			foreach (T t in base.Keys)
-				array.SetValue(t, index++);
-		}
-
-		public bool IsReadOnly { get { return false; } }
-
 		public new IEnumerator<Tally<T>> GetEnumerator()
 		{
 			return ((Dictionary<T, int>)this).Select(kvp => new Tally<T>(kvp.Key, kvp.Value)).GetEnumerator();
 		}
 
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return Keys.GetEnumerator();
+			return GetEnumerator();
 		}
 	};
 
-	public static class Ext
+	public static class _ext
 	{
 		/// <summary>
 		/// Determine tallies for each distinct group of source elements
 		/// </summary>
 		public static ITallySet<TSrc> ToTallies<TSrc>(this IEnumerable<TSrc> seq)
 		{
-			TallySet<TSrc> d = new TallySet<TSrc>();
+			var d = new TallySet<TSrc>();
 			foreach (TSrc t in seq)
-				if (d.ContainsKey(t))
-					d[t]++;
-				else
-					d.Add(t, 1);
+				d.Add(t);
 			return d;
 		}
 		/// <summary>
@@ -108,58 +91,20 @@ namespace alib.Tally
 		/// </summary>
 		public static ITallySet<TSrc> ToTallies<TSrc>(this IEnumerable<TSrc> seq, IEqualityComparer<TSrc> c)
 		{
-			TallySet<TSrc> d = new TallySet<TSrc>(c);
+			var d = new TallySet<TSrc>(c);
 			foreach (TSrc t in seq)
-				if (d.ContainsKey(t))
-					d[t]++;
-				else
-					d.Add(t, 1);
+				d.Add(t);
 			return d;
 		}
 
 		/// <summary>
 		/// Return tallies for the distinct groups of source elements, determined according to the key selector. 
 		/// </summary>
-		public static IEnumerable<Tally<TKey>> ToTallies<TSrc, TKey>(this IEnumerable<TSrc> ie, Func<TSrc, TKey> fn, IEqualityComparer<TKey> c)
+		public static ITallySet<TKey> ToTallies<TSrc, TKey>(this IEnumerable<TSrc> ie, Func<TSrc, TKey> fn, IEqualityComparer<TKey> c)
 		{
-			Dictionary<TKey, Tally<TKey>> d = new Dictionary<TKey, Tally<TKey>>(c);
+			var d = new TallySet<TKey>(c);
 			foreach (TSrc t in ie)
-			{
-				Tally<TKey> tal;
-				TKey k = fn(t);
-				if (d.TryGetValue(k, out tal))
-					d[k] = new Tally<TKey>(k, tal.Count + 1);
-				else
-					d.Add(k, new Tally<TKey>(k, 1));
-			}
-			return d.Values;
-		}
-
-		/// <summary>
-		/// Determine tallies for each distinct group of dictionary values
-		/// </summary>
-		public static ITallySet<V> TallyValues<K, V>(this IDictionary<K, V> dict)
-		{
-			TallySet<V> d = new TallySet<V>();
-			foreach (var kvp in dict)
-				if (d.ContainsKey(kvp.Value))
-					d[kvp.Value]++;
-				else
-					d.Add(kvp.Value, 1);
-			return d;
-		}
-
-		/// <summary>
-		/// Determine tallies for each distinct group of dictionary values
-		/// </summary>
-		public static ITallySet<V> TallyValues<K, V>(this IDictionary<K, V> dict, IEqualityComparer<V> c)
-		{
-			TallySet<V> d = new TallySet<V>(c);
-			foreach (var kvp in dict)
-				if (d.ContainsKey(kvp.Value))
-					d[kvp.Value]++;
-				else
-					d.Add(kvp.Value, 1);
+				d.Add(fn(t));
 			return d;
 		}
 	};

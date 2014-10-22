@@ -1,8 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
+
+using alib.Collections;
 
 namespace alib.Wpf
 {
@@ -53,48 +58,85 @@ namespace alib.Wpf
 			return el ?? _el;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool HasLocalValue(this DependencyObject o, DependencyProperty dp)
+		{
+			return o.ReadLocalValue(dp) != DependencyProperty.UnsetValue;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static DependencyObject GetVisualParent(this DependencyObject o)
+		{
+			return o is Visual || o is Visual3D ? VisualTreeHelper.GetParent(o) : null;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static DependencyObject GetLogicalParent(this DependencyObject o)
+		{
+			FrameworkElement fe;
+			FrameworkContentElement fce;
+			return (fe = o as FrameworkElement) != null ? fe.Parent : (fce = o as FrameworkContentElement) != null ? fce.Parent : null;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Window FindWindow(this DependencyObject o) { return FindAncestor<Window>(o); }
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool FindAncestor<T>(this DependencyObject o, out T result)
+			where T : DependencyObject
+		{
+			return (result = FindAncestor<T>(o)) != null;
+		}
 
 		public static T FindAncestor<T>(this DependencyObject o)
 			where T : DependencyObject
 		{
-			if (o == null)
-				return null;
-			return o as T ?? find_ancestor<T>(o, new HashSet<DependencyObject>());
+			T t;
+			if ((t = o as T) != null || o == null)
+				return t;
+			var par = GetVisualParent(o) ?? GetLogicalParent(o);
+			return par != null ? par as T ?? new _finder<T>().find_ancestor(par) : null;
 		}
 
-		static T find_ancestor<T>(DependencyObject o, HashSet<DependencyObject> hs)
+		sealed class _finder<T> : ListHashSet<DependencyObject>
 			where T : DependencyObject
 		{
-			var t = o as T;
-			if (t == null && hs.Add(o))
+			public T find_ancestor(DependencyObject o)
 			{
-				FrameworkElement fe;
-				DependencyObject par = null;
-
-				if ((fe = o as FrameworkElement) != null && (par = VisualTreeHelper.GetParent(fe)) != null && (t = find_ancestor<T>(par, hs)) != null)
-					goto ok;
-
-				if ((par = LogicalTreeHelper.GetParent(o)) != null && (t = find_ancestor<T>(par, hs)) != null)
-					goto ok;
-
-				if (o is Visual && (par = VisualTreeHelper.GetParent(o)) != null && (t = find_ancestor<T>(par, hs)) != null)
-					goto ok;
+				Debug.Assert(o != null);
+				T t;
+				return (t = o as T) == null && base.Add(o) ? get_parent(o) : t;
 			}
-		ok:
-			return t;
-		}
 
-		public static FrameworkElement FindFrameworkElement(this DependencyObject o)
+			T get_parent(DependencyObject o)
+			{
+				T t = null;
+				DependencyObject par;
+				return (par = GetVisualParent(o)) != null && (t = find_ancestor(par)) == null &&
+						(par = GetLogicalParent(o)) != null ? find_ancestor(par) : t;
+			}
+		};
+#if true
+		public static IEnumerable<DependencyObject> AllDescendants(this DependencyObject o)
 		{
-			var fe = default(FrameworkElement);
-			if (o != null)
-				if ((fe = o as FrameworkElement) == null)
-					if (!(o is Visual || o is System.Windows.Media.Media3D.Visual3D) || (fe = VisualTreeHelper.GetParent(o) as FrameworkElement) == null)
-						fe = LogicalTreeHelper.GetParent(o) as FrameworkElement;
-			return fe;
-		}
+			var hs = new ListHashSet<DependencyObject>();
+			hs.UnionWith(LogicalTreeHelper.GetChildren(o).OfType<DependencyObject>());
 
+			if (o is Visual || o is Visual3D)
+			{
+				int c = VisualTreeHelper.GetChildrenCount(o);
+				for (int i = 0; i < c; i++)
+					hs.Add(VisualTreeHelper.GetChild(o, i));
+			}
+
+			foreach (var oo in hs)
+			{
+				yield return oo;
+				foreach (var ooo in AllDescendants(oo))
+					yield return ooo;
+			}
+		}
+#else
 		public static IEnumerable<FrameworkElement> AllDescendants(this FrameworkElement fe)
 		{
 			ContentControl cc;
@@ -135,7 +177,7 @@ namespace alib.Wpf
 				yield return child;
 			yield return fe;
 		}
-
+#endif
 		public static IEnumerable<DependencyObject> EnumerateVisualChildren(this DependencyObject o)
 		{
 			int c = VisualTreeHelper.GetChildrenCount(o);
@@ -151,15 +193,15 @@ namespace alib.Wpf
 			yield return o;
 		}
 
-		static IEnumerable<DependencyObject> ImmediateChildren(this DependencyObject o)
+		static T[] ImmediateChildren<T>(this DependencyObject o)
+			where T : DependencyObject
 		{
-			int c = VisualTreeHelper.GetChildrenCount(o);
-			for (int i = 0; i < c; i++)
-			{
-				var dd = VisualTreeHelper.GetChild(o, i);
-				if (dd != null)
-					yield return dd;
-			}
+			int i, j;
+			var rg = new T[VisualTreeHelper.GetChildrenCount(o)];
+			for (i = j = 0; i < rg.Length; i++)
+				if ((rg[j] = VisualTreeHelper.GetChild(o, i) as T) != null)
+					j++;
+			return j < i ? alib.Array.arr.Resize(rg, j) : rg;
 		}
 	};
 }

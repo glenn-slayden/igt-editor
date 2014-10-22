@@ -42,45 +42,56 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="graph\edge-vertex.cs" />
-    <Compile Include="graph\graph.cs" />
-    <Compile Include="graph\graph-ex.cs">
-      <DependentUpon>graph.cs</DependentUpon>
-    </Compile>
-    <Compile Include="graph\layout.cs" />
-    <Compile Include="graph\layout_level.cs">
+    <Compile Include="collections\dictionary-ro.cs" />
+    <Compile Include="collections\dictionary-rw.cs" />
+    <Compile Include="collections\dictionary.cs" />
+    <Compile Include="collections\hashset.cs" />
+    <Compile Include="collections\index.cs" />
+    <Compile Include="collections\priority-queue.cs" />
+    <Compile Include="collections\priority-set.cs" />
+    <Compile Include="collections\reflist.cs" />
+    <Compile Include="collections\trie-nodes.cs" />
+    <Compile Include="collections\trie.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="dgraph\dgraph.cs" />
+    <Compile Include="dgraph\dgraph-base.cs" />
+    <Compile Include="dgraph\dgraph-ex.cs" />
+    <Compile Include="dgraph\edge-vertex.cs" />
+    <Compile Include="dgraph\eref-vref.cs" />
+    <Compile Include="dgraph\layout.cs" />
+    <Compile Include="dgraph\layout_level.cs">
       <DependentUpon>layout.cs</DependentUpon>
     </Compile>
-    <Compile Include="graph\layout-debug.cs">
+    <Compile Include="dgraph\layout-debug.cs">
       <DependentUpon>layout.cs</DependentUpon>
     </Compile>
-    <Compile Include="graph\layout-logical.cs">
+    <Compile Include="dgraph\layout-logical.cs">
       <DependentUpon>layout.cs</DependentUpon>
     </Compile>
-    <Compile Include="graph\layout-engine.cs">
+    <Compile Include="dgraph\layout-engine.cs">
       <DependentUpon>layout.cs</DependentUpon>
     </Compile>
-    <Compile Include="graph\layout-eval-queue.cs">
+    <Compile Include="dgraph\layout-eval-queue.cs">
       <DependentUpon>layout.cs</DependentUpon>
     </Compile>
-    <Compile Include="graph\ro-data-string.cs" />
-    <Compile Include="graph\rw-main.cs" />
-    <Compile Include="graph\rw-data-string.cs">
+    <Compile Include="dgraph\ro-data-string.cs" />
+    <Compile Include="dgraph\rw-main.cs" />
+    <Compile Include="dgraph\rw-data-string.cs">
       <DependentUpon>rw-main.cs</DependentUpon>
     </Compile>
-    <Compile Include="graph\rw-debug.cs">
+    <Compile Include="dgraph\rw-debug.cs">
       <DependentUpon>rw-main.cs</DependentUpon>
     </Compile>
-    <Compile Include="graph\rw-edit.cs">
+    <Compile Include="dgraph\rw-edit.cs">
       <DependentUpon>rw-main.cs</DependentUpon>
     </Compile>
-    <Compile Include="graph\rw-freelist.cs">
+    <Compile Include="dgraph\rw-freelist.cs">
       <DependentUpon>rw-main.cs</DependentUpon>
     </Compile>
-    <Compile Include="graph\support.cs" />
-    <Compile Include="graph\zz-automation.cs" />
-    <Compile Include="graph\zz_check.cs" />
-    <Compile Include="graph\zz_debug.cs" />
+    <Compile Include="dgraph\zz-automation.cs" />
+    <Compile Include="dgraph\zz_check.cs" />
+    <Compile Include="dgraph\zz_debug.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="tools\edit-distance.cs" />
@@ -88,35 +99,50 @@
     <Compile Include="tools\AgendaHmmDecoder.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="_interfaces.cs" />
     <Compile Include="alib.cs" />
     <Compile Include="anonymous.cs" />
     <Compile Include="array.cs" />
+    <Compile Include="array-int.cs" />
+    <Compile Include="array-sort.cs" />
+    <Compile Include="binding.cs" />
     <Compile Include="bitarr.cs" />
     <Compile Include="bits.cs" />
     <Compile Include="character.cs" />
-    <Compile Include="collections.cs" />
+    <Compile Include="collection.cs" />
+    <Compile Include="collection-base.cs">
+      <DependentUpon>collection.cs</DependentUpon>
+    </Compile>
+    <Compile Include="collection-ro.cs">
+      <DependentUpon>collection.cs</DependentUpon>
+    </Compile>
+    <Compile Include="collection-elements.cs">
+      <DependentUpon>collection.cs</DependentUpon>
+    </Compile>
     <Compile Include="combinatorics.cs" />
+    <Compile Include="compare.cs" />
     <Compile Include="concurrency.cs" />
     <Compile Include="debugging.cs" />
-    <Compile Include="dictionary.cs" />
     <Compile Include="emit.cs" />
     <Compile Include="enumerable.cs" />
     <Compile Include="file.cs" />
-    <Compile Include="hashing.cs" />
-    <Compile Include="priority.cs" />
     <Compile Include="io.cs" />
-    <Compile Include="lattice.cs" />
     <Compile Include="math.cs" />
     <Compile Include="matrix.cs" />
     <Compile Include="memory.cs" />
+    <Compile Include="multimap.cs" />
     <Compile Include="observable.cs" />
-    <Compile Include="readonly.cs" />
     <Compile Include="reflection.cs" />
-    <Compile Include="reflist.cs" />
     <Compile Include="string.cs" />
+    <Compile Include="stringmap.cs" />
+    <Compile Include="stringmap-entry.cs">
+      <DependentUpon>stringmap.cs</DependentUpon>
+    </Compile>
+    <Compile Include="stringmap-ops.cs">
+      <DependentUpon>stringmap.cs</DependentUpon>
+    </Compile>
     <Compile Include="tally.cs" />
     <Compile Include="tasks.cs" />
-    <Compile Include="trie.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

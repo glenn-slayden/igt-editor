@@ -43,7 +43,11 @@ namespace alib.Wpf
 
 		public int QueueCount { get { return q.Count; } }
 
-		public _eval_layout Dequeue() { return q.RemoveMin(); }
+		public _eval_layout Dequeue()
+		{
+			int _;
+			return q.RemoveMin(out _);
+		}
 
 		public new bool Add(_eval_layout hyp)
 		{
@@ -149,7 +153,7 @@ namespace alib.Wpf
 
 		///////////////////////////////////////////////////////////
 		///
-		public override bool Equals(object obj)
+		public override bool Equals(Object obj)
 		{
 			return obj is _eval_layout && Equals((_eval_layout)obj);
 		}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Linq;
 using alib.Array;
 using alib.Combinatorics;
 using alib.Debugging;
-using alib.dg;
+using alib.Graph;
 using alib.Enumerable;
 
 namespace alib.Wpf
@@ -553,17 +554,17 @@ namespace alib.Wpf
 
 		public IGraphExLayoutLevel this[int index]
 		{
-			get { throw new NotImplementedException(); }
+			get { throw not.impl; }
 		}
 
 		public IEnumerator<IGraphExLayoutLevel> GetEnumerator()
 		{
-			throw new NotImplementedException();
+			throw not.impl;
 		}
 
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			throw new NotImplementedException();
+			throw not.impl;
 		}
 	};
 }

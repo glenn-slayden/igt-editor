@@ -7,7 +7,7 @@ using System.Linq;
 using alib.Array;
 using alib.Collections;
 using alib.Debugging;
-using alib.dg;
+using alib.Graph;
 using alib.Enumerable;
 
 namespace alib.Wpf

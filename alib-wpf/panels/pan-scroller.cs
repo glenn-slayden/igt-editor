@@ -31,7 +31,7 @@ namespace alib.Wpf
 		const Double GestureAmplification = 1.4;	/// initial drift velocity factor relative to sampled velocity
 		const Double GestureMin = 0.18;				/// max recent anchor-dragging vector length which inhibits flinging
 		const Double HiggsField = 0.95;				/// molasses factor per frame, 1.0 == none
-		const Double StopVelocity = 2;				/// done when velocity falls below
+		const Double StopVelocity = 1.1;			/// done when velocity falls below
 		const Double BumperTransfer = 0.5;			/// energy transfer to other axis when hitting bounds
 
 		public PanScroller()
@@ -40,8 +40,8 @@ namespace alib.Wpf
 			VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
 			IsHitTestVisible = true;
 
-			this.buf = new Point[8];
-			this.i_buf = 0;
+			buf = new Point[8];
+			i_buf = 0;
 
 			timer = new DispatcherTimer();
 			timer.Interval = new TimeSpan(0, 0, 0, 0, msPerFrame);
@@ -73,7 +73,7 @@ namespace alib.Wpf
 			f_can_pan = ComputedHorizontalScrollBarVisibility == Visibility.Visible ||
 				   ComputedVerticalScrollBarVisibility == Visibility.Visible;
 
-			this.Cursor = f_can_pan ? Cursors.Hand : Cursors.Arrow;
+			Cursor = f_can_pan ? Cursors.Hand : Cursors.Arrow;
 		}
 
 		static bool ClosePoint(Point pt1, Point pt2)
@@ -91,6 +91,8 @@ namespace alib.Wpf
 		Point[] buf;							/// ring buffer for the last 8 mouse points
 		int i_buf;
 		long t_mousedown, t_mousemove;
+
+		public bool IsPanning { get { return f_can_pan && (IsMouseCaptured || timer.IsEnabled); } }
 
 		Point get_record_mouse_position()
 		{
@@ -120,22 +122,26 @@ namespace alib.Wpf
 			if (velocity.Length < StopVelocity)
 			{
 				timer.Stop();
+				Visual viz;
+				if ((viz = Content as Visual) != null && PresentationSource.FromVisual(viz) != null)
+					VisualTreeHelper.HitTest(viz, util.GetCorrectMousePosition(viz));
 			}
 			else
 			{
-				this.ScrollPos = pt;
-				this.velocity *= HiggsField;
+				ScrollPos = pt;
+				velocity *= HiggsField;
 			}
 		}
 
 		protected override void OnPreviewMouseMove(MouseEventArgs e)
 		{
-			if (IsMouseCaptured)
-				this.ScrollPos = drag_anchor + (pt_start - get_record_mouse_position());
-			else if (!timer.IsEnabled)
-				return;			/// ok to propagate the event
+			if (!f_can_pan)
+				return;
 
-			e.Handled = true;	/// do not propagate mousemove to content during drifting or dragging
+			if (e.Handled = IsMouseCaptured)
+				ScrollPos = drag_anchor + (pt_start - get_record_mouse_position());
+			else
+				e.Handled = timer.IsEnabled;	/// do not propagate mousemove to content during drifting or dragging
 		}
 
 		protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
@@ -145,21 +151,21 @@ namespace alib.Wpf
 			if (!f_can_pan)
 				return;
 
-			this.drag_anchor = this.ScrollPos;
-			this.Cursor = Cursors.ScrollAll;
-			this.i_buf = 0;
-			this.pt_start = get_record_mouse_position();
+			drag_anchor = ScrollPos;
+			Cursor = Cursors.ScrollAll;
+			i_buf = 0;
+			pt_start = get_record_mouse_position();
 
-			this.CaptureMouse();
+			CaptureMouse();
 
-			this.t_mousedown = DateTime.Now.Ticks;
+			t_mousedown = DateTime.Now.Ticks;
 
 			e.Handled = true;
 		}
 
 		protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
 		{
-			if (this.IsMouseCaptured)
+			if (IsMouseCaptured)
 			{
 				int c;
 				long ticks = DateTime.Now.Ticks - t_mousemove;
@@ -193,16 +199,25 @@ namespace alib.Wpf
 					{
 						//Debug.Print("c:{0} i:{1} j:{2}  ms:{3}  t:{4}  vv.Len:{5}", c, i, j, ms, t, (vv / TimeSpan.FromTicks(ticks).TotalMilliseconds).Length);
 
-						this.velocity = (e0 - e1) / (t / GestureAmplification);
+						velocity = (e0 - e1) / (t / GestureAmplification);
 
 						timer.Start();	/// do this prior to releasing capture: prevents stray mousemove to content
 					}
 				}
 
-				this.ReleaseMouseCapture();
-				this.Cursor = f_can_pan ? Cursors.Hand : Cursors.Arrow;
+				ReleaseMouseCapture();
+				Cursor = f_can_pan ? Cursors.Hand : Cursors.Arrow;
 				e.Handled = true;
 			}
+		}
+
+		protected override void OnMouseWheel(MouseWheelEventArgs e)
+		{
+			if ((Keyboard.Modifiers & ModifierKeys.Control) == 0)
+				ScrollToVerticalOffset(VerticalOffset - e.Delta);
+			else
+				ScrollToHorizontalOffset(HorizontalOffset - e.Delta);
+			e.Handled = true;
 		}
 	};
 }

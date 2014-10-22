@@ -9,7 +9,7 @@ using System.Windows.Controls;
 using alib.Array;
 using alib.Collections;
 using alib.Debugging;
-using alib.dg;
+using alib.Graph;
 using alib.Enumerable;
 
 namespace alib.Wpf
@@ -40,8 +40,9 @@ namespace alib.Wpf
 								typeof(WpfGraphAdapter),
 								new FrameworkPropertyMetadata(
 									default(UIElement),
-									FrameworkPropertyMetadataOptions.AffectsParentArrange | FrameworkPropertyMetadataOptions.AffectsParentMeasure/*,
-									from_changed*/));
+				//FrameworkPropertyMetadataOptions.AffectsParentArrange | FrameworkPropertyMetadataOptions.AffectsParentMeasure,
+									0
+				/*,from_changed*/));
 
 			ToProperty = DependencyProperty.RegisterAttached(
 								"To",
@@ -49,8 +50,9 @@ namespace alib.Wpf
 								typeof(WpfGraphAdapter),
 								new FrameworkPropertyMetadata(
 									default(UIElement),
-									FrameworkPropertyMetadataOptions.AffectsParentArrange | FrameworkPropertyMetadataOptions.AffectsParentMeasure/*,
-									to_changed*/));
+				//FrameworkPropertyMetadataOptions.AffectsParentArrange | FrameworkPropertyMetadataOptions.AffectsParentMeasure
+									0
+				/*,to_changed*/));
 
 			TextLabelProperty = DependencyProperty.RegisterAttached(
 								"TextLabel",
@@ -58,7 +60,9 @@ namespace alib.Wpf
 								typeof(WpfGraphAdapter),
 								new FrameworkPropertyMetadata(
 									default(String),
-									FrameworkPropertyMetadataOptions.AffectsParentArrange));
+				//FrameworkPropertyMetadataOptions.AffectsParentArrange
+									0
+									));
 
 			EdgeDirectionProperty = DependencyProperty.RegisterAttached(
 								"EdgeDirection",
@@ -66,7 +70,9 @@ namespace alib.Wpf
 								typeof(WpfGraphAdapter),
 								new FrameworkPropertyMetadata(
 									EdgeDirection.Normal,
-									FrameworkPropertyMetadataOptions.AffectsParentArrange));
+				//FrameworkPropertyMetadataOptions.AffectsParentArrange
+									0
+									));
 
 			IgnoreForLayoutProperty = DependencyProperty.RegisterAttached(
 					"IgnoreForLayout",
@@ -74,7 +80,9 @@ namespace alib.Wpf
 					typeof(WpfGraphAdapter),
 					new FrameworkPropertyMetadata(
 						false,
-						FrameworkPropertyMetadataOptions.AffectsParentArrange));
+				//FrameworkPropertyMetadataOptions.AffectsParentArrange
+						0
+						));
 
 
 			_lvProperty = DependencyProperty.RegisterAttached(
@@ -139,6 +147,10 @@ namespace alib.Wpf
 		static LayoutVertexEx GetLv(UIElement uie)
 		{
 			return uie == null ? null : (LayoutVertexEx)uie.GetValue(_lvProperty);
+		}
+		public static void SetLv(UIElement uie, LayoutVertexEx vx)
+		{
+			uie.SetValue(_lvProperty, vx);
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -218,7 +230,9 @@ namespace alib.Wpf
 
 				el.ClearValue(WpfGraphAdapter._lvProperty);
 
-				if ((vfrom = GetFrom(el)) == null & (vto = GetTo(el)) == null)
+				vfrom = GetFrom(el);
+				vto = GetTo(el);
+				if (vfrom == null && vto == null)
 				{
 					//if (!el.IsVisible)
 					//{
@@ -226,7 +240,8 @@ namespace alib.Wpf
 					//}
 					//else
 					{
-						el.Measure(util.infinite_size);
+						if (!el.IsMeasureValid)
+							el.Measure(util.infinite_size);
 
 						if (el.DesiredSize.IsZero())
 						{
@@ -234,7 +249,7 @@ namespace alib.Wpf
 						}
 						else
 						{
-							vv[ix] = new LayoutVertexEx(this, el, ix);
+							SetLv(el, vv[ix] = new LayoutVertexEx(this, el, ix));
 							ix++;
 						}
 					}

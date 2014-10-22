@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -6,6 +7,8 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 
 using alib.Debugging;
+using alib.Math;
+using alib.String;
 
 namespace alib.Wpf
 {
@@ -59,56 +62,175 @@ namespace alib.Wpf
 			}
 		}
 
-		public static String dFmt(this Double d)
+		static String[] _HASHCHAR = { "", "#", "##", "###", "####", "#####", "######", "#######", "########", "#########" };
+
+		public static String dFmt(this Double d, int N = 2)
 		{
-			return Double.IsPositiveInfinity(d) ? "∞" : Double.IsNegativeInfinity(d) ? "-∞" : d.ToString("0.##");
+			return Double.IsPositiveInfinity(d) ? "∞" : Double.IsNegativeInfinity(d) ? "-∞" : d.ToString("0." + _HASHCHAR[N]);
 		}
-		public static String ptFmt(this Point pt)
+		public static String ptFmt(this Point pt, int N = 2)
 		{
-			return dFmt(pt.X) + "," + dFmt(pt.Y);
+			return dFmt(pt.X, N) + "," + dFmt(pt.Y, N);
 		}
-		public static String ptFmt(this Vector pt)
+		public static String szFmt(this Size sz, int N = 2)
 		{
-			return dFmt(pt.X) + "," + dFmt(pt.Y);
-		}
-		public static String szFmt(this Size sz)
-		{
-			return dFmt(sz.Width) + "×" + dFmt(sz.Height);
+			return sz.IsEmpty ? "empty" : dFmt(sz.Width, N) + "×" + dFmt(sz.Height, N);
 		}
 		public static String rFmt(this Rect r)
 		{
 			return "{ " + ptFmt(r.Location) + "-" + szFmt(r.Size) + "}";
 		}
 
-		public static void ClearAllDrawings(this DrawingGroup dg)
+		public static void ClearAllDrawings(this DrawingGroup dxg)
 		{
-			if (dg != null)
+			if (dxg != null)
 			{
-				foreach (Drawing drawing in dg.Children)
+				foreach (Drawing drawing in dxg.Children)
 				{
 					if (drawing is DrawingGroup)
 						ClearAllDrawings((DrawingGroup)drawing);
 				}
-				dg.Children.Clear();
+				dxg.Children.Clear();
 			}
 		}
 
-#if true
 		public static void DrawAllDrawings(this DrawingContext dc, Visual viz)
 		{
+			var uie = viz as UIElement;
+			var x = uie != null ? uie.RenderTransform : null;
+			if (x == Transform.Identity)
+				x = null;
+
 			var v = VisualTreeHelper.GetOffset(viz);
-			var d = VisualTreeHelper.GetDrawing(viz);
 
-			dc.PushTransform(new TranslateTransform(v.X, v.Y));
-			dc.DrawDrawing(d);
+			var t = v.X.IsZero() && v.Y.IsZero() ? null : new TranslateTransform(v.X, v.Y);
 
-			foreach (var cdv in viz.ImmediateChildren().OfType<Visual>())
-			{
+			if (t != null)
+				dc.PushTransform(t);
+			if (x != null)
+				dc.PushTransform(x);
+
+			dc.DrawDrawing(VisualTreeHelper.GetDrawing(viz));
+
+			foreach (var cdv in viz.ImmediateChildren<Visual>())
 				DrawAllDrawings(dc, cdv);
-			}
-			dc.Pop();
+
+			if (x != null)
+				dc.Pop();
+			if (t != null)
+				dc.Pop();
 		}
+
+		public static IEnumerable<String> WalkReport(this Drawing d, int level = 0, int term = 0)
+		{
+			String s;
+			int i, cc;
+			DrawingGroup d1;
+			GlyphRunDrawing d2;
+			GeometryDrawing d3;
+
+			cc = (d1 = d as DrawingGroup) != null ? d1.Children.Count : 0;
+
+			var r = d.Bounds;
+#if false
+			s = r.IsEmpty ? 
+					"(empty)".PadLeft(29) :
+					_string_ext.LeftRight(
+							"(" + r.Left.ToString("0.#") + ", " + r.Top.ToString("0.#") + ")",
+							"(" + r.Width.ToString("0.#") + "×" + r.Height.ToString("0.#") + ")", 
+							29);
 #else
+			s = _string_ext.LeftRight(ptFmt(r.Location), szFmt(r.Size, 1), 29);
+#endif
+
+			{
+				var xs = new String('│', level);
+				if (cc > 0)
+					xs += "┌─";
+				else if (term > 0)
+					xs = xs.Remove(xs.Length - term) + new String('└', term) + "─";		// "└" + new String('┴', term - 1)
+				else
+					xs += " ";
+				s += " " + xs.PadRight(45, xs[xs.Length - 1]);
+			}
+
+			if (d == EmptyDrawing)
+			{
+				s += "Empty";
+				yield return s;
+				yield break;
+			}
+
+			s += " " + d.GetType().Name.Replace("Drawing", "");
+
+			if (d1 != null)
+			{
+				s += "-" + cc;
+				var x = d1.Transform;
+				if (x == null)
+					s += " x:null";
+				else
+				{
+					s += " x:" + x.GetType().Name.Replace("Transform", "");
+					var xx = x as TranslateTransform;
+					if (xx != null)
+					{
+						s += " " + xx.X.dFmt() + "," + xx.Y.dFmt();
+					}
+					else
+					{
+						throw new NotImplementedException();
+					}
+				}
+			}
+			else if ((d2 = d as GlyphRunDrawing) != null)
+			{
+				var rgch = d2.GlyphRun.Characters;
+				s += " \"" + new String(rgch as char[] ?? rgch.ToArray()) + "\"";
+			}
+			else if ((d3 = d as GeometryDrawing) != null)
+			{
+				var g = d3.Geometry;
+				if (g == null)
+					s += " (null)";
+				else
+					s += " (" + g.GetType().Name.Replace("Geometry", "") + ")";
+			}
+			else
+			{
+				throw new NotImplementedException();
+			}
+
+			yield return s;
+
+			for (i = 0; i < cc; )
+				foreach (var ss in WalkReport(d1.Children[i], level + 1, ++i == cc ? term + 1 : 0))
+					yield return ss;
+		}
+
+#if false
+		public static IEnumerable<String> WalkReport(this Visual viz, int level = 0)
+		{
+			yield return new String(' ', level * 2) + viz.GetType().Name;
+
+			level++;
+
+			var v = VisualTreeHelper.GetOffset(viz);
+
+			var d = VisualTreeHelper.GetDrawing(viz);
+			if (d != null)
+			{
+				foreach (var s in WalkReport(d, level))
+					yield return s;
+			}
+
+			var rg = viz.ImmediateChildren<Visual>();
+			for (int i = 0; i < rg.Length; i++)
+			{
+				foreach (var s in WalkReport(rg[i], level))
+					yield return s;
+			}
+		}
 		public static void DrawAllDrawings(this DrawingContext dc, Visual viz)
 		{
 			DrawingGroup grp;
@@ -117,16 +239,16 @@ namespace alib.Wpf
 			{
 				draw_all_drawings_B(dc, grp);
 
-				foreach (Visual vch in ImmediateChildren(viz))
-					draw_all_drawings_A(dc, vch);
+				foreach (var child in ImmediateChildren<Visual>(viz))
+					draw_all_drawings_A(dc, child);
 			}
 			else
 			{
 				var v = VisualTreeHelper.GetOffset(viz);
 				dc.PushTransform(new TranslateTransform(v.X, v.Y));
 
-				foreach (Visual vch in ImmediateChildren(viz))
-					draw_all_drawings_A(dc, vch);
+				foreach (var child in ImmediateChildren<Visual>(viz))
+					draw_all_drawings_A(dc, child);
 
 				dc.Pop();
 			}
@@ -149,8 +271,8 @@ namespace alib.Wpf
 
 				draw_all_drawings_B(dc, grp);
 
-				foreach (Visual vch in ImmediateChildren(viz))
-					draw_all_drawings_A(dc, vch);
+				foreach (var child in ImmediateChildren<Visual>(viz))
+					draw_all_drawings_A(dc, child);
 
 				if (xform != null)
 					dc.Pop();
@@ -161,7 +283,7 @@ namespace alib.Wpf
 			{
 				dc.PushTransform(new TranslateTransform(v.X, v.Y));
 
-				foreach (Visual vch in ImmediateChildren(viz))
+				foreach (var vch in ImmediateChildren<Visual>(viz))
 					draw_all_drawings_A(dc, vch);
 
 				dc.Pop();
@@ -179,54 +301,6 @@ namespace alib.Wpf
 				dc.DrawDrawing(d1);
 		}
 #endif
-#if false
-					//var r1 = VisualTreeHelper.GetContentBounds(viz);
-			//var r2 = VisualTreeHelper.GetDescendantBounds(viz);
-			//Debug.Print("{0,4}  {1,-22}  {2,-14}  {3,-14}  {4,-14}  {5,-14}  {6}",
-			//	ind,
-			//	viz.GetType().Name,
-			//	ptFmt(VisualTreeHelper.GetOffset(viz)),
-			//	ptFmt(r1.Location),
-			//	ptFmt(r2.Location),
-			//	szFmt(r1.Size),
-			//	szFmt(r2.Size));
-
-
-
-
-		public static void DrawAllDrawings(this DrawingContext dc, Visual viz)
-		{
-			var d = VisualTreeHelper.GetDrawing(viz);
-			if (d != null)
-			{
-				Debug.Print("1a: {0}  {1}", viz.GetType().Name, d.Bounds);
-
-				//dc.PushTransform(new TranslateTransform(cv.Offset.X, cv.Offset.Y));
-				dc.PushTransform(new TranslateTransform(d.Bounds.X, d.Bounds.Y));
-
-				dc.DrawDrawing(d);
-			}
-			else
-			{
-				Debug.Print("1x: {0}", viz.GetType().Name);
-			}
-
-			foreach (var vch in ImmediateChildren(viz))
-			{
-				if (vch is Visual)
-					DrawAllDrawings(dc, (Visual)vch);
-				else
-					Debug.Print("2x: {0}", vch.GetType().Name);
-
-				//DrawAllDrawings(dc, vch);
-			}
-
-			if (d != null)
-				dc.Pop();
-		}
-#endif
-
-
 	};
 
 
@@ -389,6 +463,4 @@ namespace alib.Wpf
 			set { SetValue(IsSelectedProperty, value); }
 		}
 	};
-
-
 }

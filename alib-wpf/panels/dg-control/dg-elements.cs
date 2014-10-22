@@ -10,7 +10,7 @@ using System.Windows;
 using System.Windows.Media;
 using alib.Collections;
 using alib.Debugging;
-using alib.dg;
+using alib.Graph;
 using alib.Enumerable;
 using alib.String;
 using alib.Wpf;
@@ -48,21 +48,21 @@ namespace alib.Wpf
 		{
 			get { return dp_key.DependencyProperty; }
 		}
-		public static element_base GetGraphElement(this DrawingGroup dg)
+		public static element_base GetGraphElement(this DrawingGroup dxg)
 		{
-			var el = dg.GetValue(GraphElementProperty) as element_base;
+			var el = dxg.GetValue(GraphElementProperty) as element_base;
 			if (el == null)
 				Nop.X();
 			return el;
 		}
-		public static void SetGraphElement(this DrawingGroup dg, element_base el)
+		public static void SetGraphElement(this DrawingGroup dxg, element_base el)
 		{
-			dg.SetValue(dp_key, el);
+			dxg.SetValue(dp_key, el);
 		}
 		public static element_base GetGraphElement(this DrawingCollection dc)
 		{
-			var dg = dc.GetOwner();
-			return dg == null ? null : dg.GetGraphElement();
+			var dxg = dc.GetOwner();
+			return dxg == null ? null : dxg.GetGraphElement();
 		}
 #endif
 	};
@@ -283,12 +283,12 @@ namespace alib.Wpf
 		{
 			get
 			{
-				var v_from = g.edge_parent(er);
+				var v_from = g.edge_v_from(er);
 
 				if (g is IGraphEx && ((IGraphExImpl)g).Edges[er].From.Index != v_from)
 					throw new Exception();
 
-				return Graph.Verticies[g.edge_parent(er)];
+				return Graph.Verticies[g.edge_v_from(er)];
 			}
 		}
 
@@ -298,7 +298,7 @@ namespace alib.Wpf
 		{
 			get
 			{
-				var v_to = g.edge_target(er);
+				var v_to = g.edge_v_to(er);
 
 				if (g is IGraphEx && ((IGraphExImpl)g).Edges[er].To.Index != v_to)
 					throw new Exception();
@@ -310,7 +310,7 @@ namespace alib.Wpf
 		public EdgeDirection EdgeDirection { get; set; }
 
 #if false
-		public bool IsMaster { get { return g.edge_is_non_coref_or_master(er); } }
+		public bool IsMaster { get { return g.edge_is_master(er); } }
 
 		public void SetMasterEdge() { ((VertexElement)To).SetMasterEdge(this); }
 
@@ -325,7 +325,7 @@ namespace alib.Wpf
 				var e = this.er;
 				var arr = new IEdgeEx[c];
 				while (--c >= 0)
-					arr[c] = Graph.Edges[e = g.edge_next_peer(e)];
+					arr[c] = Graph.Edges[e = g.edge_e_next(e)];
 
 				return arr;
 			}
@@ -343,7 +343,7 @@ namespace alib.Wpf
 				var cur = this.er;
 				var arr = new EdgeElement[c];
 				while (--c >= 0)
-					arr[c] = Graph.Edges[cur = g.edge_next_peer(cur)];
+					arr[c] = Graph.Edges[cur = g.edge_e_next(cur)];
 
 				return arr;
 			}
@@ -370,7 +370,7 @@ namespace alib.Wpf
 			get
 			{
 				var lg = g as layout_graph;
-				return lg == null || !lg.is_layout_proxy_vref(g.edge_target(er));
+				return lg == null || !lg.is_layout_proxy_vref(g.edge_v_to(er));
 			}
 		}
 	};
@@ -540,14 +540,13 @@ namespace alib.Wpf
 			}
 		}
 
-		public EdgeElement MasterEdge { get { return IsRoot ? null : (EdgeElement)Graph.Edges[g.vertex_master_edge(vr)]; } }
+		public EdgeElement MasterEdge { get { return IsRoot ? null : (EdgeElement)Graph.Edges[g.vertex_e_in(vr)]; } }
 
-#if false
-		public void SetMasterEdge(logical_edge e_new)
+		public bool SetMasterEdge(logical_edge e_new)
 		{
-			g.vertex_switch_master_edge(vr, e_new.er);
+			return ((IAvm)g).edge_set_master(e_new.er);
 		}
-#endif
+
 		IReadOnlyList<IEdgeEx> IVertexEx.InEdges { get { return InEdges; } }
 		public IReadOnlyList<EdgeElement> InEdges
 		{
@@ -559,7 +558,7 @@ namespace alib.Wpf
 		{
 			get
 			{
-				int c = g.vertex_out_edge_count(vr);
+				int c = g.vertex_c_out(vr);
 
 				if (g is IGraphEx && ((IGraphExImpl)g).Verticies[vr].OutEdges.Count != c)
 					throw new Exception();
@@ -808,13 +807,13 @@ namespace alib.Wpf
 
 		public override void reset_drawings()
 		{
-			//var lcc = ((dg.dg)graph).vertex_in_edge_count(vr) + ((dg.dg)graph).vertex_out_edge_count(vr);
+			//var lcc = ((graph.dg)graph).vertex_in_edge_count(vr) + ((graph.dg)graph).vertex_c_out(vr);
 			//var text = ((layout_graph)graph).vertex_edges_can_cross(vr) ? "*" + lcc + "*" : lcc.ToString();
 
 			var text = base.TextLabel;
 			//var text = ((int)vr).ToString();
 			//var text = vrix.ix_phys.ToString();
-			//var text = String.Format("{0}-{1}", ((dg.dg)graph).vertex_in_edge_count(vr), ((dg.dg)graph).vertex_out_edge_count(vr));
+			//var text = String.Format("{0}-{1}", ((graph.dg)graph).vertex_in_edge_count(vr), ((graph.dg)graph).vertex_c_out(vr));
 
 			Drawing _new;
 			if (String.IsNullOrEmpty(text))
@@ -896,15 +895,15 @@ namespace alib.Wpf
 			where T : keyed_element
 		{
 			rg = new T[c];
-			var dg = new DrawingGroup();
-			var dc = dg.Children;
+			var dxg = new DrawingGroup();
+			var dc = dxg.Children;
 			for (int i = 0; i < c; i++)
 			{
 				T t = _fnew(this, i);
 				if (t != null)
 					dc.Add((rg[i] = t)._get_drawing());
 			}
-			return dg;
+			return dxg;
 		}
 
 		static VertexElement f1(MasterElement re, int v) { return re._f1(v); }

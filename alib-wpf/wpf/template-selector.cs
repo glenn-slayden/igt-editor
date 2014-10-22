@@ -8,10 +8,12 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Markup;
 
+using alib.String;
+using alib.Reflection;
+
 namespace alib.Wpf.Templates
 {
 	using String = System.String;
-	using Array = System.Array;
 
 	/// <summary> ComplexGroupDataTemplateSelector provides additional functionality for finding DataTemplates in WPF </summary>
 	public sealed class ComplexGroupDataTemplateSelector : DataTemplateSelector
@@ -20,40 +22,26 @@ namespace alib.Wpf.Templates
 		public const String DEFAULT_GROUP_TEMPLATE_KEY_FORMAT = "IEnumerable[{0}]";
 		public const DiscoveryMethods DEFAULT_DISCOVERY_METHOD = DiscoveryMethods.Key | DiscoveryMethods.Type | DiscoveryMethods.Interface | DiscoveryMethods.Hierarchy;
 
-		public String TemplateKeyFormat { get; set; }
-
-		public String GroupTemplateKeyFormat { get; set; }
-
-		public DiscoveryMethods DiscoveryMethod { get; set; }
-
-		Dictionary<Object, DataTemplate> m_cachedDataTemplates;
-
 		[Flags]
 		public enum DiscoveryMethods
 		{
 			/// <summary> create a resource key to find the DataTemplate <see>TemplateKeyFormat</see>  <see>GroupTemplateKeyFormat</see> </summary>
-			Key = 0x01,
-
+			Key = 0x0001,
 			/// <summary> use the item type to find the DataTemplate based on its DataType property </summary>
-			Type = 0x02,
-
+			Type = 0x0002,
 			/// <summary> scan the item types interfaces to find the DataTemplate based on its DataType property </summary>
-			Interface = 0x04,
-
+			Interface = 0x0004,
 			/// <summary> scan the item types type hierachy to find the DataTemplate based on its DataType property </summary>
-			Hierarchy = 0x08,
-
+			Hierarchy = 0x0008,
 			/// <summary> look for the DataTemplate in the application resources first (Overrides the default resource finding method; </summary>
-			GeneralToSpecific = 0x100,
-
+			GeneralToSpecific = 0x0100,
 			/// <summary>
 			/// use the full type name when creating a resource key using <see>TemplateKeyFormat</see>  <see>GroupTemplateKeyFormat</see>
 			/// If not set the unqualified type name will be used. The default is to use the unqualified type name
 			/// </summary>
-			FullTypeName = 0x400,
-
+			FullTypeName = 0x0400,
 			/// <summary> Does not cache the result of the resource search. Note: using this flag can impact performance. </summary>
-			NoCache = 0x800,
+			NoCache = 0x0800,
 		};
 
 		/// <summary>
@@ -70,11 +58,20 @@ namespace alib.Wpf.Templates
 
 		public ComplexGroupDataTemplateSelector()
 		{
-			m_cachedDataTemplates = new Dictionary<Object, DataTemplate>();
+			this.m_cachedDataTemplates = new Dictionary<Object, DataTemplate>();
 			this.DiscoveryMethod = DEFAULT_DISCOVERY_METHOD;
 			this.TemplateKeyFormat = DEFAULT_TEMPLATE_KEY_FORMAT;
 			this.GroupTemplateKeyFormat = DEFAULT_GROUP_TEMPLATE_KEY_FORMAT;
 		}
+
+		public String TemplateKeyFormat { get; set; }
+
+		public String GroupTemplateKeyFormat { get; set; }
+
+		public DiscoveryMethods DiscoveryMethod { get; set; }
+
+		Dictionary<Object, DataTemplate> m_cachedDataTemplates;
+
 		/// <summary>
 		/// Selects a template by resource key looking from the specific to the general containers in the application heirachy
 		/// The resource key to attempted to be found in the following order: Application resources; The main window resources; 
@@ -234,9 +231,9 @@ namespace alib.Wpf.Templates
 			{
 				if ((this.DiscoveryMethod & DiscoveryMethods.Key) == DiscoveryMethods.Key)
 				{
-					if (item is IBindingGroup)
+					var bindingGroup = item as BindingGroup;
+					if (bindingGroup != null)
 					{
-						IBindingGroup bindingGroup = item as IBindingGroup;
 						Type elementType = bindingGroup.ElementType;
 						if (elementType != null)
 						{
@@ -253,7 +250,7 @@ namespace alib.Wpf.Templates
 					}
 					else if (item is IEnumerable)
 					{
-						Type elementType = BindingGroup.GetElementType(item as IEnumerable);
+						Type elementType = ((IEnumerable)item).FindElementType();
 						if (elementType != null)
 						{
 							templateKey = String.Format(this.GroupTemplateKeyFormat, getTypeNameForKey(elementType));
@@ -307,47 +304,21 @@ namespace alib.Wpf.Templates
 		}
 	};
 
-	public interface IBindingGroup
+	public sealed class BindingGroup : IEnumerable
 	{
-		Type ElementType { get; }
-		IEnumerable Items { get; }
-		String Parameter { get; }
-	};
-
-	public sealed class BindingGroup : IEnumerable, IBindingGroup
-	{
-		public String Parameter { get; private set; }
-		public IEnumerable Items { get; private set; }
-
 		public BindingGroup(IEnumerable items, String parameter)
 		{
 			this.Items = items;
 			this.Parameter = parameter;
 		}
 
-		public Type ElementType { get { return GetElementType(this.Items); } }
+		public String Parameter { get; private set; }
 
-		public static Type GetElementType(IEnumerable enumerable)
-		{
-			Type enumerableType = enumerable.GetType();
-			Type elementType = null;
-			IEnumerator enumItems;
-			Type[] genericArguments;
+		public IEnumerable Items { get; private set; }
 
-			if (enumerableType.IsGenericType && (genericArguments = enumerableType.GetGenericArguments()).Length > 0)
-				elementType = genericArguments[0];
+		public Type ElementType { get { return this.Items.FindElementType(); } }
 
-			if (elementType == null && (enumItems = enumerable.GetEnumerator()).MoveNext() && enumItems.Current != null)
-				elementType = enumItems.Current.GetType();
-
-			return elementType;
-		}
-
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.Items.GetEnumerator();
-		}
+		IEnumerator IEnumerable.GetEnumerator() { return this.Items.GetEnumerator(); }
 
 		public override String ToString()
 		{
@@ -360,13 +331,13 @@ namespace alib.Wpf.Templates
 	{
 		static Type s_genericEnumerable = typeof(IEnumerable<Object>).GetGenericTypeDefinition();
 
-		public Type Type { get; set; }
-
-		public String TypeName { get; set; }
-
 		public IEnumerableKeyExtension() { }
 		public IEnumerableKeyExtension(String typeName) { this.TypeName = typeName; }
 		public IEnumerableKeyExtension(Type type) { this.Type = type; }
+
+		public Type Type { get; set; }
+
+		public String TypeName { get; set; }
 
 		Type parseType(IServiceProvider serviceProvider)
 		{
@@ -444,7 +415,7 @@ namespace alib.Wpf.Templates
 			{
 				parameters = ((String)parameter).Split(',');
 				for (int i = 0; i < parameters.Length; i++)
-					parameters[i] = parameters[i].Trim();
+					parameters[i] = parameters[i].Trim(0);
 			}
 			else
 				parameters = new String[0];
@@ -466,7 +437,7 @@ namespace alib.Wpf.Templates
 		public Object[] ConvertBack(Object value, Type[] targetTypes, Object parameter, CultureInfo culture)
 		{
 			if (!(value is List<Object>))
-				throw new NotSupportedException();
+				throw not.valid;
 
 			List<Object> objects = value as List<Object>;
 			return objects.ToArray();

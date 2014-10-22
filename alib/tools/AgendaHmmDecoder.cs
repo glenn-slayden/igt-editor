@@ -325,7 +325,8 @@ namespace alib.Hmm
 				if (cell.agenda.Count <= 0)
 					return null;
 
-				TrellisData prev, cur = cell.agenda.RemoveMax();
+				int _;
+				TrellisData prev, cur = cell.agenda.RemoveMax(out _);
 
 				cell.cache.Add(cur);
 

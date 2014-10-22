@@ -93,7 +93,7 @@ namespace alib.Observable
 	public abstract class atoms<Q>
 		where Q : class
 	{
-		protected interface I_items { IAddRangeList<Q> List { get; } }
+		protected interface I_items { IReadWriteList<Q> List { get; } }
 
 		public abstract class atom { };
 
@@ -112,7 +112,7 @@ namespace alib.Observable
 			{
 				public complete(open.idle final) { this.final = final; }
 				open.idle final;
-				public IAddRangeList<Q> List { get { return final; } }
+				public IReadWriteList<Q> List { get { return final; } }
 			};
 		};
 		///
@@ -129,16 +129,16 @@ namespace alib.Observable
 			{
 				public busy(open.idle previous) { this._prv = previous; }
 				open.idle _prv;
-				public IAddRangeList<Q> List { get { return _prv; } }
+				public IReadWriteList<Q> List { get { return _prv; } }
 			};
 			/// 
 			///////////////////////////////////////////////////////////////////////
 
-			public abstract class idle : open, I_items, IAddRangeList<Q>
+			public abstract class idle : open, I_items, IReadWriteList<Q>
 			{
 				///////////////////////////////////////////////////////////////////////
 				/// 
-				public IAddRangeList<Q> List { get { return this; } }
+				public IReadWriteList<Q> List { get { return this; } }
 
 				public virtual Q this[int ix] { get { throw not.valid; } set { throw not.valid; } }
 				public virtual int Count { get { throw not.valid; } }
@@ -307,7 +307,7 @@ namespace alib.Observable
 						public override active Add(Q item) { return new multi(this, item); }
 						public override active Remove(Q item)
 						{
-							int ix = System.Array.IndexOf<Q>(arr, item);
+							int ix = System.Array.IndexOf(arr, item);
 							if (ix == -1)
 								return this;
 							if (arr.Length == 3)
@@ -423,7 +423,7 @@ namespace alib.Observable
 			._sync(ref m_list) is open;
 		}
 
-		public IAddRangeList<Q> Snapshot
+		public IReadWriteList<Q> Snapshot
 		{
 			get
 			{
@@ -434,7 +434,7 @@ namespace alib.Observable
 	};
 #if false
 	[DebuggerDisplay("{ToString(),nq}")]
-	public class AtomsListExposer<T> : atoms_list<T>, IAddRangeList<T>
+	public class AtomsListExposer<T> : atoms_list<T>, IReadWriteList<T>
 		where T : class
 	{
 		public T this[int ix] { get { return base.Snapshot[ix]; } }
@@ -515,4 +515,145 @@ namespace alib.Observable
 		}
 	};
 #endif
+
+	public class ObservableStack<T> : Stack<T>, INotifyCollectionChanged//, INotifyPropertyChanged
+	{
+		public ObservableStack()
+		{
+		}
+
+		public ObservableStack(IEnumerable<T> collection)
+		{
+			foreach (var item in collection)
+				base.Push(item);
+		}
+
+		public ObservableStack(List<T> list)
+		{
+			foreach (var item in list)
+				base.Push(item);
+		}
+
+		//public event PropertyChangedEventHandler PropertyChanged;
+
+		public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+		public new void Clear()
+		{
+			base.Clear();
+			this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+		}
+
+		public new T Pop()
+		{
+			var item = base.Pop();
+			this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+			return item;
+		}
+
+		public new void Push(T item)
+		{
+			base.Push(item);
+			this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
+		}
+
+		protected void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+		{
+			this.RaiseCollectionChanged(e);
+		}
+
+		//protected void OnPropertyChanged(PropertyChangedEventArgs e)
+		//{
+		//    this.RaisePropertyChanged(e);
+		//}
+
+		void RaiseCollectionChanged(NotifyCollectionChangedEventArgs e)
+		{
+			if (this.CollectionChanged != null)
+				this.CollectionChanged(this, e);
+		}
+
+		//void RaisePropertyChanged(PropertyChangedEventArgs e)
+		//{
+		//    if (this.PropertyChanged != null)
+		//        this.PropertyChanged(this, e);
+		//}
+
+		//event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+		//{
+		//    add { this.PropertyChanged += value; }
+		//    remove { this.PropertyChanged -= value; }
+		//}
+	};
+
+	public class ObservableQueue<T> : Queue<T>, INotifyCollectionChanged//, INotifyPropertyChanged
+	{
+		public ObservableQueue()
+		{
+		}
+
+		public ObservableQueue(IEnumerable<T> collection)
+		{
+			foreach (var item in collection)
+				base.Enqueue(item);
+		}
+
+		public ObservableQueue(List<T> list)
+		{
+			foreach (var item in list)
+				base.Enqueue(item);
+		}
+
+		//public event PropertyChangedEventHandler PropertyChanged;
+
+		public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+		public new void Clear()
+		{
+			base.Clear();
+			this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+		}
+
+		public new void Enqueue(T item)
+		{
+			base.Enqueue(item);
+			this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
+		}
+
+		public new T Dequeue()
+		{
+			var item = base.Dequeue();
+			this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+			return item;
+		}
+
+		protected void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+		{
+			this.RaiseCollectionChanged(e);
+		}
+
+		//protected void OnPropertyChanged(PropertyChangedEventArgs e)
+		//{
+		//    this.RaisePropertyChanged(e);
+		//}
+
+		void RaiseCollectionChanged(NotifyCollectionChangedEventArgs e)
+		{
+			if (this.CollectionChanged != null)
+				this.CollectionChanged(this, e);
+		}
+
+		//void RaisePropertyChanged(PropertyChangedEventArgs e)
+		//{
+		//    if (this.PropertyChanged != null)
+		//        this.PropertyChanged(this, e);
+		//}
+
+		//event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+		//{
+		//    add { this.PropertyChanged += value; }
+		//    remove { this.PropertyChanged -= value; }
+		//}
+	};
+
 }

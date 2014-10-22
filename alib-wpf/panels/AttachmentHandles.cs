@@ -163,7 +163,7 @@ namespace alib.Wpf
 			return el;
 		}
 
-		void AttachmentHandles_LayoutUpdated(object sender, EventArgs e)
+		void AttachmentHandles_LayoutUpdated(Object sender, EventArgs e)
 		{
 			FrameworkElement par = FindParent(this);
 			if (par == null)

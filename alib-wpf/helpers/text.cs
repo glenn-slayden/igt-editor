@@ -28,6 +28,7 @@ namespace alib.Wpf
 		public static readonly FontFamily ff_cambria;
 		public static readonly FontFamily ff_calibri;
 		public static readonly FontFamily ff_consolas;
+		public static readonly FontFamily ff_lucida_console;
 
 		public static readonly Typeface tf_calibri;
 
@@ -75,6 +76,15 @@ namespace alib.Wpf
 					foreach (var sil in ((Span)il).Inlines.Flatten())
 						yield return sil;
 			}
+		}
+
+		public static void Prepend(this InlineCollection coll, Inline inl)
+		{
+			var fi = coll.FirstInline;
+			if (fi == null)
+				coll.Add(inl);
+			else
+				coll.InsertBefore(fi, inl);
 		}
 
 		//return sp.Inlines.OfType<Span>().SelectMany(cspan => SpanDescendants(cspan).Prepend(cspan));

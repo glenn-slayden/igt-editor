@@ -1,23 +1,33 @@
 ﻿#define DOTNET_45
 using System;
+using System.Diagnostics;
+using System.Threading;
+using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace alib.Memory
 {
+	using String = System.String;
+	using Array = System.Array;
+
+
 	public static class _ext
 	{
-		public static System.String MemoryDisplay(byte[] mem)
+		public static String MemoryDisplay(byte[] mem, int i = 0, int c = -1)
 		{
-			System.Text.StringBuilder sb = new System.Text.StringBuilder();
-			for (int i = 0; i < mem.Length; i += 32)
+			if (mem == null || (uint)((c = c < 0 ? mem.Length : c) - i) > (uint)mem.Length)
+				return String.Empty;
+
+			StringBuilder sb = new StringBuilder();
+			for (; i < c; i += 32)
 			{
 				byte[] line = mem.Skip(i).Take(32).ToArray();
-				System.String s = System.String.Format("{0:x8} {1,-96}{2}",
+				String s = String.Format("{0:x8} {1,-96}{2}",
 					i,
-					System.String.Join(" ", line.Select(e => e.ToString("x2")).ToArray()),
-					new System.String(line.Select(e => 32 <= e && e <= 127 ? (Char)e : '.').ToArray()));
+					String.Join(" ", line.Select(e => e.ToString("x2")).ToArray()),
+					new String(line.Select(e => 32 <= e && e <= 127 ? (Char)e : '.').ToArray()));
 				sb.AppendLine(s);
 			}
 			return sb.ToString();
@@ -102,7 +112,7 @@ namespace alib.Memory
 		internal const int TOKEN_QUERY /*				*/ = 0x00000008;
 		internal const int TOKEN_ADJUST_PRIVILEGES /*	*/ = 0x00000020;
 
-		public static bool SetPriv(System.String sz_priv)
+		public static bool SetPriv(String sz_priv)
 		{
 			bool retVal;
 			TokPriv1Luid tp;
@@ -133,22 +143,22 @@ namespace alib.Memory
 		/// </returns>
 		public static int SetBit(ref int pi, int singleton_bit)
 		{
-			System.Diagnostics.Debug.Assert((singleton_bit & (singleton_bit - 1)) == 0);
+			Debug.Assert((singleton_bit & (singleton_bit - 1)) == 0);
 			int _cur = pi;
 			do
 				if ((_cur & singleton_bit) != 0)
 					return _cur;
-			while (_cur != (_cur = System.Threading.Interlocked.CompareExchange(ref pi, _cur ^ singleton_bit, _cur)));
+			while (_cur != (_cur = Interlocked.CompareExchange(ref pi, _cur ^ singleton_bit, _cur)));
 			return _cur;
 		}
 		public static long SetBit(ref long pi, long singleton_bit)
 		{
-			System.Diagnostics.Debug.Assert((singleton_bit & (singleton_bit - 1)) == 0);
+			Debug.Assert((singleton_bit & (singleton_bit - 1)) == 0);
 			long _cur = pi;
 			do
 				if ((_cur & singleton_bit) != 0)
 					return _cur;
-			while (_cur != (_cur = System.Threading.Interlocked.CompareExchange(ref pi, _cur ^ singleton_bit, _cur)));
+			while (_cur != (_cur = Interlocked.CompareExchange(ref pi, _cur ^ singleton_bit, _cur)));
 			return _cur;
 		}
 
@@ -165,22 +175,22 @@ namespace alib.Memory
 		/// </returns>
 		public static int ClearBit(ref int pi, int singleton_bit)
 		{
-			System.Diagnostics.Debug.Assert((singleton_bit & (singleton_bit - 1)) == 0);
+			Debug.Assert((singleton_bit & (singleton_bit - 1)) == 0);
 			int _cur = pi;
 			do
 				if ((_cur & singleton_bit) == 0)
 					return _cur;
-			while (_cur != (_cur = System.Threading.Interlocked.CompareExchange(ref pi, _cur ^ singleton_bit, _cur)));
+			while (_cur != (_cur = Interlocked.CompareExchange(ref pi, _cur ^ singleton_bit, _cur)));
 			return _cur;
 		}
 		public static long ClearBit(ref long pi, long singleton_bit)
 		{
-			System.Diagnostics.Debug.Assert((singleton_bit & (singleton_bit - 1)) == 0);
+			Debug.Assert((singleton_bit & (singleton_bit - 1)) == 0);
 			long _cur = pi;
 			do
 				if ((_cur & singleton_bit) == 0)
 					return _cur;
-			while (_cur != (_cur = System.Threading.Interlocked.CompareExchange(ref pi, _cur ^ singleton_bit, _cur)));
+			while (_cur != (_cur = Interlocked.CompareExchange(ref pi, _cur ^ singleton_bit, _cur)));
 			return _cur;
 		}
 	}
@@ -381,7 +391,7 @@ namespace alib.Memory
 			a[0] = a[1] = a[2] = a[3] = a[4] = a[5] = a[6] = a[7] = value;
 			var c_src = c >> 1;
 			for (i = 8; i < c; i += i)
-				System.Array.Copy(a, 0, a, i, i <= c_src ? i : c - i);
+				Array.Copy(a, 0, a, i, i <= c_src ? i : c - i);
 		}
 #endif
 		public static MEMORYSTATUSEX MemoryStatus
@@ -690,62 +700,5 @@ namespace alib.Memory
 
 		[DllImport("kernel32")]
 		public static extern void GetSystemInfo(out SYSTEM_INFO lpSystemInfo);
-
-#if VIRTUAL_ALLOC
-			ulong cb = 2UL * 1024UL * 1024UL * 1024UL;
-			pate_base = (arr_tfs_entry*)VirtualAlloc(IntPtr.Zero, new UIntPtr(cb), AllocationType.RESERVE, MemoryProtection.READWRITE);
-			//GC.AddMemoryPressure(cb);
-			c_ate = 0;
-#endif
-
-#if VIRTUAL_ALLOC
-		long c_ate;
-		ulong c_commit;
-		arr_tfs_entry* pate_base;
-#endif
-
-#if VIRTUAL_ALLOC
-		static ulong page_mask;
-		static ChartBase()
-		{
-			SYSTEM_INFO si;
-			GetSystemInfo(out si);
-			page_mask = ~(si.pageSize - 1);
-		}
-
-		public arr_tfs_entry* GetEdgeStorage(long c)
-		{
-			arr_tfs_entry* p_end = &pate_base[Interlocked.Add(ref c_ate, c)];
-			arr_tfs_entry* p = p_end - c;
-
-			long cb = (byte*)p_end - (byte*)p;
-
-			ulong page = ((ulong)p_end - (ulong)pate_base) >> 12;
-			if (page >= c_commit)
-			{
-				c_commit = page + 1;
-				VirtualAlloc((IntPtr)pate_base, new UIntPtr(c_commit << 12), AllocationType.COMMIT, MemoryProtection.READWRITE);
-			}
-
-			GC.AddMemoryPressure(cb);
-			return p;
-		}
-
-		public void Dispose()
-		{
-			if (pate_base != null)
-			{
-				long cb = (byte*)(pate_base + c_ate) - (byte*)pate_base;
-
-				VirtualFree((IntPtr)pate_base, UIntPtr.Zero, 0x8000);
-				pate_base = null;
-				GC.RemoveMemoryPressure(cb);
-
-
-				//long cb2 = (long)2 * 1024 * 1024 * 1024;
-				//GC.RemoveMemoryPressure(cb2);
-			}
-		}
-#endif
 	};
 }

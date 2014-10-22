@@ -12,37 +12,12 @@ namespace alib.Wpf
 
 	public static partial class util
 	{
-		public static TimestampedMousePosition GetCorrectTimestampedMousePosition(Visual relativeTo)
-		{
-			Win32Point w32Mouse = new Win32Point();
-			GetCursorPos(ref w32Mouse);
-			return new TimestampedMousePosition
-			{
-				pt = relativeTo.PointFromScreen(new Point(w32Mouse.X, w32Mouse.Y)),
-				ticks = DateTime.Now.Ticks
-			};
-		}
-
-		public static Point GetCorrectMousePosition(Visual relativeTo)
-		{
-			Win32Point w32Mouse = new Win32Point();
-			GetCursorPos(ref w32Mouse);
-			return relativeTo.PointFromScreen(new Point(w32Mouse.X, w32Mouse.Y));
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		internal struct Win32Point
-		{
-			public Int32 X;
-			public Int32 Y;
-		};
-
 		[DebuggerDisplay("{ToString(),nq}")]
 		public struct TimestampedMousePosition : IEquatable<TimestampedMousePosition>
 		{
 			public Point pt;
 			public long ticks;
-			public override bool Equals(object obj)
+			public override bool Equals(Object obj)
 			{
 				return obj is TimestampedMousePosition && ((TimestampedMousePosition)obj).Equals(this);
 			}
@@ -60,9 +35,25 @@ namespace alib.Wpf
 			}
 		};
 
-		[DllImport("user32.dll")]
-		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool GetCursorPos(ref Win32Point pt);
+		public static TimestampedMousePosition GetCorrectTimestampedMousePosition(Visual viz)
+		{
+			var w32Mouse = new _interop.Win32Point();
+			_interop.GetCursorPos(ref w32Mouse);
+			return new TimestampedMousePosition
+			{
+				pt = viz.PointFromScreen(new Point(w32Mouse.X, w32Mouse.Y)),
+				ticks = DateTime.Now.Ticks
+			};
+		}
+
+		public static Point GetCorrectMousePosition(Visual viz)
+		{
+			if (PresentationSource.FromVisual(viz) == null)
+				throw new Exception("GetCorrectMousePosition: visual detached");
+			var pt32 = new _interop.Win32Point();
+			_interop.GetCursorPos(ref pt32);
+			return viz.PointFromScreen(new Point(pt32.X, pt32.Y));
+		}
 
 		public static T AddWithEvent<T>(this ItemCollection item_coll, T t)
 		{
@@ -91,7 +82,7 @@ namespace alib.Wpf
 			UIElement uie;
 			DependencyObject cur;
 			if ((cur = inp as DependencyObject) != null)
-				while ((cur = VisualTreeHelper.GetParent(cur)) != null)
+				while ((cur = cur.GetVisualParent()) != null)
 					if ((uie = cur as UIElement) != null && uie.Focusable)
 					{
 						uie.Focus();

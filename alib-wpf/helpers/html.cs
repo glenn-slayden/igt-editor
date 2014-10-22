@@ -6,6 +6,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 
 using alib.Enumerable;
+using alib.String;
 
 namespace alib.Wpf
 {
@@ -164,7 +165,7 @@ namespace alib.Wpf
 						break;
 					}
 					/// Get the HTML tag type
-					String s_tag = part.Remove(ix).Trim().ToLower();
+					String s_tag = part.Remove(ix).Trim(0).ToLower();
 					part = part.Substring(ix + 1);
 
 					/// is it a closing tag?
@@ -177,15 +178,15 @@ namespace alib.Wpf
 					else if (s_tag.EndsWith("/"))
 					{
 						found_tag_type = TagType.AutoClose;
-						s_tag = s_tag.Remove(s_tag.Length - 1).Trim();
+						s_tag = s_tag.Remove(s_tag.Length - 1).Trim(0);
 					}
 
 					String s_av = null;
 					ix = s_tag.IndexOfAny(tag_term);
 					if (ix != -1)
 					{
-						s_av = s_tag.Substring(ix + 1).Trim();
-						s_tag = s_tag.Remove(ix).Trim();
+						s_av = s_tag.Substring(ix + 1).Trim(0);
+						s_tag = s_tag.Remove(ix).Trim(0);
 					}
 
 					if (found_tag_type == TagType.Open || found_tag_type == TagType.AutoClose)
@@ -208,7 +209,7 @@ namespace alib.Wpf
 								if ((rgsp.Length & 1) > 0)
 									throw new Exception();
 
-								styles = rgsp.PairOff().ToDictionary(av => av.x.Trim(), av => av.y.Trim());
+								styles = rgsp.PairOff().ToDictionary(av => av.x.Trim(), av => av.y.Trim(0));
 							}
 						}
 

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+
 using alib.Collections;
 using alib.Collections.ReadOnly;
 using alib.Debugging;
@@ -16,375 +17,7 @@ namespace alib.Enumerable
 	using Array = System.Array;
 	using arr = alib.Array.arr;
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/// 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	public static class IntArray
-	{
-		public const int[] Null = default(int[]);
-
-		public static readonly int[] Empty, Zero, MinusOne;
-
-		public static readonly IEqualityComparer<int[]> EqualityComparer;
-
-		public static readonly IComparer<int[]> LexicalComparer;
-
-		static IntArray()
-		{
-			Empty = Collection<int>.None;
-			Zero = new int[] { 0 };
-			MinusOne = new int[] { -1 };
-			EqualityComparer = Comparer.Instance;
-			LexicalComparer = Comparer.Instance;
-		}
-
-		/// <summary>
-		/// You may sort the result, but please do not change the overall constitution of values.
-		/// In other words, you are issued a private instance except for the singleton and empty 
-		/// cases (which are always shared instances and where sorting is permitted because it is 
-		/// vacuous)
-		/// </summary>
-		public static int[] MakeIdentity(int c)
-		{
-			if (c == 0)
-				return Empty;
-			if (c == 1)
-				return Zero;
-			var ret = new int[c];
-			for (int i = 0; i < c; i++)
-				ret[i] = i;
-			return ret;
-		}
-
-		public static int[] MakeMinusOne(int c)
-		{
-			if (c == 0)
-				return Empty;
-			if (c == 1)
-				return MinusOne;
-			var ret = new int[c];
-			for (int i = 0; i < c; i++)
-				ret[i] = -1;
-			return ret;
-		}
-
-		public sealed class Comparer : IEqualityComparer<int[]>, IComparer<int[]>
-		{
-			public static readonly Comparer Instance;
-			static Comparer() { Instance = new Comparer(); }
-			Comparer() { }
-
-			public int Compare(int[] x, int[] y)
-			{
-				int d, i, cx = x.Length, cy = y.Length;
-				for (i = 0; i < cx && i < cy; i++)
-					if ((d = x[i] - y[i]) != 0)
-						return d;
-				return cx == cy ? 0 : cx < cy ? -1 : 1;
-			}
-
-			public bool Equals(int[] x, int[] y)
-			{
-				if ((Object)x == (Object)y)
-					return true;
-				if ((Object)x == null || (Object)y == null)
-					return false;
-
-				int i;
-				if ((i = x.Length) != y.Length)
-					return false;
-				while (--i >= 0)
-					if (x[i] != y[i])
-						return false;
-				return true;
-			}
-
-			public int GetHashCode(int[] a)
-			{
-				if (a == null)
-					return -1;
-				int h, k, i, g;
-				h = i = a.Length;
-				for (k = 7; --i >= 0; k += 7)
-					h ^= ((g = a[i]) << k) | (int)((uint)g >> (32 - k));
-				return h;
-			}
-		};
-	};
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/// 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	public class LambdaComparer<T> : IEqualityComparer<T>
-	{
-		private readonly Func<T, T, bool> c;
-		private readonly Func<T, int> h;
-
-		public LambdaComparer(Func<T, T, bool> lambdaComparer) :
-			this(lambdaComparer, o => o.GetHashCode())
-		{
-		}
-
-		public LambdaComparer(Func<T, T, bool> lambdaComparer, Func<T, int> lambdaHash)
-		{
-			if (lambdaComparer == null)
-				throw new ArgumentNullException("lambdaComparer");
-			if (lambdaHash == null)
-				throw new ArgumentNullException("lambdaHash");
-
-			c = lambdaComparer;
-			h = lambdaHash;
-		}
-
-		public bool Equals(T x, T y)
-		{
-			return c(x, y);
-		}
-
-		public int GetHashCode(T obj)
-		{
-			return h(obj);
-		}
-	};
-
-	[DebuggerDisplay("[0...{count}]")]
-	public sealed class ZeroRange : _IList<int>, _ICollection<int>, IList
-	{
-		public ZeroRange(int count) { this.count = count; }
-
-		readonly int count;
-		public int Count { get { return count; } }
-
-		public int this[int ix]
-		{
-			get
-			{
-				if (ix < 0 || ix >= Count)
-					throw new IndexOutOfRangeException();
-				return ix;
-			}
-		}
-
-		public IEnumerator<int> GetEnumerator() { return new _enum(this.count); }
-		IEnumerator IEnumerable.GetEnumerator() { return new _enum(this.count); }
-
-		public void CopyTo(int[] array, int index)
-		{
-			for (int i = 0; i < count; i++)
-				array[index++] = i;
-		}
-		void ICollection.CopyTo(Array array, int index)
-		{
-			for (int i = 0; i < count; i++)
-				array.SetValue(i, index++);
-		}
-
-		public bool Contains(int i) { return i >= 0 && i < count; }
-
-		public void Add(int item) { throw not.valid; }
-		public bool Remove(int item) { throw not.valid; }
-		public void Clear() { throw not.valid; }
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public bool IsReadOnly { get { return true; } }
-
-		Object ICollection.SyncRoot { get { return this; } }
-		bool ICollection.IsSynchronized { get { return false; } }
-
-		int IList.Add(Object value) { throw not.valid; }
-		void IList.Insert(int index, Object value) { throw not.valid; }
-		void IList.Remove(Object value) { throw not.valid; }
-		void IList.RemoveAt(int index) { throw not.valid; }
-		bool IList.IsFixedSize { get { return true; } }
-		bool IList.Contains(Object value) { return value is int && this.Contains((int)value); }
-		int IList.IndexOf(Object value) { return value is int && this.Contains((int)value) ? (int)value : -1; }
-		Object IList.this[int index]
-		{
-			get { return this[index]; }
-			set { throw not.valid; }
-		}
-
-		sealed class _enum : IEnumerator<int>
-		{
-			public _enum(int count)
-			{
-				this.i = -1;
-				this.count = count;
-			}
-			int i;
-			readonly int count;
-			public int Current
-			{
-				get
-				{
-					if (i < 0 || i >= count)
-						throw new Exception();
-					return i;
-				}
-			}
-			Object IEnumerator.Current { get { return Current; } }
-			public bool MoveNext()
-			{
-				if (i >= count)
-					throw new Exception();
-				return ++i < count;
-			}
-			public void Reset() { i = -1; }
-			public void Dispose() { }
-		};
-	};
-
-	[DebuggerDisplay("{ToString(),nq}")]
-	public struct Pairing<T> : IEquatable<Pairing<T>>
-#if pairing_coll
-		, _ICollection<T>
-#endif
-	{
-		public Pairing(T x, T y)
-		{
-			this.x = x;
-			this.y = y;
-		}
-		public T x;
-		public T y;
-		public override String ToString()
-		{
-			var frt = !typeof(T).IsValueType;
-			return String.Format("{0} {1}",
-				frt && (Object)x == null ? "(null)" : x.ToString().PadRight(40),
-				frt && (Object)y == null ? "(null)" : y.ToString());
-		}
-
-		public bool Equals(Pairing<T> other)
-		{
-			if (((this.x == null) != (other.x != null)) || ((this.y == null) != (other.y != null)))
-				return false;
-			return this.x.Equals(other.x) && this.y.Equals(other.y);
-		}
-
-		public override bool Equals(object other)
-		{
-			return other is Pairing<T> && this.Equals((Pairing<T>)other);
-		}
-
-		public override int GetHashCode()
-		{
-			int h = this.x == null ? 0x55550000 : (x.GetHashCode() << 16);
-			if (this.y != null)
-				h ^= y.GetHashCode();
-			return h;
-		}
-
-		public T[] ToArray()
-		{
-			return new T[] { x, y };
-		}
-#if pairing_coll
-		public IEnumerator<T> GetEnumerator() { yield return x; yield return y; }
-		IEnumerator IEnumerable.GetEnumerator() { return ((IEnumerable<T>)this).GetEnumerator(); }
-
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public int Count { get { return 2; } }
-
-		bool ICollection<T>.Contains(T item)
-		{
-			var cmp = EqualityComparer<T>.Default;
-			return cmp.Equals(x, item) || cmp.Equals(y, item);
-		}
-		void ICollection.CopyTo(Array array, int ix)
-		{
-			array.SetValue(x, ix++);
-			array.SetValue(y, ix);
-		}
-		void ICollection<T>.CopyTo(T[] array, int ix)
-		{
-			array[ix++] = x;
-			array[ix] = y;
-		}
-		void ICollection<T>.Add(T item) { throw not.valid; }
-		void ICollection<T>.Clear() { throw not.valid; }
-		bool ICollection<T>.Remove(T item) { throw not.valid; }
-
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		bool ICollection<T>.IsReadOnly { get { return true; } }
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		bool ICollection.IsSynchronized { get { return false; } }
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		object ICollection.SyncRoot { get { return null; } }
-#endif
-	};
-
-#if PARTIAL_ORDER
-	public interface IPartialOrderComparer<T> : IComparer<T>, IEqualityComparer<T>
-	{
-	};
-#endif
-
-	public interface IGrouping : IEnumerable
-	{
-		Object Key { get; }
-	};
-	public interface IMasterGroup<out T> : IGrouping<T, T>, IGrouping
-	{
-		new T Key { get; }
-	};
-
-	public sealed class Grouping<TKey, TElement> : IGrouping<TKey, TElement>, IGrouping
-	{
-		public Grouping(TKey key, IEnumerable<TElement> ie)
-		{
-			this.key = key;
-			this.ie = ie;
-		}
-		IEnumerable<TElement> ie;
-		TKey key;
-		public TKey Key { get { return key; } }
-		object IGrouping.Key { get { return key; } }
-
-		public IEnumerator<TElement> GetEnumerator()
-		{
-			return ie.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return ie.GetEnumerator();
-		}
-	};
-
-	[DebuggerDisplay("{ToString(),nq}")]
-	public struct RangeF
-	{
-		public RangeF(Double min, Double max)
-		{
-			this.Min = min;
-			this.Max = max;
-		}
-		public RangeF(Double minmax)
-			: this(minmax, minmax)
-		{
-		}
-		public static readonly RangeF Vacant = new RangeF(Double.MaxValue, Double.MinValue);
-		public Double Min;
-		public Double Max;
-		public Double Size { get { return Max - Min; } }
-		public override String ToString()
-		{
-			return String.Format("[{0} {1}]", Min, Max);
-		}
-	}
-
-	//public class t_grouping<T> : List<T>, IGrouping<T, T>
-	//{
-	//    public t_grouping(T key, IEnumerable<T> items)
-	//        : base(items)
-	//    {
-	//        this.m_key = key;
-	//    }
-	//    T m_key;
-	//    public T Key { get { return m_key; } }
-	//};
-
-	public static class _enumerable_ext
+	public static class enum_ext
 	{
 		public static IEnumerable<TElem> Coalesce<TElem>(this IEnumerable<TElem> a, IEnumerable<TElem> b)
 		{
@@ -473,8 +106,8 @@ namespace alib.Enumerable
 		{
 			if (ie is T[])
 				throw new Exception();
-			ICollection<T> ic = ie as ICollection<T>;
 			int i = 0;
+			ICollection ic = ie as ICollection;
 			if (ic != null)
 			{
 				ic.CopyTo(rgt, 0);
@@ -489,21 +122,6 @@ namespace alib.Enumerable
 			return i;
 		}
 
-#if false
-		/// <summary>
-		/// WARNING: Does not force copying
-		/// </summary>
-		public static T[] _ToArray<T>(this ICollection<T> coll)
-		{
-			T[] arr;
-			if ((arr = coll as T[]) == null)
-			{
-				arr = new T[coll.Count];
-				coll.CopyTo(arr, 0);
-			}
-			return arr;
-		}
-#endif
 		/// <summary>
 		/// always-copy semantics except for zero-sized array which will always return the same object
 		/// </summary>
@@ -520,19 +138,14 @@ namespace alib.Enumerable
 
 		public static T[] ToArray<T>(this IEnumerable<T> ie, int max_hint)
 		{
-			ICollection<T> ic;
-			//IReadOnlyCollection<T> ic2;
 			T[] rgt;
 
-			if ((ic = ie as ICollection<T>) != null)
+			ICollection ic;
+			if ((ic = ie as ICollection) != null)
 			{
 				rgt = new T[ic.Count];
 				ic.CopyTo(rgt, 0);
 			}
-			//else if ((ic2 = ie as IReadOnlyCollection<T>) != null)
-			//{
-			//	rgt = new T[ic2.Count];
-			//}
 			else
 			{
 				T[] rgx = new T[max_hint];
@@ -672,6 +285,7 @@ namespace alib.Enumerable
 	//static Char[][][] foo = new[] { new[] { "abc".ToCharArray(), "xyz".ToCharArray(), "def".ToCharArray() } };
 
 #endif
+#if false
 		/// <summary>
 		/// From a sequence of groupings where each grouping correlates a key of type T with some set of 'matched items'--each 
 		/// item being also of type T--generate all possible complete 'match-ups' where every key is associated with exactly 
@@ -686,6 +300,7 @@ namespace alib.Enumerable
 		{
 			return GroupCrossProduct(seq, EqualityComparer<T>.Default);
 		}
+#endif
 
 		/// <summary>
 		/// From a sequence of groupings where each grouping correlates a key of type T with some set of 'matched items'--each 
@@ -694,32 +309,104 @@ namespace alib.Enumerable
 		/// keys select are set-distinct according to the supplied equality comparer.
 		/// </summary>
 		/// <param name="seq">Input sequence of groupings which associate a key with a set of 'matched items'</param>
-		/// <param name="ceq">Equality comparer used to determine distinctness of matched items within one set of pairings</param>
+		/// <param name="cmp">Equality comparer used to determine distinctness of matched items within one set of pairings</param>
 		/// <returns>
 		/// All possible sets of pairings between a key and one item from its group, where each set has exactly one pairing per 
 		/// key from the input sequence</returns>
-		public static IEnumerable<IEnumerable<Pairing<T>>> GroupCrossProduct<T>(this IEnumerable<IGrouping<T, T>> seq, IEqualityComparer<T> ceq)
+#if true
+		public static IEnumerable<IEnumerable<Pairing<T>>> GroupCrossProduct<T>(this IEnumerable<IGrouping<T, T>> seq, IEqualityComparer<T> cmp = null)
 		{
-			bool f_any;
-			IGrouping<T, T> cur;
+			if (cmp == null)
+				cmp = EqualityComparer<T>.Default;
+
+			var ie = seq.GetEnumerator();
+			if (!ie.MoveNext())
+				yield break;
+
+			var key = ie.Current.Key;
+			var f_any = ie.MoveNext();
+
+			foreach (var ySide in ie.Current)
 			{
-				IEnumerator<IGrouping<T, T>> ie = seq.GetEnumerator();
-				if (!ie.MoveNext())
-					yield break;
-				cur = ie.Current;
-				f_any = ie.MoveNext();
-			}
-			foreach (var ySide in cur)
-			{
-				Pairing<T> pr = new Pairing<T>(cur.Key, ySide);
+				Pairing<T> pr = new Pairing<T>(key, ySide);
 				if (!f_any)
 					yield return new[] { pr };
 				else
-					foreach (var rightwards in GroupCrossProduct<T>(seq.Skip(1), ceq))
-						if (!rightwards.Any(so_far => ceq.Equals(ySide, so_far.y)))
+					foreach (var rightwards in GroupCrossProduct<T>(seq.Skip(1), cmp))
+						if (!rightwards.Any(so_far => cmp.Equals(ySide, so_far.y)))
 							yield return rightwards.Prepend(pr);
 			}
 		}
+#warning I believe the code below is fine and a bit improvement, but i didn't have time to test it
+#elif true
+		public static IEnumerable<IEnumerable<Pairing<T>>> GroupCrossProduct<T>(this IEnumerable<IGrouping<T, T>> seq, IEqualityComparer<T> cmp = null)
+		{
+			if (cmp == null)
+				cmp = EqualityComparer<T>.Default;
+
+			var ie = seq.GetEnumerator();
+			if (!ie.MoveNext())
+				yield break;
+
+			var cur = ie.Current;
+			var f_any = ie.MoveNext();
+
+			foreach (var ySide in cur)
+			{
+				var rg = new[] { new Pairing<T>(cur.Key, ySide) };
+
+				if (f_any)
+					foreach (var rightwards in GroupCrossProduct<T>(seq.Skip(1), cmp))
+						foreach (var so_far in rightwards)
+							if (!cmp.Equals(ySide, so_far.y))
+								rg = arr.Append(rg, so_far);
+							else
+								goto _no;
+				yield return rg;
+			_no:
+				;
+			}
+		}
+#else
+		public static IEnumerable<IEnumerable<Pairing<T>>> GroupCrossProduct<T>(this IEnumerable<IGrouping<T, T>> seq, IEqualityComparer<T> cmp = null)
+		{
+			IEnumerator<IEnumerable<Pairing<T>>> e2;
+			IEnumerator<Pairing<T>> e3;
+			bool f_any;
+
+			var e0 = seq.GetEnumerator();
+			if (!e0.MoveNext())
+				yield break;
+
+			var key = e0.Current.Key;
+
+			if ((f_any = e0.MoveNext()) && cmp == null)
+				cmp = EqualityComparer<T>.Default;
+
+			var e1 = e0.Current.GetEnumerator();
+			while (e1.MoveNext())
+			{
+				var pr = new Pairing<T>(key, e1.Current);
+				if (!f_any)
+					yield return new[] { pr };
+				else
+				{
+					e2 = GroupCrossProduct<T>(seq.Skip(1), cmp).GetEnumerator();
+					while (e2.MoveNext())
+					{
+						e3 = e2.Current.GetEnumerator();
+						while (e3.MoveNext())
+							if (cmp.Equals(pr.y, e3.Current.y))
+								goto _any;
+
+						yield return e2.Current.Prepend(pr);
+					_any:
+						;
+					}
+				}
+			}
+		}
+#endif
 
 		public static IEnumerable<IEnumerable<Pairing<T>>> GroupCrossMatch<T>(this IEnumerable<IGrouping<T, T>> seq, IEqualityComparer<T> ceq)
 		{
@@ -762,18 +449,18 @@ namespace alib.Enumerable
 			}
 		}
 
-		public static IEnumerable<_ICollection<T>> UnaryExpand<T>(this IEnumerable<T> seq)
+		public static IEnumerable<IReadWriteCollection<T>> UnaryExpand<T>(this IEnumerable<T> seq)
 		{
 			if (!seq.GetEnumerator().MoveNext())
 				return Collection<T>.UnaryNone;
 			return new _unary_expand<T>(seq);
 		}
 
-		sealed class _unary_expand<T> : IEnumerable<_ICollection<T>>
+		sealed class _unary_expand<T> : IEnumerable<IReadWriteCollection<T>>
 		{
 			public _unary_expand(IEnumerable<T> seq) { this.seq = seq; }
 			readonly IEnumerable<T> seq;
-			public IEnumerator<_ICollection<T>> GetEnumerator()
+			public IEnumerator<IReadWriteCollection<T>> GetEnumerator()
 			{
 				var e = seq.GetEnumerator();
 				while (e.MoveNext())
@@ -849,7 +536,7 @@ namespace alib.Enumerable
 
 		}
 
-		public static IEnumerable<T>[] Divide<T>(this ICollection<T> seq, int count)
+		public static IEnumerable<T>[] Divide<T>(this IReadOnlyCollection<T> seq, int count)
 		{
 			if (count == 0)
 				throw new Exception();
@@ -878,11 +565,11 @@ namespace alib.Enumerable
 			}
 		}
 #endif
-		public static IEnumerable<_grouping<TArg, T>> PartitionBy<T, TArg>(this IEnumerable<T> seq, Func<T, TArg> selector)
+		public static IEnumerable<Grouping<TArg, T>> PartitionBy<T, TArg>(this IEnumerable<T> seq, Func<T, TArg> selector)
 		{
 			var e = seq.GetEnumerator();
 
-			_grouping<TArg, T> grp = null;
+			Grouping<TArg, T> grp = null;
 			T t;
 
 			while (e.MoveNext())
@@ -895,7 +582,7 @@ namespace alib.Enumerable
 
 					yield return grp;
 				}
-				grp = new _grouping<TArg, T>(arg);
+				grp = new Grouping<TArg, T>(arg);
 			match:
 				grp.Add(t);
 			}
@@ -939,6 +626,83 @@ namespace alib.Enumerable
 				yield return list;
 		}
 
+		public static IEnumerable<Grouping<T, T>> PartitionWhere<T>(this IEnumerable<T> seq, Func<T, bool> selector)
+		{
+			Grouping<T, T> grp = null;
+			T t;
+
+			var e = seq.GetEnumerator();
+			while (e.MoveNext())
+			{
+				if (selector(t = e.Current))
+				{
+					if (grp != null)
+						yield return grp;
+					grp = new Grouping<T, T>(t);
+				}
+				else
+				{
+					if (grp == null)
+						grp = new Grouping<T, T>(default(T));
+
+					grp.Add(t);
+				}
+			}
+			if (grp != null)
+				yield return grp;
+		}
+
+		/// <summary>
+		/// Reduce a sequence of 'n' elements to 'n-1' by combining adjacent elements
+		/// </summary>
+		public static IEnumerable<TDst> ReduceAdjacent<TSrc, TDst>(this IEnumerable<TSrc> seq, Func<TSrc, TSrc, TDst> combiner)
+		{
+			IEnumerator<TSrc> iei = seq.GetEnumerator();
+			if (!iei.MoveNext())
+				yield break;
+			TSrc i_prev = iei.Current;
+			while (iei.MoveNext())
+				yield return combiner(i_prev, i_prev = iei.Current);
+		}
+
+		/// <summary>
+		/// Reduce a sequence of 'n' elements to 'n-1' by pairing adjacent elements. If there
+		/// is only one element, it is returned as 'x' in a pairing with default(TSrc)
+		/// </summary>
+		public static IEnumerable<Pairing<TSrc>> ReduceAdjacent<TSrc>(this IEnumerable<TSrc> seq)
+		{
+			IEnumerator<TSrc> iei = seq.GetEnumerator();
+			if (!iei.MoveNext())
+				yield break;
+			TSrc i_prev = iei.Current;
+			if (!iei.MoveNext())
+				yield return new Pairing<TSrc>(i_prev, default(TSrc));
+			else
+				do
+					yield return new Pairing<TSrc>(i_prev, i_prev = iei.Current);
+				while (iei.MoveNext());
+		}
+
+		public static IEnumerable<IEnumerable<T>> Window<T>(this IEnumerable<T> seq, int size)
+		{
+			if (size < 0)
+				throw new ArgumentException();
+			if (size == 0)
+				return seq.Select(_ => Collection<T>.None);
+			if (size == 1)
+				return seq.Select(t => new T[] { t });
+			if (size == 2)
+				return seq.ReduceAdjacent().Select(p => p.ToArray());
+			return _window(seq, size);
+		}
+
+		static IEnumerable<IEnumerable<T>> _window<T>(this IEnumerable<T> seq, int size)
+		{
+			int ex_count = seq._Count() - (size - 1);
+
+			for (int i = 0; i < ex_count; i++)
+				yield return seq.Skip(i).Take(size);
+		}
 
 		public static IEnumerable<T> SelectMany<T>(this IEnumerable<IEnumerable<T>> seq)
 		{
@@ -1309,7 +1073,7 @@ namespace alib.Enumerable
 				tmp[c--] = seq[c];
 			return tmp;
 		}
-		public static _ICollection<T> Prepend<T>(this ICollection<T> seq, T element)
+		public static _ICollection<T> Prepend<T>(this IReadOnlyCollection<T> seq, T element)
 		{
 			if (seq == null || seq.Count == 0)
 				return new UnaryCollection<T>(element);
@@ -1317,7 +1081,7 @@ namespace alib.Enumerable
 				return new _coll_duple<T>(element, seq);
 			return new _coll_prepend<T>(element, seq);
 		}
-		public static _ICollection<T> Append<T>(this ICollection<T> seq, T element)
+		public static _ICollection<T> Append<T>(this IReadOnlyCollection<T> seq, T element)
 		{
 			if (seq == null || seq.Count == 0)
 				return new UnaryCollection<T>(element);
@@ -1346,29 +1110,31 @@ namespace alib.Enumerable
 #endif
 
 
-		public static Double[] VectorAverage<T>(this IEnumerable<T> seq, Func<T, ICollection<Double>> selector)
+		public static Double[] VectorAverage<T>(this IEnumerable<T> seq, Func<T, IReadOnlyCollection<Double>> selector)
 		{
-			var e = seq.GetEnumerator();
-			if (!e.MoveNext())
-				throw new Exception();
+			int i, cc;
+			Double[] tmp = null;
 
-			var rgd = selector(e.Current);
-			int i, cc = 0, c = rgd.Count;
-			var tmp = new Double[c];
-			rgd.CopyTo(tmp, 0);
+			IEnumerator<T> e = seq.GetEnumerator();
 
-			while (e.MoveNext())
+			for (cc = 0; e.MoveNext(); cc++)
 			{
-				rgd = selector(e.Current);
-				if (rgd.Count != c)
+				var rgd = selector(e.Current);
+
+				if (tmp == null)
+					tmp = new Double[rgd.Count];
+				else if (rgd.Count != tmp.Length)
 					throw new Exception();
 
 				var f = rgd.GetEnumerator();
 				for (i = 0; f.MoveNext(); )
 					tmp[i++] += f.Current;
-				cc++;
 			}
-			for (i = 0; i < c; i++)
+
+			if (cc == 0)
+				throw new Exception();
+
+			for (i = 0; i < tmp.Length; i++)
 				tmp[i] /= cc;
 			return tmp;
 		}
@@ -1416,37 +1182,70 @@ namespace alib.Enumerable
 						yield return td;
 		}
 
+#if false
+		/// <summary>
+		/// Return one source element from each range result mapped by the selector function
+		/// </summary>
+		public static IEnumerable<TSrc> Distinct<TSrc, TKey>(this IEnumerable<TSrc> seq, Func<TSrc, TKey> keySelector)
+		{
+			if (seq == null)
+				throw new ArgumentNullException("source");
+
+			return seq.GroupBy(keySelector).Select(g =>
+				{
+					var q = g.GetEnumerator();
+					q.MoveNext();
+					return q.Current;
+				});
+		}
+		public static IEnumerable<TSrc> Distinct<TSrc, TKey>(this IEnumerable<TSrc> seq, Func<TSrc, TKey> keySelector, IEqualityComparer<TKey> cmp)
+		{
+			if (seq == null)
+				throw new ArgumentNullException("source");
+
+			return seq._GroupBy(e => keySelector(e), cmp).Select(g => ((IList<TSrc>)g)[0]);
+		}
+#endif
+
 		/// <summary>
 		/// Although there's no problem on .NET, the 'GroupBy' extension method is unusably slow on Mono. Below, we 
 		/// implement a usable version from scratch
 		/// </summary>
-		public static IEnumerable<IGrouping<TKey, TSrc>> _GroupBy<TSrc, TKey>(this IEnumerable<TSrc> ie, Func<TSrc, TKey> fn)
+		public static IEnumerable<_IGrouping<TKey, TSrc>> _GroupBy<TSrc, TKey>(this IEnumerable<TSrc> ie, Func<TSrc, TKey> fn)
 		{
-#if __MonoCS__ 
-			Dictionary<TKey, _grouping<TKey, TSrc>> d = new Dictionary<TKey, _grouping<TKey, TSrc>>();
-			foreach (TSrc src in ie)
+#if __MonoCS__ || true
+
+			TKey k;
+			TSrc item;
+			Grouping<TKey, TSrc> l;
+
+			var d = new alib.Dictionary.SlotDictionary<TKey, Grouping<TKey, TSrc>>();
+
+			var e = ie.GetEnumerator();
+			while (e.MoveNext())
 			{
-				TKey k = fn(src);
-				_grouping<TKey, TSrc> l;
-				if (!d.TryGetValue(k, out l))
-					d.Add(k, l = new _grouping<TKey, TSrc>(k));
-				l.Add(src);
+				if (!d.TryGetValue(k = fn(item = e.Current), out l))
+					d.Add(k, l = new Grouping<TKey, TSrc>(k, item));
+				else
+					l.Add(item);
 			}
 			return d.Values;
 #else
 			return ie.GroupBy(fn);
 #endif
 		}
+
+#if false
 		public static IEnumerable<IGrouping<TKey, TSrc>> _GroupBy<TSrc, TKey>(this IEnumerable<TSrc> ie, Func<TSrc, TKey> fn, IEqualityComparer<TKey> c)
 		{
 #if __MonoCS__ 
-			Dictionary<TKey, _grouping<TKey, TSrc>> d = new Dictionary<TKey, _grouping<TKey, TSrc>>(c);
+			Dictionary<TKey, Grouping<TKey, TSrc>> d = new Dictionary<TKey, Grouping<TKey, TSrc>>(c);
 			foreach (TSrc src in ie)
 			{
 				TKey k = fn(src);
-				_grouping<TKey, TSrc> l;
+				Grouping<TKey, TSrc> l;
 				if (!d.TryGetValue(k, out l))
-					d.Add(k, l = new _grouping<TKey, TSrc>(k));
+					d.Add(k, l = new Grouping<TKey, TSrc>(k));
 				l.Add(src);
 			}
 			return d.Values;
@@ -1455,16 +1254,14 @@ namespace alib.Enumerable
 #endif
 		}
 
-		public class _grouping<TKey, TSrc> : List<TSrc>, IGrouping<TKey, TSrc>, _ICollection<TSrc>, _IList<TSrc>
+		public static IEnumerable<IGrouping<TKey, TSource>> GroupBy<TSource, TKey>(
+			this IEnumerable<TSource> seq,
+			Func<TSource, TKey> keySelector,
+			Func<TKey, TKey, bool> comparer)
 		{
-			public TKey _key;
-			public _grouping(TKey k) { _key = k; }
-
-			public TKey Key
-			{
-				get { return _key; }
-			}
+			return seq._GroupBy(keySelector, new LambdaComparer<TKey>(comparer));
 		}
+#endif
 
 		public static IEnumerable<IGrouping<TKey, TElement>> EnsureKeys<TKey, TElement>(this IEnumerable<IGrouping<TKey, TElement>> seq, IEnumerable<TKey> keys)
 		{
@@ -1674,7 +1471,7 @@ namespace alib.Enumerable
 				return seq as _ICollection<T> ?? new _coll_defer<T>(seq, c);
 			return new _rot_fwd<T>(seq, c, num);
 		}
-		sealed class _rot_fwd<T> : _ICollection<T>
+		sealed class _rot_fwd<T> : ro_coll_base<T>, IReadWriteCollection<T>
 		{
 			public _rot_fwd(IEnumerable<T> src, int c, int num)
 			{
@@ -1705,28 +1502,6 @@ namespace alib.Enumerable
 					yield return e.Current;
 				}
 			}
-
-			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-			void ICollection<T>.CopyTo(T[] array, int arrayIndex)
-			{
-				var e = GetEnumerator();
-				while (e.MoveNext())
-					array[arrayIndex++] = e.Current;
-			}
-			void ICollection.CopyTo(Array array, int index)
-			{
-				var e = GetEnumerator();
-				while (e.MoveNext())
-					array.SetValue(e.Current, index++);
-			}
-			bool ICollection<T>.Contains(T item) { throw not.impl; }
-			void ICollection<T>.Add(T item) { throw not.valid; }
-			void ICollection<T>.Clear() { throw not.valid; }
-			bool ICollection<T>.Remove(T item) { throw not.valid; }
-			bool ICollection<T>.IsReadOnly { get { return true; } }
-			bool ICollection.IsSynchronized { get { return false; } }
-			Object ICollection.SyncRoot { get { return this; } }
 		};
 
 		public static IEnumerable<T> RotateBackward<T>(this IEnumerable<T> seq)
@@ -1757,95 +1532,14 @@ namespace alib.Enumerable
 			return seq;
 		}
 
-		public static IEnumerable<IEnumerable<T>> Window<T>(this IEnumerable<T> seq, int size)
-		{
-			if (size < 0)
-				throw new ArgumentException();
-			if (size == 0)
-				return seq.Select(_ => Collection<T>.None);
-			if (size == 1)
-				return seq.Select(t => new T[] { t });
-			if (size == 2)
-				return seq.ReduceAdjacent().Select(p => p.ToArray());
-			return _window(seq, size);
-		}
-
-		static IEnumerable<IEnumerable<T>> _window<T>(this IEnumerable<T> seq, int size)
-		{
-			int ex_count = seq._Count() - (size - 1);
-
-			for (int i = 0; i < ex_count; i++)
-				yield return seq.Skip(i).Take(size);
-		}
-
-		public static _ICollection<T> Decapitate<T>(this ICollection<T> coll, int i_skip)
+		public static _ICollection<T> Decapitate<T>(this IReadOnlyCollection<T> coll, int i_skip)
 		{
 			if (i_skip <= 0)
 				return coll as _ICollection<T> ?? new _coll_defer<T>(coll);
 			if (i_skip >= coll.Count)
-				return Collection<T>.NoneCollection;
+				return Collection<T>._Empty;
 			return new _skip_coll<T>(coll, i_skip);
 		}
-
-		class _skip_coll<T> : _ICollection<T>
-		{
-			public _skip_coll(ICollection<T> coll, int i_skip)
-			{
-				this.coll = coll;
-				this.i_skip = i_skip;
-			}
-			ICollection<T> coll;
-			int i_skip;
-
-			public int Count { get { return coll.Count - i_skip; } }
-
-			public IEnumerator<T> GetEnumerator() { return System.Linq.Enumerable.Skip(coll, i_skip).GetEnumerator(); }
-
-			public bool Contains(T item)
-			{
-				var e = coll.GetEnumerator();
-				int i = 0;
-				while (e.MoveNext())
-					if (i++ == i_skip)
-					{
-						do
-							if (e.Current.Equals(item))
-								return true;
-						while (e.MoveNext());
-						break;
-					}
-				return false;
-			}
-			public void CopyTo(T[] array, int arrayIndex)
-			{
-				var e = coll.GetEnumerator();
-				int i = 0;
-				while (e.MoveNext())
-					if (i++ == i_skip)
-						break;
-				do
-					array[arrayIndex++] = e.Current;
-				while (e.MoveNext());
-			}
-			public void CopyTo(Array array, int index)
-			{
-				var e = coll.GetEnumerator();
-				int i = 0;
-				while (e.MoveNext())
-					if (i++ == i_skip)
-						break;
-				do
-					array.SetValue(e.Current, index++);
-				while (e.MoveNext());
-			}
-			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-			public bool IsReadOnly { get { return true; } }
-			public object SyncRoot { get { return this; } }
-			public bool IsSynchronized { get { return false; } }
-			public void Add(T item) { throw not.valid; }
-			public bool Remove(T item) { throw not.valid; }
-			public void Clear() { throw not.valid; }
-		};
 
 
 #if false
@@ -1902,38 +1596,6 @@ namespace alib.Enumerable
 		}
 
 		/// <summary>
-		/// Reduce a sequence of 'n' elements to 'n-1' by combining adjacent elements
-		/// </summary>
-		public static IEnumerable<TDst> ReduceAdjacent<TSrc, TDst>(this IEnumerable<TSrc> seq, Func<TSrc, TSrc, TDst> combiner)
-		{
-			IEnumerator<TSrc> iei = seq.GetEnumerator();
-			if (!iei.MoveNext())
-				yield break;
-			TSrc i_prev = iei.Current;
-			while (iei.MoveNext())
-				yield return combiner(i_prev, i_prev = iei.Current);
-		}
-
-		/// <summary>
-		/// Reduce a sequence of 'n' elements to 'n-1' by pairing adjacent elements. If there
-		/// is only one element, it is returned as 'x' in a pairing with default(TSrc)
-		/// </summary>
-		public static IEnumerable<Pairing<TSrc>> ReduceAdjacent<TSrc>(this IEnumerable<TSrc> seq)
-		{
-			IEnumerator<TSrc> iei = seq.GetEnumerator();
-			if (!iei.MoveNext())
-				yield break;
-			TSrc i_prev = iei.Current;
-			if (!iei.MoveNext())
-				yield return new Pairing<TSrc>(i_prev, default(TSrc));
-			else
-				do
-					yield return new Pairing<TSrc>(i_prev, i_prev = iei.Current);
-				while (iei.MoveNext());
-		}
-
-
-		/// <summary>
 		/// Exclude all instances of element <paramref name="element"/> from the sequence <paramref name="seq"/>.
 		/// </summary>
 		/// <param name="seq">The original sequence.</param>
@@ -1969,17 +1631,19 @@ namespace alib.Enumerable
 
 		public static void AddRange<T>(this ICollection<T> seq, IEnumerable<T> items)
 		{
-#if DEBUG
-			if (seq is RefList<T>)
-				throw new Exception();
-#endif
-			List<T> L;
-			if ((L = seq as List<T>) != null)
+			List<T> list;
+			ISet<T> set;
+
+			if ((set = seq as ISet<T>) != null)
+			{
+				set.UnionWith(items);
+			}
+			else if ((list = seq as List<T>) != null)
 			{
 				int c;
 				if ((c = items.CountIfAvail()) >= 0)
-					L.Capacity = seq.Count + c;
-				L.AddRange(items);
+					list.Capacity = seq.Count + c;
+				list.AddRange(items);
 			}
 			else
 			{
@@ -1989,73 +1653,10 @@ namespace alib.Enumerable
 			}
 		}
 
-		public static _ICollection<T> ExceptElementAt<T>(this ICollection<T> seq, int ix)
-		{
-			return new _coll_except_ix<T>(seq, seq.Count, ix);
-		}
 		public static _ICollection<T> ExceptElementAt<T>(this IReadOnlyCollection<T> seq, int ix)
 		{
 			return new _coll_except_ix<T>(seq, seq.Count, ix);
 		}
-
-		class _coll_except_ix<T> : _ICollection<T>
-		{
-			public _coll_except_ix(IEnumerable<T> coll, int count, int ix)
-			{
-				if (ix >= count)
-					throw new Exception();
-				this.coll = coll;
-				this.count = count - 1;
-				this.ix = ix;
-			}
-			IEnumerable<T> coll;
-			int count;
-			int ix;
-
-			public int Count { get { return count; } }
-
-			public IEnumerator<T> GetEnumerator()
-			{
-				var e = coll.GetEnumerator();
-				for (int i = 0; i < ix; i++)
-				{
-					e.MoveNext();
-					yield return e.Current;
-				}
-				e.MoveNext();
-				while (e.MoveNext())
-					yield return e.Current;
-			}
-
-			public bool Contains(T item)
-			{
-				var e = this.GetEnumerator();
-				while (e.MoveNext())
-					if (e.Current.Equals(item))
-						return true;
-				return false;
-			}
-			public void CopyTo(T[] array, int arrayIndex)
-			{
-				var e = this.GetEnumerator();
-				while (e.MoveNext())
-					array[arrayIndex++] = e.Current;
-			}
-			public void CopyTo(Array array, int index)
-			{
-				var e = this.GetEnumerator();
-				while (e.MoveNext())
-					array.SetValue(e.Current, index++);
-			}
-			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-			public bool IsReadOnly { get { return true; } }
-			public object SyncRoot { get { return this; } }
-			public bool IsSynchronized { get { return false; } }
-			public void Add(T item) { throw not.valid; }
-			public bool Remove(T item) { throw not.valid; }
-			public void Clear() { throw not.valid; }
-		};
-
 		/// <summary>
 		/// Returns objects of the original sequence for which the given projection is a derived class
 		/// </summary>
@@ -2164,55 +1765,12 @@ namespace alib.Enumerable
 			return -1;
 		}
 
-		/// <summary>
-		/// Return one source element from each range result mapped by the selector function
-		/// </summary>
-#if true
-		public static IEnumerable<TSrc> Distinct<TSrc, TKey>(this IEnumerable<TSrc> seq, Converter<TSrc, TKey> keySelector)
-		{
-			if (seq == null)
-				throw new ArgumentNullException("source");
-
-			return seq._GroupBy(e => keySelector(e)).Select(g => ((IList<TSrc>)g)[0]);
-		}
-		public static IEnumerable<TSrc> Distinct<TSrc, TKey>(this IEnumerable<TSrc> seq, Converter<TSrc, TKey> keySelector, IEqualityComparer<TKey> cmp)
-		{
-			if (seq == null)
-				throw new ArgumentNullException("source");
-
-			return seq._GroupBy(e => keySelector(e), cmp).Select(g => ((IList<TSrc>)g)[0]);
-		}
-#else
-		public static IEnumerable<TSrc> Distinct<TSrc, TKey>(this IEnumerable<TSrc> source, Converter<TSrc, TKey> keySelector)
-		{
-			if (source == null)
-				throw new ArgumentNullException("source");
-
-			return source.Distinct<TSrc>(new LambdaComparer<TSrc>((s1, s2) =>
-			{
-				return keySelector(s1).Equals(keySelector(s2));
-			}, h => 0));
-		}
-#endif
-
-		class distinct_grouping<TKey, TSrc> : HashSet<TSrc>, IGrouping<TKey, TSrc>
-			where TKey : IEquatable<TKey>
-			where TSrc : IEquatable<TSrc>
-		{
-			public TKey _key;
-			public distinct_grouping(TKey k) { _key = k; }
-
-			public TKey Key
-			{
-				get { return _key; }
-			}
-		}
-
+#if false
 		/// <summary>
 		/// Group elements of the sequence according to the key generated by keySelector, where each group contains a distinct
 		/// set of elements projected by elementSelector.
 		/// </summary>
-		public static IEnumerable<IGrouping<TKey, TElement>> GroupByDistinct<TSrc, TKey, TElement>(
+		public static IEnumerable<DistinctGrouping<TKey, TElement>> GroupIntoSets<TSrc, TKey, TElement>(
 			this IEnumerable<TSrc> seq,
 			Func<TSrc, TKey> keySelector,
 			Func<TSrc, TElement> elementSelector)
@@ -2221,21 +1779,22 @@ namespace alib.Enumerable
 		{
 			var ie = seq.GetEnumerator();
 			if (!ie.MoveNext())
-				return System.Linq.Enumerable.Empty<IGrouping<TKey, TElement>>();
+				return DistinctGrouping<TKey, TElement>.None;
 
-			Dictionary<TKey, distinct_grouping<TKey, TElement>> d = new Dictionary<TKey, distinct_grouping<TKey, TElement>>();
+			var d = new Dictionary<TKey, DistinctGrouping<TKey, TElement>>();
 			do
 			{
 				TSrc t = ie.Current;
 				TKey k = keySelector(t);
-				distinct_grouping<TKey, TElement> l;
+				DistinctGrouping<TKey, TElement> l;
 				if (!d.TryGetValue(k, out l))
-					d.Add(k, l = new distinct_grouping<TKey, TElement>(k));
+					d.Add(k, l = new DistinctGrouping<TKey, TElement>(k));
 				l.Add(elementSelector(t));
 			}
 			while (ie.MoveNext());
 			return d.Values;
 		}
+#endif
 
 		public static IEnumerable<TDst> SelectDistinct<TSrc, TDst>(this IEnumerable<TSrc> seq, Func<TSrc, TDst> selector)
 		{
@@ -2269,7 +1828,7 @@ namespace alib.Enumerable
 			}
 		}
 
-		public static IReadOnlyCollection<TDst> SelectManyDistinct<TSrc, TDst>(this IEnumerable<TSrc> seq, Func<TSrc, IEnumerable<TDst>> selector)
+		public static IReadOnlyCollection<TDst> SelectManyDistinct<TSrc, TDst>(this IEnumerable<TSrc> seq, Func<TSrc, IEnumerable<TDst>> selector, IEqualityComparer<TDst> cmp = null)
 		{
 			IEnumerator<TSrc> eSrc = seq.GetEnumerator();
 			IEnumerator<TDst> eDst;
@@ -2283,20 +1842,23 @@ namespace alib.Enumerable
 			/// found an element
 			TDst e1, e0 = eDst.Current;
 
+			if (cmp == null)
+				cmp = EqualityComparer<TDst>.Default;
+
 			/// avoid creating a hashset if the first element is the only one, or if all are identical
 			while (true)
 			{
 				while (eDst.MoveNext())
-					if (!(e1 = eDst.Current).Equals(e0))
+					if (!cmp.Equals(e1 = eDst.Current, e0))
 						goto full;
 				if (!eSrc.MoveNext())
-					return new UnaryCollection<TDst>(e0);
+					return new[] { e0 };
 				eDst = selector(eSrc.Current).GetEnumerator();
 			}
 
 		full:
 			/// found 2 distinct elements; create hashset
-			var hs = new HashSetSequence<TDst> { e0, e1 };
+			var hs = new ListHashSet<TDst>(cmp) { e0, e1 };
 			while (true)
 			{
 				while (eDst.MoveNext())
@@ -2334,7 +1896,7 @@ namespace alib.Enumerable
 
 		full:
 			/// found 2 distinct elements; create hashset
-			var hs = new HashSetSequence<TDst> { e0, e1 };
+			var hs = new ListHashSet<TDst> { e0, e1 };
 			while (true)
 			{
 				while (eDst.MoveNext())
@@ -2346,27 +1908,29 @@ namespace alib.Enumerable
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int CountIfAvail<T>(this IEnumerable<T> seq)
+		/// <summary> won't get Collection(T) </summary>
+		public static int CountIfAvail(this IEnumerable _this)
 		{
-			Array t1;
-			IReadOnlyCollection<T> t2;
-			ICollection<T> t3;
-			ICollection t4;
+			if (_this != null)
+			{
+				IReadOnlyCollection<Object> a3;
+				if ((a3 = _this as IReadOnlyCollection<Object>) != null)
+					return a3.Count;
 
-#if DEBUG
-			_IList<T> t101;
-			if ((t101 = seq as _IList<T>) != null && t101.Count != ((IReadOnlyCollection<T>)seq).Count)
-				throw new Exception();
-			_ICollection<T> t102;
-			if ((t102 = seq as _ICollection<T>) != null && t102.Count != ((IReadOnlyCollection<T>)seq).Count)
-				throw new Exception();
+				ICollection a2;
+				if ((a2 = _this as ICollection) != null)
+					return a2.Count;
+
+				Array a1;
+				if ((a1 = _this as Array) != null)
+					return a1.Length;
+#if false
+				System.Reflection.MethodInfo mi;
+				if ((mi = _this.GetType().GetMethod("get_Count", (System.Reflection.BindingFlags)0x14)) != null)
+					return (int)mi.Invoke(_this, null);
 #endif
-
-			return (t1 = seq as Array) != null ? t1.Length :
-						(t2 = seq as IReadOnlyCollection<T>) != null ? t2.Count :
-							(t3 = seq as ICollection<T>) != null ? t3.Count :
-								(t4 = seq as ICollection) != null ? t4.Count :
-									-1;
+			}
+			return -1;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -2375,7 +1939,7 @@ namespace alib.Enumerable
 			int c;
 			if (seq == null)
 				c = 0;
-			else if ((c = CountIfAvail<T>(seq)) < 0)
+			else if ((c = CountIfAvail(seq)) < 0)
 			{
 				c = 0;
 				var e = seq.GetEnumerator();
@@ -2423,12 +1987,10 @@ namespace alib.Enumerable
 			return c;
 		}
 
-		public static int CountDistinct<TSrc, TDst>(this IEnumerable<TSrc> seq, Func<TSrc, TDst> selector)
+		public static int CountDistinct<TSrc, TDst>(this IEnumerable<TSrc> seq, Func<TSrc, TDst> selector, IEqualityComparer<TDst> cmp = null)
 		{
-			return CountDistinct(seq, selector, EqualityComparer<TDst>.Default);
-		}
-		public static int CountDistinct<TSrc, TDst>(this IEnumerable<TSrc> seq, Func<TSrc, TDst> selector, IEqualityComparer<TDst> cmp)
-		{
+			if (cmp == null)
+				cmp = EqualityComparer<TDst>.Default;
 			var e = seq.GetEnumerator();
 			if (!e.MoveNext())
 				return 0;
@@ -2610,7 +2172,7 @@ namespace alib.Enumerable
 		/// <param name="seq">The original sequence.</param>
 		/// <param name="filter">A predicate for matching elements from the original sequence.</param>
 		/// <param name="selector">A transformation which will be applied to matching elements.</param>
-		public static IEnumerable<TResult> WhereSelect<TSrc, TResult>(this IEnumerable<TSrc> seq, Predicate<TSrc> filter, Converter<TSrc, TResult> selector)
+		public static IEnumerable<TResult> WhereSelect<TSrc, TResult>(this IEnumerable<TSrc> seq, Predicate<TSrc> filter, Func<TSrc, TResult> selector)
 		{
 			TSrc t;
 			var e = seq.GetEnumerator();
@@ -2628,7 +2190,7 @@ namespace alib.Enumerable
 		{
 			if (seq == null)
 				return true;
-			int c = CountIfAvail<T>(seq);
+			int c = CountIfAvail(seq);
 			if (c != -1)
 				return c == 0;
 			return !seq.GetEnumerator().MoveNext();
@@ -2664,6 +2226,86 @@ namespace alib.Enumerable
 					return true;
 			return false;
 		}
+#if false
+		sealed class xx : IReadOnlyCollection<int>
+		{
+			public xx(params int[] rg) { this.rg = rg; }
+			public int Count { get { return rg.Length; } }
+			readonly int[] rg;
+			public IEnumerator<int> GetEnumerator() { return rg.Enumerator(); }
+			IEnumerator IEnumerable.GetEnumerator() { return rg.Enumerator(); }
+		};
+		static void _contains_any_unit_test()
+		{
+			bool bb;
+
+			bb = "abcde".ContainsAny("xyz".ToCharArray());
+			bb = "abcde".ContainsAny("".ToCharArray());
+			bb = "abcde".ContainsAny("a".ToCharArray());
+			bb = "abcde".ContainsAny("b".ToCharArray());
+			bb = "abcde".ContainsAny("c".ToCharArray());
+			bb = "abcde".ContainsAny("d".ToCharArray());
+			bb = "abcde".ContainsAny("e".ToCharArray());
+
+			bb = "abcde".ContainsAny("ayz".ToCharArray());
+			bb = "abcde".ContainsAny("xaz".ToCharArray());
+			bb = "abcde".ContainsAny("xya".ToCharArray());
+
+			bb = "abcde".ContainsAny("eyz".ToCharArray());
+			bb = "abcde".ContainsAny("xez".ToCharArray());
+			bb = "abcde".ContainsAny("xye".ToCharArray());
+
+			bb = "".ContainsAny("".ToCharArray());
+			bb = "".ContainsAny("a".ToCharArray());
+			bb = "".ContainsAny("xyz".ToCharArray());
+
+			bb = new[] { 1, 2, 3, 4, 5 }.ContainsAny(new xx(7, 8, 9, 1, 10, 11, 12));
+			bb = new[] { 1, 2, 3, 4, 5 }.ContainsAny(new xx(1, 2, 3, 4, 5, 6, 7));
+			bb = new[] { 1, 2, 3, 4, 5 }.ContainsAny(new xx());
+			bb = new[] { 1, 2, 3, 4, 5 }.ContainsAny(new xx(0));
+			bb = new[] { 1, 2, 3, 4, 5 }.ContainsAny(new xx(99));
+			bb = new[] { 1, 2, 3, 4, 5 }.ContainsAny(new xx(2, 3, 4));
+		}
+#endif
+		public static bool ContainsAny<T>(this IEnumerable<T> seq, IReadOnlyCollection<T> other)
+		{
+			int i;
+			IEnumerator<T> e;
+			IReadOnlyList<T> rg;
+			int c;
+
+			if ((c = other.Count) > 0 && (e = seq.GetEnumerator()).MoveNext())
+			{
+				if ((rg = other as IReadOnlyList<T>) == null)
+				{
+					var _tmp = new T[c];
+					var ee = other.GetEnumerator();
+					for (i = 0; i < _tmp.Length; i++)
+					{
+#if DEBUG
+						if (!ee.MoveNext())
+							throw new Exception();
+#else
+						ee.MoveNext();
+#endif
+						if (Object.Equals(e.Current, _tmp[i] = ee.Current))
+							return true;
+					}
+					if (!e.MoveNext())
+						goto exit;
+					rg = _tmp;
+				}
+
+				do
+					for (i = 0; i < c; i++)
+						if (Object.Equals(e.Current, rg[i]))
+							return true;
+				while (e.MoveNext());
+			}
+		exit:
+			return false;
+		}
+
 
 		/// <summary>
 		/// Returns the element from a sequence that maximizes the function <paramref name="objective"/>.
@@ -2673,22 +2315,41 @@ namespace alib.Enumerable
 		/// <param name="objective">An objective function to maximize. <paramref name="objective"/> will not be called more than once per element.</param>
 		/// <returns>The element in the sequence that maximizes the function. If more than one element equivalently maximize the function, the first such element is returned.</returns>
 		/// <remarks>There must be at least one element in the sequence.</remarks>
-		public static TArg ArgMax<TArg, TVal>(this IEnumerable<TArg> seq, Converter<TArg, TVal> objective)
-			where TVal : IComparable<TVal>
-		{
-			TVal _;
-			return ArgMax(seq, objective, out _);
-		}
-
-		public static TArg ArgMax<TArg, TVal>(this IEnumerable<TArg> seq, Converter<TArg, TVal> objective, out TVal v_max)
+		public static TArg ArgMax<TArg, TVal>(this IEnumerable<TArg> seq, Func<TArg, TVal> objective)
 			where TVal : IComparable<TVal>
 		{
 			IEnumerator<TArg> e = seq.GetEnumerator();
 			if (!e.MoveNext())
 				throw new InvalidOperationException("Sequence has no elements.");
 
-			TArg a_max;
-			v_max = objective(a_max = e.Current);
+			TArg t, t_max = e.Current;
+			TVal v, v_max;
+
+			if (e.MoveNext())
+			{
+				v_max = objective(t_max);
+				do
+				{
+					if ((v = objective(t = e.Current)).CompareTo(v_max) > 0)
+					{
+						t_max = t;
+						v_max = v;
+					}
+				}
+				while (e.MoveNext());
+			}
+			return t_max;
+		}
+
+		public static TArg ArgMax<TArg, TVal>(this IEnumerable<TArg> seq, Func<TArg, TVal> objective, out TVal v_max)
+			where TVal : IComparable<TVal>
+		{
+			IEnumerator<TArg> e = seq.GetEnumerator();
+			if (!e.MoveNext())
+				throw new InvalidOperationException("Sequence has no elements.");
+
+			TArg t_max;
+			v_max = objective(t_max = e.Current);
 
 			while (e.MoveNext())
 			{
@@ -2696,11 +2357,11 @@ namespace alib.Enumerable
 				TVal v;
 				if ((v = objective(t = e.Current)).CompareTo(v_max) > 0)
 				{
-					a_max = t;
+					t_max = t;
 					v_max = v;
 				}
 			}
-			return a_max;
+			return t_max;
 		}
 
 		/// <summary>
@@ -2711,14 +2372,14 @@ namespace alib.Enumerable
 		/// <param name="objective">An objective function to minimize. <paramref name="objective"/> will not be called more than once per element.</param>
 		/// <returns>The element in the sequence that maximizes the function. If more than one element equivalently minimize the function, the first such element is returned.</returns>
 		/// <remarks>There must be at least one element in the sequence.</remarks>
-		public static TArg ArgMin<TArg, TVal>(this IEnumerable<TArg> seq, Converter<TArg, TVal> objective)
+		public static TArg ArgMin<TArg, TVal>(this IEnumerable<TArg> seq, Func<TArg, TVal> objective)
 			where TVal : IComparable<TVal>
 		{
 			TVal _;
 			return ArgMin(seq, objective, out _);
 		}
 
-		public static TArg ArgMin<TArg, TVal>(this IEnumerable<TArg> seq, Converter<TArg, TVal> objective, out TVal v_min)
+		public static TArg ArgMin<TArg, TVal>(this IEnumerable<TArg> seq, Func<TArg, TVal> objective, out TVal v_min)
 			where TVal : IComparable<TVal>
 		{
 			IEnumerator<TArg> e = seq.GetEnumerator();
@@ -2741,7 +2402,7 @@ namespace alib.Enumerable
 			return a_min;
 		}
 
-		public static TSrc ArgMinOrDefault<TSrc, TArg>(this IEnumerable<TSrc> seq, Converter<TSrc, TArg> objective) where TArg : IComparable<TArg>
+		public static TSrc ArgMinOrDefault<TSrc, TArg>(this IEnumerable<TSrc> seq, Func<TSrc, TArg> objective) where TArg : IComparable<TArg>
 		{
 			IEnumerator<TSrc> e = seq.GetEnumerator();
 			if (!e.MoveNext())
@@ -2765,7 +2426,7 @@ namespace alib.Enumerable
 			return t;
 		}
 
-		public static IEnumerable<TArg> ArgMins<TArg, TVal>(this IEnumerable<TArg> seq, Converter<TArg, TVal> objective)
+		public static IEnumerable<TArg> ArgMins<TArg, TVal>(this IEnumerable<TArg> seq, Func<TArg, TVal> objective)
 			where TVal : IComparable<TVal>
 		{
 			var e = seq.GetEnumerator();
@@ -2802,7 +2463,7 @@ namespace alib.Enumerable
 			return t;
 		}
 
-		public static int IndexOf<TSrc>(this ICollection<TSrc> seq, TSrc element)
+		public static int IndexOf<TSrc>(this IEnumerable<TSrc> seq, TSrc element)
 		{
 			int i = 0;
 			var e = seq.GetEnumerator();
@@ -2896,7 +2557,7 @@ namespace alib.Enumerable
 			return true;
 		}
 
-		public static bool TryMax<TSrc>(this IEnumerable<TSrc> seq, Converter<TSrc, int> objective, out int t)
+		public static bool TryMax<TSrc>(this IEnumerable<TSrc> seq, Func<TSrc, int> objective, out int t)
 		{
 			IEnumerator<TSrc> e = seq.GetEnumerator();
 			if (!e.MoveNext())
@@ -2928,7 +2589,7 @@ namespace alib.Enumerable
 		/// <param name="objective">An objective function to maximize. <paramref name="objective"/> will not be called more than once per element.</param>
 		/// <returns>The index of the element in the sequence that maximizes the function, or <value>-1</value> if the sequence has no elements. If more than one element 
 		/// equivalently maximize the function, the index of the first such element is returned.</returns>
-		public static int IndexOfMax<TSrc, TArg>(this IEnumerable<TSrc> seq, Converter<TSrc, TArg> objective) where TArg : IComparable<TArg>
+		public static int IndexOfMax<TSrc, TArg>(this IEnumerable<TSrc> seq, Func<TSrc, TArg> objective) where TArg : IComparable<TArg>
 		{
 			IEnumerator<TSrc> e = seq.GetEnumerator();
 			if (!e.MoveNext())
@@ -2987,7 +2648,7 @@ namespace alib.Enumerable
 		/// <param name="objective">An objective function to minimize. <paramref name="objective"/> will not be called more than once per element.</param>
 		/// <returns>The index of the element in the sequence that minimize the function, or <value>-1</value> if the sequence has no elements. If more than one element 
 		/// equivalently minimize the function, the index of the first such element is returned.</returns>
-		public static int IndexOfMin<TSrc, TArg>(this IEnumerable<TSrc> seq, Converter<TSrc, TArg> objective) where TArg : IComparable<TArg>
+		public static int IndexOfMin<TSrc, TArg>(this IEnumerable<TSrc> seq, Func<TSrc, TArg> objective) where TArg : IComparable<TArg>
 		{
 			IEnumerator<TSrc> e = seq.GetEnumerator();
 			if (!e.MoveNext())
@@ -3047,37 +2708,37 @@ namespace alib.Enumerable
 			return sum;
 		}
 
-
 		public static Range Range(this IEnumerable<int> seq)
 		{
+			int _min, _max, v;
 			var e = seq.GetEnumerator();
 			if (!e.MoveNext())
-				return alib.Enumerable.Range.Vacant;
-			Range r = new Range(e.Current);
+				return Enumerable.Range.Vacant;
+
+			_min = _max = e.Current;
 			while (e.MoveNext())
 			{
-				int v = e.Current;
-				if (v < r.Min)
-					r.Min = v;
-				if (v > r.Max)
-					r.Max = v;
+				if ((v = e.Current) < _min)
+					_min = v;
+				else if (v > _max)
+					_max = v;
 			}
-			return r;
+			return new Range(_min, _max);
 		}
 		public static Range Range<T>(this IEnumerable<T> seq, Func<T, int> selector)
 		{
-			Range r = alib.Enumerable.Range.Vacant;
+			var r = Enumerable.Range.Vacant;
 			ExtendRange<T>(seq, ref r, selector);
 			return r;
 		}
 
-		public static alib.Enumerable.RangeF RangeF(this IEnumerable<Double> seq)
+		public static RangeF RangeF(this IEnumerable<Double> seq)
 		{
 			var e = seq.GetEnumerator();
 			if (!e.MoveNext())
-				return alib.Enumerable.RangeF.Vacant;
+				return Enumerable.RangeF.Vacant;
 
-			alib.Enumerable.RangeF r = new Enumerable.RangeF(e.Current);
+			var r = new RangeF(e.Current);
 			Double d;
 			while (e.MoveNext())
 				if ((d = e.Current) < r.Min)
@@ -3086,13 +2747,13 @@ namespace alib.Enumerable
 					r.Max = d;
 			return r;
 		}
-		public static alib.Enumerable.RangeF RangeF<T>(this IEnumerable<T> seq, Func<T, Double> selector)
+		public static RangeF RangeF<T>(this IEnumerable<T> seq, Func<T, Double> selector)
 		{
 			var e = seq.GetEnumerator();
 			if (!e.MoveNext())
-				return alib.Enumerable.RangeF.Vacant;
+				return Enumerable.RangeF.Vacant;
 
-			alib.Enumerable.RangeF r = new Enumerable.RangeF(selector(e.Current));
+			var r = new Enumerable.RangeF(selector(e.Current));
 			Double d;
 			while (e.MoveNext())
 				if ((d = selector(e.Current)) < r.Min)
@@ -3104,10 +2765,10 @@ namespace alib.Enumerable
 
 		public static Range BuildRange<T>(this IEnumerable<T> seq, Func<T, Range> selector)
 		{
-			Range r = alib.Enumerable.Range.Vacant;
+			var r = Enumerable.Range.Vacant;
 			var e = seq.GetEnumerator();
 			while (e.MoveNext())
-				r.Extend(selector(e.Current));
+				r.UnionWith(selector(e.Current));
 			return r;
 		}
 
@@ -3159,14 +2820,6 @@ namespace alib.Enumerable
 				yield return new Pairing<T>(e1.Current, e2.Current);
 		}
 
-		public static IEnumerable<IGrouping<TKey, TSource>> GroupBy<TSource, TKey>(
-			this IEnumerable<TSource> seq,
-			Func<TSource, TKey> keySelector,
-			Func<TKey, TKey, bool> comparer)
-		{
-			return seq._GroupBy(keySelector, new LambdaComparer<TKey>(comparer));
-		}
-
 		public static bool MoreThanOne<T>(this IEnumerable<T> seq)
 		{
 			var e = seq.GetEnumerator();
@@ -3194,7 +2847,7 @@ namespace alib.Enumerable
 		/// Filter for non-default(T) values (i.e. non-null references, non-default values)
 		/// </summary>
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		public static IEnumerable<TSrc> NotDefault<TSrc, TAny>(this IEnumerable<TSrc> seq, Converter<TSrc, TAny> selector)
+		public static IEnumerable<TSrc> NotDefault<TSrc, TAny>(this IEnumerable<TSrc> seq, Func<TSrc, TAny> selector)
 		{
 			TSrc t;
 			var e = seq.GetEnumerator();

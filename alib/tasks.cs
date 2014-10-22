@@ -54,12 +54,16 @@ namespace alib.Concurrency
 			Unclaimed = new ManualResetEvent(false);
 		}
 
+		[DebuggerDisplay("Completed Task")]
 		public static readonly Task CompletedTask;
 
+		[DebuggerDisplay("Completed WaitHandle")]
 		public static readonly WaitHandle Completed;
 
+		[DebuggerDisplay("Signaled ManualResetEvent")]
 		public static readonly ManualResetEvent Signaled;
 
+		[DebuggerDisplay("Unclaimed ManualResetEvent")]
 		public static readonly ManualResetEvent Unclaimed;
 
 		public static Task<T> FromError<T>(Exception ex)

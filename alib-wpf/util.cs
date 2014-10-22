@@ -1,12 +1,37 @@
 ﻿using System;
 using System.Windows;
+using System.Linq;
+using System.Diagnostics;
 using System.Windows.Controls;
 using System.Windows.Markup;
 using System.Windows.Media;
+using System.Windows.Interop;
+using System.Runtime.InteropServices;
 
 namespace alib.Wpf
 {
 	using SP = SystemParameters;
+	using String = System.String;
+
+	public static class _interop
+	{
+		[StructLayout(LayoutKind.Sequential)]
+		public struct Win32Point
+		{
+			public Int32 X;
+			public Int32 Y;
+		};
+
+		[DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+		public static extern IntPtr GetActiveWindow();
+
+		[DllImport("user32.dll")]
+		public static extern uint GetDoubleClickTime();
+
+		[DllImport("user32.dll")]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool GetCursorPos(ref Win32Point pt);
+	};
 
 	public static partial class util
 	{
@@ -17,9 +42,7 @@ namespace alib.Wpf
 			xlang_en = XmlLanguage.GetLanguage("en");
 			xlang_th = XmlLanguage.GetLanguage("th");
 
-			var d = EmptyDrawing = new DrawingGroup();
-			d.ClearValue(DrawingGroup.ChildrenProperty);
-			d.Freeze();
+			(EmptyDrawing = new GeometryDrawing(null, null, RectangleGeometry.Empty)).Freeze();
 
 			zero_size = new Size(0, 0);
 			infinite_size = new Size(double.PositiveInfinity, double.PositiveInfinity);
@@ -39,7 +62,7 @@ namespace alib.Wpf
 			{
 				Target = "Tahoma",
 				Language = xlang_th,
-				Scale = 1.27,
+				Scale = 1.37,
 			});
 
 			ff_arial = new FontFamily("Arial");
@@ -48,8 +71,14 @@ namespace alib.Wpf
 			ff_cambria = new FontFamily("Cambria");
 			ff_calibri = new FontFamily("Calibri");
 			ff_consolas = new FontFamily("Consolas");
+			ff_lucida_console = new FontFamily("Lucida Console");
 
 			tf_calibri = new Typeface("Calibri");
+
+			LightGrayPen = new Pen(Brushes.LightGray, 1);
+			DarkGrayPen = new Pen(Brushes.DarkGray, 1);
+
+			DoubleClickTime = TimeSpan.FromMilliseconds(_interop.GetDoubleClickTime());
 		}
 
 		public static int GetScreenConfigHash()
@@ -61,6 +90,44 @@ namespace alib.Wpf
 				((int)SP.VirtualScreenHeight << 24) ^
 				((int)SP.VirtualScreenLeft << 11) ^
 				((int)SP.VirtualScreenTop << 21);
+		}
+
+		public static Window GetActiveWindow()
+		{
+			IntPtr active = _interop.GetActiveWindow();
+			Window w;
+
+			var e = Application.Current.Windows.GetEnumerator();
+			while (e.MoveNext())
+				if ((w = e.Current as Window) != null && new WindowInteropHelper(w).Handle == active)
+					return w;
+			return null;
+		}
+
+
+		public static readonly TimeSpan DoubleClickTime;
+
+		public static readonly Pen LightGrayPen;
+		public static readonly Pen DarkGrayPen;
+
+		public static Brush gethatchbrush()
+		{
+			return new DrawingBrush
+			{
+				Stretch = Stretch.None,
+				ViewportUnits = BrushMappingMode.Absolute,
+				Viewport = new Rect(0, 0, 10, 10),
+				TileMode = TileMode.Tile,
+				Drawing = new GeometryDrawing
+				{
+					Pen = LightGrayPen,
+					Geometry = new LineGeometry
+					{
+						StartPoint = new Point(-1, -1),
+						EndPoint = new Point(11, 11),
+					}
+				},
+			};
 		}
 	};
 }

@@ -894,7 +894,7 @@ namespace alib.BitArray
 			return false;
 		}
 
-		public override bool Equals(object obj) { throw new NotImplementedException(); }
+		public override bool Equals(Object obj) { throw new NotImplementedException(); }
 
 		///////////////////////////////////////////////////////////////////////////////////////
 		/// internal

@@ -10,7 +10,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.ComponentModel;
 
-using alib.dg;
+using alib.Graph;
 using alib.Math;
 using alib.Array;
 using alib.Debugging;
@@ -42,12 +42,13 @@ namespace alib.Wpf
 		void graph_change()
 		{
 			Children.Clear();
-			g_cur = null;
+			this.g_cur = null;
+			this.r_all = util.zero_rect;
 
 			var gg = this.IGraphEx;
 			if (gg != null)
 			{
-				if (ReadLocalValue(TextBlock.FontSizeProperty) == DependencyProperty.UnsetValue)
+				if (!this.HasLocalValue(TextBlock.FontSizeProperty))
 					TextBlock.SetFontSize(this, 13);
 				var vertx = new UIElement[gg.VertexCount];
 
@@ -69,20 +70,20 @@ namespace alib.Wpf
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		///
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		void adapter_build()
-		{
-			//var sw = Stopwatch.StartNew();
-
-			this.g_cur = new WpfGraphAdapter(this, InternalChildren);
-
-			//Debug.Print("graph layout complete: {0:#,###}ms.", sw.ElapsedMilliseconds);
-		}
-
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		///
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		protected override Size MeasureOverride(Size _)
 		{
+			bool f_ok = true;
+			foreach (UIElement el in InternalChildren)
+			{
+				if (!el.IsMeasureValid)
+				{
+					el.Measure(_);
+					f_ok = false;
+				}
+			}
+			if (f_ok)
+				return RuntimeSizeWithPadding;
+
 			layout_gen++;
 
 			this.r_all = util.zero_rect;
@@ -96,10 +97,15 @@ namespace alib.Wpf
 				};
 			}
 
-			adapter_build();
+			//var sw = Stopwatch.StartNew();
+			this.g_cur = new WpfGraphAdapter(this, InternalChildren);
+			//Debug.Print("graph layout complete: {0:#,###}ms.", sw.ElapsedMilliseconds);
 
 			if (g_cur.Verticies.Count > 0)
 			{
+				//foreach (layout_vertex_base v in g_cur.Verticies)
+				//	v.Location = util.point_NaN;
+
 				var _tmp = g_cur.Verticies
 								.GroupBy(vx => vx.LogicalPosition.Row)
 								.OrderBy(g => g.Key)
@@ -117,7 +123,11 @@ namespace alib.Wpf
 				if (g_cur.Verticies.Cast<layout_vertex_base>().Any(vx => !vx.Location.IsFinite()))
 					throw new Exception();
 
-				layout_edges();
+				//foreach (LayoutEdgeEx e in g_cur.Edges)
+				//	e.ResetUI();
+
+				if (EdgeContentMode != EdgeContentMode.None)
+					layout_edges();
 			}
 			return RuntimeSizeWithPadding;
 		}

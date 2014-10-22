@@ -78,21 +78,6 @@ namespace alib.Wpf
 		Line L;
 		TextBlock tb;
 
-		protected override Size ArrangeOverride(Size finalSize)
-		{
-			L.Arrange(new Rect(finalSize));
-
-			//Point midPoint = util.Midpoint(pt1, pt2);
-
-			var text_origin = util.get_text_origin(tb.Text, tb.DesiredSize, 10, new Rotation(new Point(X1, Y1), new Point(X2, Y2)));
-
-			text_origin = TransformToAncestor((Visual)Parent).Transform(text_origin);
-
-			tb.Arrange(new Rect(text_origin, tb.DesiredSize));
-
-			return L.DesiredSize;
-		}
-
 		protected override Size MeasureOverride(Size availableSize)
 		{
 			var pt1 = new Point(X1, Y1);
@@ -105,8 +90,27 @@ namespace alib.Wpf
 			L.Y1 = pt1.Y;
 			L.X2 = pt2.X;
 			L.Y2 = pt2.Y;
-			L.Measure(availableSize);
-			tb.Measure(availableSize);
+			if (!L.IsMeasureValid)
+				L.Measure(availableSize);
+			
+			//if (!tb.IsMeasureValid)
+			//	tb.Measure(availableSize);
+
+			return L.DesiredSize;
+		}
+
+		protected override Size ArrangeOverride(Size finalSize)
+		{
+			L.Arrange(new Rect(finalSize));
+
+			//Point midPoint = util.Midpoint(pt1, pt2);
+
+			var text_origin = util.get_text_origin(tb.Text, tb.DesiredSize, 10, new Rotation(new Point(X1, Y1), new Point(X2, Y2)));
+
+			text_origin = TransformToAncestor((Visual)Parent).Transform(text_origin);
+
+			tb.Arrange(new Rect(text_origin, tb.DesiredSize));
+
 			return L.DesiredSize;
 		}
 

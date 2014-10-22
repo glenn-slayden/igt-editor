@@ -5,6 +5,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
+using alib.Enumerable;
+
 namespace alib.Bits
 {
 	public static unsafe class Bitz
@@ -53,6 +55,14 @@ namespace alib.Bits
 			*p = v | m;
 			return true;
 		}
+		public static bool TestAndSet(ulong[] arr, int ix)
+		{
+			ulong v, m = 1UL << ix;
+			if (((v = arr[ix >> 6]) & m) != 0)
+				return false;
+			arr[ix >> 6] = v | m;
+			return true;
+		}
 
 		public static void ClearAll(this ulong[] arr)
 		{
@@ -83,6 +93,59 @@ namespace alib.Bits
 		//    public fixed ulong data[1];
 		//}
 	};
+
+
+#if false
+	sealed class BitHelper
+	{
+		public static int ToIntArrayLength(int n)
+		{
+			if (n <= 0)
+				return 0;
+			return ((n - 1) / 0x20) + 1;
+		}
+
+		const byte IntSize = 0x20;
+		const byte MarkedBitFlag = 1;
+
+		public BitHelper(int* pi, int c)
+		{
+			m_pi = pi;
+			m_c = c;
+		}
+
+		public BitHelper(int c)
+		{
+			m_arr = new int[c];
+			m_c = c;
+		}
+
+		int m_c;
+		int* m_pi;
+		readonly int[] m_arr;
+
+		public bool IsMarked(int bitPosition)
+		{
+			int index = bitPosition / 0x20;
+			if (m_pi != null)
+				return index < m_c && index >= 0 && (m_pi[index] & (1 << (bitPosition % 0x20))) != 0;
+			return index < m_c && index >= 0 && (m_arr[index] & (1 << (bitPosition % 0x20))) != 0;
+		}
+
+		public void MarkBit(int bitPosition)
+		{
+			int ix = bitPosition / 0x20;
+
+			if (ix < m_c && ix >= 0)
+			{
+				if (m_pi != null)
+					m_pi[ix] |= 1 << (bitPosition % 0x20);
+				else
+					m_arr[ix] |= 1 << (bitPosition % 0x20);
+			}
+		}
+	};
+#endif
 
 	public unsafe struct BitHelper
 	{
@@ -135,7 +198,7 @@ namespace alib.Bits
 			{
 				int c = OnesCount;
 				if (c == 0)
-					return Enumerable.IntArray.Empty;
+					return IntArray.Empty;
 				int[] arr = new int[c];
 				fixed (int* _pi = arr)
 				{
@@ -574,6 +637,41 @@ namespace alib.Bits
 				msk <<= 1;
 			}
 			return new System.String(rgch);
+		}
+	};
+
+	[StructLayout(LayoutKind.Explicit, Pack = 1, Size = 4)]
+	public struct bytehash32
+	{
+		[FieldOffset(0)]
+		int _int32;
+
+		[FieldOffset(0)]
+		byte a;
+		[FieldOffset(1)]
+		byte b;
+		[FieldOffset(2)]
+		byte c;
+		[FieldOffset(3)]
+		byte d;
+
+		public static int Get(int x, int y)
+		{
+			var h = default(bytehash32);
+			h._int32 = x ^ y;
+			return h.a ^ h.b ^ h.c ^ h.d;
+		}
+		public static int Get(int x)
+		{
+			var h = default(bytehash32);
+			h._int32 = x;
+			return h.a ^ h.b ^ h.c ^ h.d;
+		}
+		public static int Get(uint x)
+		{
+			var h = default(bytehash32);
+			h._int32 = (int)x;
+			return h.a ^ h.b ^ h.c ^ h.d;
 		}
 	};
 }

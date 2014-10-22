@@ -128,14 +128,16 @@ namespace alib.Wpf
 
 		protected static TextBlock _text_child(String txt)
 		{
-			return new TextBlock
+			var tb = new TextBlock
 			{
-				Text = txt,
 				Foreground = Brushes.Black,
 				Padding = new Thickness(1.5),
 				TextWrapping = TextWrapping.NoWrap,
 				VerticalAlignment = VerticalAlignment.Center,
 			};
+			if (txt != null)
+				tb.Text = txt;
+			return tb;
 		}
 
 		public RoundedRectangle()

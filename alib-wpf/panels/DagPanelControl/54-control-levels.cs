@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 
-using alib.dg;
+using alib.Graph;
 using alib.Array;
 using alib.Debugging;
 using alib.Enumerable;
@@ -33,8 +33,15 @@ namespace alib.Wpf
 				if (rg_src[0] is layout_vertex_base)
 					Array.Copy(rg_src, this.rg, rg_src.Length);
 				else
-					for (int i = 0; i < Count; i++)
-						this.rg[i] = new LayoutVertexEx((WpfGraphAdapter)g.GraphInstance, DagPanelControl.create_vertex_element(g, rg_src[i]), i);
+				{
+					throw not.tested;
+					//for (int i = 0; i < Count; i++)
+					//{
+					//	var el = DagPanelControl.create_vertex_element(g, rg_src[i]);
+					//	this.rg[i] = new LayoutVertexEx((WpfGraphAdapter)g.GraphInstance, el, i);
+					//	WpfGraphAdapter.SetLV(
+					//}
+				}
 			}
 		}
 

@@ -575,7 +575,7 @@ namespace alib.geom
 
 		public bool Equals(VectorD value) { return Equals(this, value); }
 
-		public override bool Equals(object o) { return o is VectorD && Equals(this, (VectorD)o); }
+		public override bool Equals(Object o) { return o is VectorD && Equals(this, (VectorD)o); }
 
 		public static bool operator ==(VectorD v1, VectorD v2) { return Equals(v1, v2); }
 

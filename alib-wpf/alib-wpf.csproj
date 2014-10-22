@@ -99,7 +99,6 @@
     <Compile Include="wpf\dispatcher.cs" />
     <Compile Include="wpf\value-converters.cs" />
     <Compile Include="wpf\template-selector.cs" />
-    <Compile Include="wpf\complex-template.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="util.cs" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using alib.Debugging;
+using alib.Enumerable;
 
 namespace alib.Concurrency
 {
@@ -309,6 +311,7 @@ namespace alib.Concurrency
 		}
 	};
 
+#if false
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// <summary>
 	/// Concurrent producer/consumer buffered into a blocking ring buffer
@@ -316,7 +319,7 @@ namespace alib.Concurrency
 	/// the objects in the buffer.
 	/// </summary>
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	public class RingBuf<T> : alib.Enumerable.IAddRange<T>
+	public class RingBuf<T> : IReadWriteCollection<T>
 	{
 		public RingBuf(int c_ranges_to_add)
 		{
@@ -525,6 +528,14 @@ namespace alib.Concurrency
 			return f_ok;
 		}
 
+		void ICollection<T>.CopyTo(T[] array, int arrayIndex) { throw not.valid; }
+		bool ICollection<T>.Contains(T item) { throw not.valid; }
+		bool ICollection<T>.Remove(T item) { throw not.impl; }
+		void ICollection<T>.Clear() { throw not.valid; }
+		bool ICollection<T>.IsReadOnly { get { return false; } }
+		void ICollection.CopyTo(System.Array array, int index) { throw not.valid; }
+		Object ICollection.SyncRoot { get { return null; } }
+		bool ICollection.IsSynchronized { get { return true; } }
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/// 
@@ -535,14 +546,14 @@ namespace alib.Concurrency
 			RingBuf<T> rb;
 			T cur;
 			public T Current { get { return cur; } }
-			object System.Collections.IEnumerator.Current { get { return cur; } }
+			object IEnumerator.Current { get { return cur; } }
 			public bool MoveNext() { cur = rb.Take(); return cur != null; }
 			public void Reset() { cur = default(T); }
 			public void Dispose() { rb = null; cur = default(T); }
 		}
 
 		public IEnumerator<T> GetEnumerator() { return new _enum(this); }
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw new NotImplementedException(); }
+		IEnumerator IEnumerable.GetEnumerator() { return new _enum(this); }
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -584,6 +595,7 @@ namespace alib.Concurrency
 		readonly Action<Action<IEnumerable<T>>, IEnumerable<T>> ar_wrap;
 		public override void AddRange(IEnumerable<T> e) { ar_wrap(base.AddRange, e); }
 	}
+#endif
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// <summary>
@@ -850,6 +862,10 @@ namespace alib.Concurrency
 		/// </summary>
 		public new /*override*/ bool Contains(T item)
 		{
+#if DEBUG
+			if (this is ISet<T>)
+				throw not.expected;
+#endif
 			bool entered = false;
 			try
 			{
@@ -909,9 +925,41 @@ namespace alib.Concurrency
 		/// <summary>
 		/// 
 		/// </summary>
-		public new /*override*/ bool Remove(T item) { throw new NotImplementedException(); }
+		public new /*override*/ bool Remove(T item) { throw not.valid; }
 	};
 
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// 
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public abstract class ConcurrentContainer<T> : Collections.rw_set_base<T>//, _ISet<T>
+	{
+		public T this[int index]
+		{
+			get { throw not.impl; }
+		}
+
+		//int _ISet<T>.RemoveWhere(Predicate<T> match) { throw not.impl; }
+
+		public void ExceptWith(IEnumerable<T> other) { throw not.valid; }
+
+		public void IntersectWith(IEnumerable<T> other) { throw not.valid; }
+
+		//public void UnionWith(IEnumerable<T> other) { throw not.valid; }
+
+		public bool IsProperSubsetOf(IEnumerable<T> other) { throw not.valid; }
+
+		public bool IsProperSupersetOf(IEnumerable<T> other) { throw not.valid; }
+
+		public bool IsSubsetOf(IEnumerable<T> other) { throw not.valid; }
+
+		public bool IsSupersetOf(IEnumerable<T> other) { throw not.valid; }
+
+		public bool Overlaps(IEnumerable<T> other) { throw not.valid; }
+
+		public bool SetEquals(IEnumerable<T> other) { throw not.valid; }
+
+		public void SymmetricExceptWith(IEnumerable<T> other) { throw not.valid; }
+	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// <summary>
@@ -926,7 +974,7 @@ namespace alib.Concurrency
 
 		public T Peek() { return any; }
 
-		public override bool Add(T item)
+		public bool Add(T item)
 		{
 			bool entered = false;
 			try
@@ -944,7 +992,7 @@ namespace alib.Concurrency
 			}
 		}
 
-		public override bool Remove(T item)
+		public bool Remove(T item)
 		{
 			bool entered = false;
 			try
@@ -971,7 +1019,7 @@ namespace alib.Concurrency
 			}
 		}
 
-		public override void Clear()
+		public void Clear()
 		{
 			bool entered = false;
 			try
@@ -989,6 +1037,10 @@ namespace alib.Concurrency
 
 		public override bool Contains(T item)
 		{
+#if DEBUG
+			if (this is ISet<T>)
+				throw not.expected;
+#endif
 			bool entered = false;
 			try
 			{
@@ -1002,7 +1054,7 @@ namespace alib.Concurrency
 			}
 		}
 
-		public T[] ToArray()
+		public override T[] ToArray()
 		{
 			bool entered = false;
 			try
@@ -1017,12 +1069,12 @@ namespace alib.Concurrency
 			}
 		}
 
-		public override IEnumerator<T> GetEnumerator()
+		public IEnumerator<T> GetEnumerator()
 		{
-			return alib.Enumerable._enumerable_ext.Enumerator(this.ToArray());
+			return enum_ext.Enumerator(this.ToArray());
 		}
 
-		public override int Count { get { return hs.Count; } }
+		public int Count { get { return hs.Count; } }
 	};
 
 
@@ -1132,58 +1184,9 @@ namespace alib.Concurrency
 	};
 
 
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/// <summary>
 	/// 
-	/// </summary>
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	public abstract class ConcurrentContainer<T> : ISet<T>
-	{
-		public abstract bool Add(T item);
-
-		public abstract void Clear();
-
-		public abstract bool Contains(T item);
-
-		public abstract int Count { get; }
-
-		public abstract bool Remove(T item);
-
-		public virtual IEnumerator<T> GetEnumerator() { throw new NotImplementedException(); }
-
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-		void ICollection<T>.Add(T item) { Add(item); }
-
-		public bool IsReadOnly { get { return false; } }
-
-		public void CopyTo(T[] array, int arrayIndex) { throw new NotSupportedException(); }
-
-		public void ExceptWith(IEnumerable<T> other) { throw new NotSupportedException(); }
-
-		public void IntersectWith(IEnumerable<T> other) { throw new NotSupportedException(); }
-
-		public bool IsProperSubsetOf(IEnumerable<T> other) { throw new NotSupportedException(); }
-
-		public bool IsProperSupersetOf(IEnumerable<T> other) { throw new NotSupportedException(); }
-
-		public bool IsSubsetOf(IEnumerable<T> other) { throw new NotSupportedException(); }
-
-		public bool IsSupersetOf(IEnumerable<T> other) { throw new NotSupportedException(); }
-
-		public bool Overlaps(IEnumerable<T> other) { throw new NotSupportedException(); }
-
-		public bool SetEquals(IEnumerable<T> other) { throw new NotSupportedException(); }
-
-		public void SymmetricExceptWith(IEnumerable<T> other) { throw new NotSupportedException(); }
-
-		public void UnionWith(IEnumerable<T> other) { throw new NotSupportedException(); }
-	};
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/// <summary>
-	/// 
-	/// </summary>
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public class ConcurrentSymmetricDictionary<K1, K2>
 	{
@@ -1547,7 +1550,7 @@ namespace alib.Collections.Concurrent
 	using Array = System.Array;
 
 	[DebuggerDisplay("Count = {this.m_c}  Type = {_item_type().Name,nq}")]
-	public class ConcurrentRefList<T> : IList<T>, System.Collections.IList where T : class
+	public class ConcurrentRefList<T> : IList<T>, IList where T : class
 	{
 		const int _defaultCapacity = 4;
 		public static readonly ConcurrentRefList<T> Empty = new ConcurrentRefList<T>();
@@ -1580,7 +1583,7 @@ namespace alib.Collections.Concurrent
 			if (collection == null)
 				throw new ArgumentNullException();
 
-			ICollection<T> is2 = collection as ICollection<T>;
+			var is2 = collection as ICollection;
 			if (is2 != null)
 			{
 				int count = is2.Count;
@@ -1679,9 +1682,9 @@ namespace alib.Collections.Concurrent
 		}
 
 #if false
-		public System.Collections.ObjectModel.ReadOnlyCollection<T> AsReadOnly()
+		public ObjectModel.ReadOnlyCollection<T> AsReadOnly()
 		{
-			return new System.Collections.ObjectModel.ReadOnlyCollection<T>(this);
+			return new ObjectModel.ReadOnlyCollection<T>(this);
 		}
 
 		public int BinarySearch(T item)
@@ -1702,7 +1705,7 @@ namespace alib.Collections.Concurrent
 			return Array.BinarySearch<T>(m_arr, index, count, item, comparer);
 		}
 
-		public List<TOutput> ConvertAll<TOutput>(Converter<T, TOutput> converter)
+		public List<TOutput> ConvertAll<TOutput>(Func<T, TOutput> converter)
 		{
 			if (converter == null)
 				throw new ArgumentNullException();
@@ -1893,7 +1896,7 @@ namespace alib.Collections.Concurrent
 			if (index > m_c)
 				throw new ArgumentOutOfRangeException();
 
-			ICollection<T> is2 = collection as ICollection<T>;
+			var is2 = collection as ICollection;
 			if (is2 != null)
 			{
 				int count = is2.Count;
@@ -2200,27 +2203,18 @@ namespace alib.Collections.Concurrent
 
 		public bool Contains(T item)
 		{
+#if DEBUG
+			if (this is ISet<T>)
+				throw not.expected;
+#endif
 			bool b_ret = false;
 			Monitor.Enter(this);
-			if (item == null)
-			{
-				for (int j = 0; j < m_c; j++)
-					if (m_arr[j] == null)
-					{
-						b_ret = true;
-						break;
-					}
-			}
-			else
-			{
-				EqualityComparer<T> comparer = EqualityComparer<T>.Default;
-				for (int i = 0; i < m_c; i++)
-					if (comparer.Equals(m_arr[i], item))
-					{
-						b_ret = true;
-						break;
-					}
-			}
+			for (int i = 0; i < m_c; i++)
+				if (Object.Equals(m_arr[i], item))
+				{
+					b_ret = true;
+					break;
+				}
 			Monitor.Exit(this);
 			return b_ret;
 		}
@@ -2337,7 +2331,7 @@ namespace alib.Collections.Concurrent
 			return _tmp.Take(c).GetEnumerator();
 		}
 
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { return GetEnumerator(); }
+		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public bool IsReadOnly { get { return false; } }
@@ -2348,7 +2342,7 @@ namespace alib.Collections.Concurrent
 		///
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		object System.Collections.IList.this[int index]
+		object IList.this[int index]
 		{
 			get { return this[index]; }
 			set { this[index] = (T)value; }
@@ -2507,9 +2501,4 @@ void test_reflist()
 	//    };
 
 	//};
-
-
-
-
-
 }

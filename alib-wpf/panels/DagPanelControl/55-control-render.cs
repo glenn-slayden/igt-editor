@@ -10,7 +10,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.ComponentModel;
 
-using alib.dg;
+using alib.Graph;
 using alib.Math;
 using alib.Array;
 using alib.Debugging;
@@ -138,7 +138,7 @@ namespace alib.Wpf
 			if ((mle = e as LayoutMultiEdgeEx) != null)
 			{
 				var pt = mle.multi_mid_adjust(points[0], points[1]);
-				points /* ref param */ = points.InsertAt(1, pt);
+				arr.InsertAt(ref points, 1, pt);
 				return CanonicalSpline.Create(points, SplineTension, null, false, false);
 			}
 

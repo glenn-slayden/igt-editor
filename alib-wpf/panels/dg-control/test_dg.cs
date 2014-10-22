@@ -13,11 +13,13 @@ using System.Globalization;
 using alib.Debugging;
 using alib.Array;
 
+using alib.Enumerable;
+using alib.Collections;
+using alib.Graph;
 
 namespace alib.Wpf
 {
 	using String = System.String;
-	using alib.dg;
 
 	[DebuggerDisplay("{s_feat,nq} {in_mark} {s_type,nq} {out_mark}")]
 	public struct __ate
@@ -37,7 +39,7 @@ namespace alib.Wpf
 
 	public unsafe class dg_ate_test_builder
 	{
-		public dg_ate_test_builder(StringIndex edict, StringIndex vdict, __ate[] rgate, out dg.Edge[] _E, out dg.Vertex[] _V)
+		public dg_ate_test_builder(IDataMap<String> edict, IDataMap<String> vdict, __ate[] rgate, out Edge[] _E, out Vertex[] _V)
 		{
 			this.edict = edict;
 			this.vdict = vdict;
@@ -52,8 +54,8 @@ namespace alib.Wpf
 			m_v = default(Vref);
 			m_e = default(Eref);
 			int* CC = stackalloc int[c];
-			dg.Edge* EE = stackalloc dg.Edge[c];
-			dg.Vertex* VV = stackalloc dg.Vertex[c + 1];
+			Edge* EE = stackalloc Edge[c];
+			Vertex* VV = stackalloc Vertex[c + 1];
 
 			this.corefs = CC;
 			this.E = EE;
@@ -61,17 +63,17 @@ namespace alib.Wpf
 
 			build_node(Eref.None, 0);
 
-			_E = new dg.Edge[m_e];
+			_E = new Edge[m_e];
 			for (c = 0; c < m_e; c++)
 				_E[c] = *E++;
 
-			_V = new dg.Vertex[m_v];
+			_V = new Vertex[m_v];
 			for (c = 0; c < m_v; c++)
 				_V[c] = *V++;
 		}
 
-		StringIndex edict;
-		StringIndex vdict;
+		IDataMap<String> edict;
+		IDataMap<String> vdict;
 		__ate[] rgate;
 		int offs;
 		int[][] IMR;
@@ -79,8 +81,8 @@ namespace alib.Wpf
 		Vref m_v;
 		Eref m_e;
 		int* corefs;
-		dg.Edge* E;
-		dg.Vertex* V;
+		Edge* E;
+		Vertex* V;
 
 		Vref build_node(Eref e, int i_ate)
 		{
@@ -103,7 +105,7 @@ namespace alib.Wpf
 
 			m_v++;
 
-			V[v] = new dg.Vertex
+			V[v] = new Vertex
 			{
 				e_in = e,
 				value = vdict.GetOrAdd(rgate[i_ate].s_type),
@@ -114,7 +116,7 @@ namespace alib.Wpf
 			return v;
 		}
 
-		void build_arcs(Vref v_par, ref dg.Vertex par, int in_mark)
+		void build_arcs(Vref v_par, ref Vertex par, int in_mark)
 		{
 			int c;
 			int[] fvp;
@@ -126,7 +128,7 @@ namespace alib.Wpf
 			else
 			{
 				Eref e;
-				dg.Edge* pe = E + (e = par.e_out = m_e);
+				Edge* pe = E + (e = par.e_out = m_e);
 				m_e += par.c_out = c;
 
 				for (int q = 0; q < c; q++, e++, pe++)
@@ -141,10 +143,10 @@ namespace alib.Wpf
 
 		public static rw_string_graph FromArrayTfs()
 		{
-			var edict = new StringIndex();
-			var vdict = new StringIndex();
-			dg.Edge[] E;
-			dg.Vertex[] V;
+			var edict = new graph_data_map<String>();
+			var vdict = new graph_data_map<String>();
+			Edge[] E;
+			Vertex[] V;
 			new dg_ate_test_builder(edict, vdict, sample_data, out E, out V);
 
 			var graph = new rw_string_graph(edict, vdict, E, V, default(IGraph));

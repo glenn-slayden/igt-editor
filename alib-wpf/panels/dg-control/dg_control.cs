@@ -13,8 +13,8 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using alib.Debugging;
 
-using alib.dg;
-using alib.Collections;
+using alib.Graph;
+using alib.Collections.ReadOnly;
 using alib.Enumerable;
 using alib.Wpf;
 using alib.Array;
@@ -828,17 +828,17 @@ namespace alib.Wpf
 			}
 		}
 
-		DrawingHitTestResult EnumDrawingGroup(DrawingGroup dg, Point pt)
+		DrawingHitTestResult EnumDrawingGroup(DrawingGroup dxg, Point pt)
 		{
 			DrawingGroup d1;
 			GeometryDrawing d2;
 			GlyphRunDrawing d3;
 			int ix;
 
-			if (dg.Bounds.Contains(pt) && (ix = drawing_index.FindEntry(dg)) != -1)
-				return new DrawingHitTestResult(this, pt, dg, ix);
+			if (dxg.Bounds.Contains(pt) && (ix = drawing_index.FindEntry(dxg)) != -1)
+				return new DrawingHitTestResult(this, pt, dxg, ix);
 
-			foreach (Drawing drawing in dg.Children)
+			foreach (Drawing drawing in dxg.Children)
 			{
 				if ((d1 = drawing as DrawingGroup) != null)
 				{
@@ -890,10 +890,12 @@ namespace alib.Wpf
 			base.Content = new graph_control();
 		}
 
+		public new graph_control Content { get { return (graph_control)base.Content; } }
+
 		public IGraph Graph
 		{
-			get { return ((graph_control)base.Content).Graph; }
-			set { ((graph_control)base.Content).Graph = value; }
+			get { return Content.Graph; }
+			set { Content.Graph = value; }
 		}
 	};
 }

@@ -8,7 +8,7 @@ using System.Windows.Shapes;
 
 using alib.Debugging;
 using alib.Enumerable;
-using alib.dg;
+using alib.Graph;
 
 namespace alib.Wpf
 {
@@ -17,7 +17,7 @@ namespace alib.Wpf
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public partial class DagPanelControl
 	{
-		const FrameworkPropertyMetadataOptions MeasureArrangeRender = (FrameworkPropertyMetadataOptions)0x13;
+		const FrameworkPropertyMetadataOptions MeasureArrangeRender = 0;//(FrameworkPropertyMetadataOptions)0x13;
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		///
@@ -67,19 +67,20 @@ namespace alib.Wpf
 			StrokeProperty.AddOwner(typeof(DagPanelControl),
 											new FrameworkPropertyMetadata(
 												Brushes.Black,
-												FrameworkPropertyMetadataOptions.AffectsRender,
+												0,//FrameworkPropertyMetadataOptions.AffectsRender,
 												(o, e) => ((DagPanelControl)o)._pen = null));
 
 			StrokeThicknessProperty.AddOwner(typeof(DagPanelControl),
 											new FrameworkPropertyMetadata(
 												1.0,
-												FrameworkPropertyMetadataOptions.AffectsRender,
+												0,//FrameworkPropertyMetadataOptions.AffectsRender,
 												(o, e) => ((DagPanelControl)o)._pen = null));
 
 			CornerRadiusProperty.AddOwner(typeof(DagPanelControl),
 											new FrameworkPropertyMetadata(
 												new CornerRadius(0.0),
-												FrameworkPropertyMetadataOptions.AffectsRender));
+												0//FrameworkPropertyMetadataOptions.AffectsRender
+												));
 
 			PaddingProperty.AddOwner(typeof(DagPanelControl),
 											new FrameworkPropertyMetadata(
@@ -108,7 +109,7 @@ namespace alib.Wpf
 											typeof(Thickness),
 											typeof(DagPanelControl),
 											new FrameworkPropertyMetadata(
-												new Thickness(60.0),
+												new Thickness(40, 60, 40, 60),
 												MeasureArrangeRender));
 
 			VertexMinWidthProperty = DependencyProperty.Register(
@@ -183,7 +184,8 @@ namespace alib.Wpf
 											typeof(DagPanelControl),
 											new FrameworkPropertyMetadata(
 												false,
-												FrameworkPropertyMetadataOptions.AffectsRender));
+												0//FrameworkPropertyMetadataOptions.AffectsRender
+												));
 
 			ShowLayoutProxyPointsProperty = DependencyProperty.Register(
 											"ShowLayoutProxyPoints",
@@ -191,7 +193,8 @@ namespace alib.Wpf
 											typeof(DagPanelControl),
 											new FrameworkPropertyMetadata(
 												false,
-												FrameworkPropertyMetadataOptions.AffectsRender));
+												0//FrameworkPropertyMetadataOptions.AffectsRender
+												));
 
 			ShowLayoutProxyOutlinesProperty = DependencyProperty.Register(
 											"ShowLayoutProxyOutlines",
@@ -199,7 +202,8 @@ namespace alib.Wpf
 											typeof(DagPanelControl),
 											new FrameworkPropertyMetadata(
 												false,
-												FrameworkPropertyMetadataOptions.AffectsRender));
+												0//FrameworkPropertyMetadataOptions.AffectsRender
+												));
 
 			EdgeTextStyleProperty = DependencyProperty.Register(
 											"EdgeTextStyle",
@@ -221,7 +225,8 @@ namespace alib.Wpf
 											typeof(DagPanelControl),
 											new FrameworkPropertyMetadata(
 												0.35,
-												FrameworkPropertyMetadataOptions.AffectsRender));
+												0//FrameworkPropertyMetadataOptions.AffectsRender
+												));
 		}
 
 		public Thickness BorderThickness

@@ -132,8 +132,42 @@ namespace alib.Reflection
 			if (ix != -1)
 				s = s.Remove(ix);
 			if (s[s.Length - 1] == '&')
-				s = s.Substring(0, s.Length - 1);
+				s = s.Remove(s.Length - 1);
 			return s;
+		}
+
+		public static bool HasCustomAttribute<T>(this Assembly a)
+			where T : Attribute
+		{
+			return HasCustomAttribute<T>(a.GetCustomAttributesData());
+		}
+		public static bool HasCustomAttribute<T>(this MemberInfo mi)
+			where T : Attribute
+		{
+			return HasCustomAttribute<T>(mi.GetCustomAttributesData());
+		}
+		public static CustomAttributeData GetCustomAttributeData<T>(this MemberInfo mi)
+			where T : Attribute
+		{
+			return GetCustomAttributeData<T>(mi.GetCustomAttributesData());
+		}
+
+		static bool HasCustomAttribute<T>(this IList<CustomAttributeData> rgcad)
+		{
+			int c = rgcad.Count;
+			for (int i = 0; i < c; i++)
+				if (typeof(T).IsAssignableFrom(rgcad[i].AttributeType))
+					return true;
+			return false;
+		}
+		static CustomAttributeData GetCustomAttributeData<T>(this IList<CustomAttributeData> rgcad)
+		{
+			int c = rgcad.Count;
+			CustomAttributeData cad;
+			for (int i = 0; i < c; i++)
+				if (typeof(T).IsAssignableFrom((cad = rgcad[i]).AttributeType))
+					return cad;
+			return null;
 		}
 
 		[DebuggerStepThrough]
@@ -292,12 +326,20 @@ namespace alib.Reflection
 		{
 			Debug.Assert(Topen.IsGenericTypeDefinition);
 			do
-			{
 				if (t.IsGenericType && t.GetGenericTypeDefinition() == Topen)
 					return t;
-			}
 			while ((t = t.BaseType) != null);
 			return null;
+		}
+
+		public static bool HasGenericBase(this Type t, Type Topen)
+		{
+			Debug.Assert(Topen.IsGenericTypeDefinition);
+			do
+				if (t.IsGenericType && t.GetGenericTypeDefinition() == Topen)
+					return true;
+			while ((t = t.BaseType) != null);
+			return false;
 		}
 
 		[DebuggerStepThrough]
@@ -319,7 +361,24 @@ namespace alib.Reflection
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/// 
+		public static Type FindElementType(this IEnumerable seq)
+		{
+			Type Tseq = seq.GetType();
+			Type Telem = null;
+			IEnumerator en;
+			Type[] rgT;
+
+			if (Tseq.IsGenericType && (rgT = Tseq.GetGenericArguments()).Length > 0)
+				Telem = rgT[0];
+
+			if (Telem == null && (en = seq.GetEnumerator()).MoveNext() && en.Current != null)
+				Telem = en.Current.GetType();
+
+			return Telem;
+		}
+
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// 
 		public static T _ctor<T>(this Type t, params Object[] args)
 		{
 #if DEBUG
@@ -364,7 +423,7 @@ namespace alib.Reflection
 			var msg = String.Format("No constructor on type '{0}' takes {1} argument(s) which are compatible with types '{2}'.",
 				t._Name(),
 				args.Length,
-				alib.Enumerable._enumerable_ext.StringJoin(System.Linq.Enumerable.Select(rgt, x => alib.String._string_ext.SQRB(x._Name())), ", "));
+				Enumerable.enum_ext.StringJoin(System.Linq.Enumerable.Select(rgt, x => alib.String._string_ext.SQRB(x._Name())), ", "));
 			throw new Exception(msg);
 #endif
 		invoke:

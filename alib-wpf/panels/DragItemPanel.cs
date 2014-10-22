@@ -70,19 +70,12 @@ namespace alib.Wpf
 			}
 		}
 
-		public UIElement FindCanvasChild(DependencyObject depObj)
+		public UIElement FindCanvasChild(DependencyObject o)
 		{
-			while (depObj != null)
-			{
-				UIElement elem = depObj as UIElement;
-				if (elem != null && base.Children.Contains(elem))
-					break;
-				if (depObj is Visual || depObj is Visual3D)
-					depObj = VisualTreeHelper.GetParent(depObj);
-				else
-					depObj = LogicalTreeHelper.GetParent(depObj);
-			}
-			return depObj as UIElement;
+			UIElement elem = null;
+			while (o != null && ((elem = o as UIElement) == null || !Children.Contains(elem)))
+				o = o.GetVisualParent() ?? o.GetLogicalParent();
+			return elem;
 		}
 
 		protected override void OnPreviewMouseLeftButtonDown(MouseButtonEventArgs e)
@@ -153,7 +146,8 @@ namespace alib.Wpf
 			Size sz = new Size();
 			foreach (UIElement uie in Children)
 			{
-				uie.Measure(constraint);
+				if (!uie.IsMeasureValid)
+					uie.Measure(constraint);
 				Size ds = uie.DesiredSize;
 				if (ds.Width != 0)
 				{

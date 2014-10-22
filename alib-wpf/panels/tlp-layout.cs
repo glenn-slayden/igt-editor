@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define LEAF_HEIGHT_EXEMPT
+
+using System;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 
 using alib.Enumerable;
-using alib.Collections.ReadOnly;
 using alib.Collections;
 
 namespace alib.Wpf
@@ -28,8 +29,8 @@ namespace alib.Wpf
 				this.tlp = tlp;
 				this.fe = fe;
 				this.children = new List<FrameworkElement>();
-				this.lstPosLeftBoundaryRelativeToRoot = new List<Double>();
-				this.lstPosRightBoundaryRelativeToRoot = new List<Double>();
+				this.lstPosLBoundaryRelativeToRoot = new List<Double>();
+				this.lstPosRBoundaryRelativeToRoot = new List<Double>();
 
 				if (!fe.IsMeasureValid)
 					fe.Measure(util.infinite_size);
@@ -58,8 +59,8 @@ namespace alib.Wpf
 
 			public Rect r_final;
 
-			readonly List<Double> lstPosLeftBoundaryRelativeToRoot;
-			readonly List<Double> lstPosRightBoundaryRelativeToRoot;
+			readonly List<Double> lstPosLBoundaryRelativeToRoot;
+			readonly List<Double> lstPosRBoundaryRelativeToRoot;
 
 			Double SubTreeWidth;
 			public Double pxLeftPosRelativeToParent;
@@ -88,9 +89,10 @@ namespace alib.Wpf
 			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			///
 			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			public Size DetermineFinalPositions(int iLayer, Double pxRowHeight, Double pxFromTop, Double pxParentFromLeft)
+			public Size DetermineFinalPositions(List<Double> layer_heights, int iLayer, Double pxFromTop, Double pxParentFromLeft)
 			{
-				r_final.X = this.pxLeftPosRelativeToParent + pxParentFromLeft;
+				var pxRowHeight = layer_heights[iLayer];
+				r_final.X = pxLeftPosRelativeToParent + pxParentFromLeft;
 				r_final.Y = pxFromTop + CalcJustify(fe.DesiredSize.Height, pxRowHeight);
 
 				if (Count == 0 &&
@@ -101,13 +103,14 @@ namespace alib.Wpf
 
 				Double pxBottom = r_final.Y + fe.DesiredSize.Height;
 
+				iLayer++;
 				foreach (FrameworkElement tnCur in this)
 				{
 					var y = pxFromTop + pxRowHeight + tlp.VerticalBuffer;
-					var b = tlp.nli_dict[tnCur].DetermineFinalPositions(iLayer, pxRowHeight, y, r_final.X).Height;
-					pxBottom = Math.Max(pxBottom, b);
+					var b = tlp.nli_dict[tnCur].DetermineFinalPositions(layer_heights, iLayer, y, r_final.X).Height;
+					math.Maximize(ref pxBottom, b);
 				}
-				return new Size(this.SubTreeWidth, pxBottom);
+				return new Size(SubTreeWidth, pxBottom);
 			}
 
 			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -117,44 +120,43 @@ namespace alib.Wpf
 			{
 				if (ix == 0)
 				{
-					foreach (Double pxRelativeToRoot in this.lstPosRightBoundaryRelativeToRoot)
+					foreach (Double pxRelativeToRoot in lstPosRBoundaryRelativeToRoot)
 					{
-						lstLeftToBB.Add(pxRelativeToRoot + this.pxLeftPosRelativeToBoundingBox);
+						lstLeftToBB.Add(pxRelativeToRoot + pxLeftPosRelativeToBoundingBox);
 						lsttnResponsible.Add(0);
 					}
 					return;
 				}
 
-				boundary_calc bc_max = MergeBoundaryEnums(lstLeftToBB, this.lstPosLeftBoundaryRelativeToRoot, lsttnResponsible)
+				boundary_calc bc_max = MergeBoundaryEnums(lstLeftToBB, lstPosLBoundaryRelativeToRoot, lsttnResponsible)
 										.ArgMax(bc => bc.delta);
 
-				Double horz_node_pad = tlp.HorizontalBuffer;
-				Double horz_tree_pad = tlp.HorizontalBufferSubtree;
-				Double pxHorizontalBuffer = bc_max.i_cur == 0 ? horz_node_pad : horz_tree_pad;
+				Double buf_x = bc_max.i_cur == 0 ? tlp.HorizontalBuffer : tlp.HorizontalBufferSubtree;
 
 				FrameworkElement tnLeft = tngSiblings[ix - 1];
 
-				this.pxToLeftSibling = bc_max.delta - lstLeftToBB[0] + tnLeft.DesiredSize.Width + pxHorizontalBuffer;
+				pxToLeftSibling = bc_max.delta - lstLeftToBB[0] + tnLeft.DesiredSize.Width + buf_x;
 
-				int cLevels = Math.Min(this.lstPosRightBoundaryRelativeToRoot.Count, lstLeftToBB.Count);
-				for (int i = 0; i < cLevels; i++)
+				int i, cLevels = Math.Min(lstPosRBoundaryRelativeToRoot.Count, lstLeftToBB.Count);
+
+				for (i = 0; i < cLevels; i++)
 				{
-					lstLeftToBB[i] = this.lstPosRightBoundaryRelativeToRoot[i] + bc_max.delta + pxHorizontalBuffer;
+					lstLeftToBB[i] = lstPosRBoundaryRelativeToRoot[i] + bc_max.delta + buf_x;
 					lsttnResponsible[i] = ix;
 				}
-				for (int i = lstLeftToBB.Count; i < this.lstPosRightBoundaryRelativeToRoot.Count; i++)
+				for (i = lstLeftToBB.Count; i < lstPosRBoundaryRelativeToRoot.Count; i++)
 				{
-					lstLeftToBB.Add(this.lstPosRightBoundaryRelativeToRoot[i] + bc_max.delta + pxHorizontalBuffer);
+					lstLeftToBB.Add(lstPosRBoundaryRelativeToRoot[i] + bc_max.delta + buf_x);
 					lsttnResponsible.Add(ix);
 				}
 
-				Double pxSlop = this.pxToLeftSibling - tnLeft.DesiredSize.Width - horz_node_pad;
+				Double pxSlop = pxToLeftSibling - tnLeft.DesiredSize.Width - tlp.HorizontalBuffer;
 				if (pxSlop > 0)
 				{
-					for (int i = bc_max.i_resp + 1; i < ix; i++)
+					for (i = bc_max.i_resp + 1; i < ix; i++)
 						tlp.nli_dict[tngSiblings[i]].pxToLeftSibling += pxSlop * (i - bc_max.i_resp) / (ix - bc_max.i_resp);
 
-					this.pxToLeftSibling -= (ix - bc_max.i_resp - 1) * pxSlop / (ix - bc_max.i_resp);
+					pxToLeftSibling -= (ix - bc_max.i_resp - 1) * pxSlop / (ix - bc_max.i_resp);
 				}
 			}
 
@@ -167,9 +169,9 @@ namespace alib.Wpf
 
 				if (Count == 0)
 				{
-					this.SubTreeWidth = width;
-					this.lstPosLeftBoundaryRelativeToRoot.Add(0);
-					this.lstPosRightBoundaryRelativeToRoot.Add(width);
+					SubTreeWidth = width;
+					lstPosLBoundaryRelativeToRoot.Add(0.0);
+					lstPosRBoundaryRelativeToRoot.Add(width);
 				}
 				else
 				{
@@ -186,26 +188,25 @@ namespace alib.Wpf
 
 					// If a subtree extends deeper than it's left neighbors then at that lower level it could potentially extend beyond those neighbors
 					// on the left.  We have to check for this and make adjustements after the loop if it occurred.
-					Double pxWidth = 0.0;
-					Double pxUndercut = 0.0;
-					Double pxWidthCur = Double.NaN;
+
+					Double pxWidth = 0.0, pxUndercut = 0.0, x_cur = Double.NaN;
+
 					foreach (FrameworkElement tn in this)
 					{
 						NodeLayoutInfo nlic = tlp.nli_dict[tn];
-						if (Double.IsNaN(pxWidthCur))
-							pxWidthCur = nlic.pxLeftPosRelativeToBoundingBox;
-						pxWidthCur += nlic.pxToLeftSibling;
+						if (Double.IsNaN(x_cur))
+							x_cur = nlic.pxLeftPosRelativeToBoundingBox;
+						x_cur += nlic.pxToLeftSibling;
 
-						if (nlic.pxLeftPosRelativeToBoundingBox > pxWidthCur)
-							pxUndercut = Math.Max(pxUndercut, nlic.pxLeftPosRelativeToBoundingBox - pxWidthCur);
+						math.Maximize(ref pxUndercut, nlic.pxLeftPosRelativeToBoundingBox - x_cur);
 
 						// pxWidth might already be wider than the current node's subtree if earlier nodes "undercut" on the
 						// right hand side so we have to take the Max here...
-						pxWidth = Math.Max(pxWidth, pxWidthCur + nlic.SubTreeWidth - nlic.pxLeftPosRelativeToBoundingBox);
+						math.Maximize(ref pxWidth, x_cur + nlic.SubTreeWidth - nlic.pxLeftPosRelativeToBoundingBox);
 
 						// After this next statement, the BoundingBox we're relative to is the one of our parent's subtree rather than
 						// our own subtree (with the exception of undercut considerations)
-						nlic.pxLeftPosRelativeToBoundingBox = pxWidthCur;
+						nlic.pxLeftPosRelativeToBoundingBox = x_cur;
 					}
 
 					if (pxUndercut > 0.0)
@@ -218,41 +219,41 @@ namespace alib.Wpf
 
 					// We are never narrower than our root node's width which we haven't taken into account yet so
 					// we do that here.
-					this.SubTreeWidth = Math.Max(width, pxWidth);
+					SubTreeWidth = Math.Max(width, pxWidth);
 
 					// ...so that this centering may place the parent node negatively while the "width" is the width of
 					// all the child nodes.
 
 					// We should be centered between  the connection points of our children...
-					FrameworkElement tnLeftMost = this[0];
-					FrameworkElement tnRightMost = this[this.Count - 1];
-					Double pxLeftChild = tlp.nli_dict[tnLeftMost].pxLeftPosRelativeToBoundingBox + tnLeftMost.DesiredSize.Width / 2;
-					Double pxRightChild = tlp.nli_dict[tnRightMost].pxLeftPosRelativeToBoundingBox + tnRightMost.DesiredSize.Width / 2;
+					FrameworkElement feL = this[0];
+					FrameworkElement feR = this[this.Count - 1];
+					Double pxLeftChild = tlp.nli_dict[feL].pxLeftPosRelativeToBoundingBox + feL.DesiredSize.Width / 2;
+					Double pxRightChild = tlp.nli_dict[feR].pxLeftPosRelativeToBoundingBox + feR.DesiredSize.Width / 2;
 
-					this.pxLeftPosRelativeToBoundingBox = (pxLeftChild + pxRightChild - width) / 2;
+					pxLeftPosRelativeToBoundingBox = (pxLeftChild + pxRightChild - width) / 2;
 
 					// If the root node was wider than the subtree, then we'll have a negative position for it.  We need
 					// to readjust things so that the left of the root node represents the left of the bounding box and
 					// the child distances to the Bounding box need to be adjusted accordingly.
-					if (this.pxLeftPosRelativeToBoundingBox < 0)
+					if (pxLeftPosRelativeToBoundingBox < 0)
 					{
 						foreach (FrameworkElement tnChildCur in this)
-							tlp.nli_dict[tnChildCur].pxLeftPosRelativeToBoundingBox -= this.pxLeftPosRelativeToBoundingBox;
+							tlp.nli_dict[tnChildCur].pxLeftPosRelativeToBoundingBox -= pxLeftPosRelativeToBoundingBox;
 
-						this.pxLeftPosRelativeToBoundingBox = 0;
+						pxLeftPosRelativeToBoundingBox = 0;
 					}
 
 					foreach (FrameworkElement tn in this)
 					{
 						NodeLayoutInfo ltiCur = tlp.nli_dict[tn];
-						ltiCur.pxLeftPosRelativeToParent = ltiCur.pxLeftPosRelativeToBoundingBox - this.pxLeftPosRelativeToBoundingBox;
+						ltiCur.pxLeftPosRelativeToParent = ltiCur.pxLeftPosRelativeToBoundingBox - pxLeftPosRelativeToBoundingBox;
 					}
 
-					this.lstPosLeftBoundaryRelativeToRoot.Add(0.0);
-					this.lstPosRightBoundaryRelativeToRoot.Add(width);
+					lstPosLBoundaryRelativeToRoot.Add(0.0);
+					lstPosRBoundaryRelativeToRoot.Add(width);
 
-					DetermineBoundary(this, true, this.lstPosLeftBoundaryRelativeToRoot);
-					DetermineBoundary(this.AsEnumerable().Reverse(), false, this.lstPosRightBoundaryRelativeToRoot);
+					DetermineBoundary(this, true, lstPosLBoundaryRelativeToRoot);
+					DetermineBoundary(this.Reverse(), false, lstPosRBoundaryRelativeToRoot);
 				}
 
 				while (layer_heights.Count <= iLayer)
@@ -279,8 +280,8 @@ namespace alib.Wpf
 					NodeLayoutInfo ltiChild = tlp.nli_dict[tnChild];
 
 					List<Double> lstPosCur = fLeft ?
-												ltiChild.lstPosLeftBoundaryRelativeToRoot :
-												ltiChild.lstPosRightBoundaryRelativeToRoot;
+												ltiChild.lstPosLBoundaryRelativeToRoot :
+												ltiChild.lstPosRBoundaryRelativeToRoot;
 
 					if (lstPosCur.Count >= lstPos.Count)
 					{
@@ -303,20 +304,20 @@ namespace alib.Wpf
 			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			///
 			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			static IEnumerable<boundary_calc> MergeBoundaryEnums(IEnumerable<Double> eLeft, IEnumerable<Double> eRight, IEnumerable<int> eResponsible)
+			static IEnumerable<boundary_calc> MergeBoundaryEnums(IEnumerable<Double> eL, IEnumerable<Double> eR, IEnumerable<int> eX)
 			{
-				IEnumerator<Double> enLeft = eLeft.GetEnumerator();
-				IEnumerator<Double> enRight = eRight.GetEnumerator();
-				IEnumerator<int> enResponsible = eResponsible.GetEnumerator();
-
+				return MergeBoundaryEnums(eL.GetEnumerator(), eR.GetEnumerator(), eX.GetEnumerator());
+			}
+			static IEnumerable<boundary_calc> MergeBoundaryEnums(IEnumerator<Double> enL, IEnumerator<Double> enR, IEnumerator<int> enX)
+			{
 				int i = 0;
-				while (enLeft.MoveNext() && enRight.MoveNext() && enResponsible.MoveNext())
+				while (enL.MoveNext() && enR.MoveNext() && enX.MoveNext())
 				{
 					yield return new boundary_calc
 					{
 						i_cur = i++,
-						delta = enLeft.Current - enRight.Current,
-						i_resp = enResponsible.Current
+						delta = enL.Current - enR.Current,
+						i_resp = enX.Current
 					};
 				}
 			}

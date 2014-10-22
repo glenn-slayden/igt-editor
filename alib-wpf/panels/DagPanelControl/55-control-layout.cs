@@ -10,7 +10,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.ComponentModel;
 
-using alib.dg;
+using alib.Graph;
 using alib.Math;
 using alib.Array;
 using alib.Debugging;
@@ -31,29 +31,19 @@ namespace alib.Wpf
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		///
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		void reset_vertex_locations()
-		{
-			foreach (layout_vertex_base v in g_cur.Verticies)
-				v.Location = util.point_NaN;
-		}
-
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		///
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		void layout_verticies(LevelInfo[] levels)
 		{
-			reset_vertex_locations();
-
 			int i, j;
 			LevelInfo L;
 			LevelInfo.RuntimeLayoutData rtd;
 
 			this.max_width = Double.NegativeInfinity;
+		
+			foreach (layout_vertex_base v in g_cur.Verticies)
+				v.Location = util.point_NaN;
 
 			for (i = 0; i < levels.Length; i++)
-			{
 				math.Maximize(ref max_width, levels[i].RuntimeData.TotalWidth);
-			}
 
 #if report
 			Debug.Print("");
@@ -284,7 +274,7 @@ namespace alib.Wpf
 					break;
 
 				case EdgeContentMode.None:
-					break;
+					throw not.expected;
 			}
 
 			if (!String.IsNullOrWhiteSpace(txt))
@@ -300,10 +290,7 @@ namespace alib.Wpf
 
 			if (sz.IsZero())
 			{
-				e.geom = null;
-				uie.Visibility = Visibility.Hidden;
-				if ((fe = uie as FrameworkElement) != null)
-					fe.LayoutTransform = null;
+				//e.ResetUI();
 				return;
 			}
 
@@ -393,8 +380,8 @@ namespace alib.Wpf
 			{
 				if (e.geom != null)
 					e.AddTransform(Transform.Identity);
-				else if ((fe = uie as FrameworkElement) != null)
-					fe.LayoutTransform = null;
+				//else if ((fe = uie as FrameworkElement) != null)
+				//	fe.LayoutTransform = null;
 			}
 
 			r_all.Union(r);

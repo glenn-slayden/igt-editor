@@ -11,8 +11,10 @@ using System.Windows.Shapes;
 using alib.Array;
 using alib.Collections;
 using alib.Debugging;
-using alib.dg;
+using alib.Graph;
 using alib.Enumerable;
+using alib.String;
+
 
 namespace alib.Wpf
 {
@@ -156,6 +158,18 @@ namespace alib.Wpf
 
 		public Geometry geom;
 
+		public void ResetUI()
+		{
+			geom = null;
+			if (el != null)
+			{
+				el.Visibility = Visibility.Hidden;
+				var fe = el as FrameworkElement;
+				if (fe != null && !fe.LayoutTransform.IsNullOrIdentity())
+					fe.LayoutTransform = null;
+			}
+		}
+
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public TransformGroup TransformGroup { get { return (TransformGroup)geom.Transform; } }
 
@@ -268,9 +282,9 @@ namespace alib.Wpf
 		public override String ToString()
 		{
 			return String.Format("[V{0}] ->  E{1}  ->  [V{2}] {3}",
-				From.Index + " " + (From.TextLabel ?? "").Trim(),
+				From.Index + " " + (From.TextLabel ?? "").Trim(0),
 				Index,
-				To.Index + " " + (To.TextLabel ?? "").Trim(),
+				To.Index + " " + (To.TextLabel ?? "").Trim(0),
 				TextLabel ?? "");
 		}
 
@@ -280,7 +294,7 @@ namespace alib.Wpf
 			{
 				Object ep;
 				var th = __ctrl.EdgePadding;
-				if (el != null && (ep = el.GetValue(Control.PaddingProperty)) != DependencyProperty.UnsetValue)
+				if (el != null && (ep = el.ReadLocalValue(Control.PaddingProperty)) != DependencyProperty.UnsetValue)
 					util.Maximize(ref th, (Thickness)ep);
 				return th;
 			}
@@ -542,7 +556,7 @@ namespace alib.Wpf
 				String s = "V" + vx.Index.ToString();
 				if (vx is LayoutVertexEx)
 					s += " " + (((LayoutVertexEx)vx).TextLabel ?? "");
-				return alib.String._string_ext.SQRB(s.Trim());
+				return alib.String._string_ext.SQRB(s.Trim(0));
 			})
 				.StringJoin(" ");
 		}
@@ -614,7 +628,7 @@ namespace alib.Wpf
 		{
 			this.in_edges = Collection<LayoutEdgeEx>.None;
 			this.out_edges = Collection<LayoutEdgeEx>.None;
-			(this.el = el).SetValue(WpfGraphAdapter._lvProperty, this);
+			this.el = el;
 		}
 
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -627,7 +641,7 @@ namespace alib.Wpf
 			{
 				Object vp;
 				var th = __ctrl.VertexPadding;
-				if (el != null && (vp = el.GetValue(Control.PaddingProperty)) != DependencyProperty.UnsetValue)
+				if (el != null && (vp = el.ReadLocalValue(Control.PaddingProperty)) != DependencyProperty.UnsetValue)
 					util.Maximize(ref th, (Thickness)vp);
 				return th;
 			}
@@ -641,7 +655,7 @@ namespace alib.Wpf
 
 		public void AddInEdge(LayoutEdgeEx ex) { arr.Append(ref in_edges, ex); }
 
-		public void RemoveInEdge(LayoutEdgeEx ex) { arr.RemoveOne(ref in_edges, ex); }
+		public void RemoveInEdge(LayoutEdgeEx ex) { arr.TryRemoveItemFirst(ref in_edges, ex); }
 
 		public void ReplaceInEdge(LayoutEdgeEx e_old, LayoutEdgeEx e_new)
 		{
@@ -663,7 +677,7 @@ namespace alib.Wpf
 
 		public void AddOutEdge(LayoutEdgeEx ex) { arr.Append(ref out_edges, ex); }
 
-		public void RemoveOutEdge(LayoutEdgeEx ex) { arr.RemoveOne(ref out_edges, ex); }
+		public void RemoveOutEdge(LayoutEdgeEx ex) { arr.TryRemoveItemFirst(ref out_edges, ex); }
 
 		public void ReplaceOutEdge(LayoutEdgeEx e_old, LayoutEdgeEx e_new)
 		{

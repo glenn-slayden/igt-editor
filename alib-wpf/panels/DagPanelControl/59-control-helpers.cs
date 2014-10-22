@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-using alib.dg;
+using alib.Graph;
 using alib.Array;
 using alib.Debugging;
 using alib.Enumerable;
