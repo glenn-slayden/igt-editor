@@ -1,5 +1,7 @@
 alib/
 alib-wpf/
+__test/
+__train/
 __test-in/
 __test-out/
 odin-2.0-splits/
