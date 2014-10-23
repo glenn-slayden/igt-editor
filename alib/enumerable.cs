@@ -1816,12 +1816,15 @@ namespace alib.Enumerable
 			where TSrc : class
 		{
 			TSrc tsrc;
+			IEnumerator<TDst> ee;
+			IEnumerable<TDst> en;
+
 			var e = seq.GetEnumerator();
 			while (e.MoveNext())
 			{
-				if ((tsrc = e.Current) != null)
+				if ((tsrc = e.Current) != null && (en = selector(tsrc)) != null)
 				{
-					var ee = selector(tsrc).GetEnumerator();
+					ee = en.GetEnumerator();
 					while (ee.MoveNext())
 						yield return ee.Current;
 				}
