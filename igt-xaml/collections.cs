@@ -50,13 +50,12 @@ namespace xie
 				{
 					hi.Host = null;
 				}
-				Nop.X();
 			}
-
+#if false
 			if (e.Action == NotifyCollectionChangedAction.Replace)
 			{
-				Nop.X();
 			}
+#endif
 		}
 	};
 
@@ -121,11 +120,15 @@ namespace xie
 		}
 	};
 
-	public class PartsSet : _promoter<IPart, IPart>
+	public abstract class PartsSet : _promoter<IPart, IPart>
 	{
-		public PartsSet(Iitems<IPart> owner, Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
-			: base(owner, src, f_newU, f_newT)
+		public PartsSet(Iitems<IPart> owner, Iset<IPart> src)
+			: base(owner, src)
 		{
 		}
+		//public PartsSet(Iitems<IPart> owner, Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
+		//	: base(owner, src, f_newU, f_newT)
+		//{
+		//}
 	};
 }

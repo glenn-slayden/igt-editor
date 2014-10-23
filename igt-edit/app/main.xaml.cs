@@ -50,7 +50,13 @@ namespace xie
 			if (App.settings.ReloadLastSession && (_tmp = App.settings.SessionFiles) != null)
 				foo(_tmp);
 
+			var ic = new xxx().bar(@"D:\github\igt-editor\odin-2.0-splits\by-lang\tha.xml");
+			//new xxx().bar(@"D:\github\igt-editor\odin-2.0-splits\full\odin.xml");
+
+			ccc.Add(ic);
 		}
+
+
 		void foo(String[] _tmp)
 		{
 			try
@@ -85,7 +91,9 @@ namespace xie
 
 			App.settings.SessionFiles =
 							w_corpora
-							.Select(c => Path.GetFullPath(c.Filename))
+							.Select(c => c.Filename)
+							.Where(fn => fn != null)
+							.Select(fn => Path.GetFullPath(fn))
 							.ToArray();
 
 			var _tmp = w_corpora.SelectedItem;
@@ -212,7 +220,7 @@ namespace xie
 					w_items.SelectedIndex = ix;
 
 #if false
-				var igt = mw.w_items.SelectedItem;
+				var igt = w_items.SelectedItem;
 				var nt = new TierGroupTier
 				{
 					TiersHost = igt,

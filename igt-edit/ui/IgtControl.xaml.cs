@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
+using alib;
 using alib.Enumerable;
 using alib.Debugging;
 using alib.Wpf;

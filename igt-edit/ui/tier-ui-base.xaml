@@ -15,7 +15,7 @@
         CornerRadius="2.5"
         x:Name="w_root"
         Background="{Binding TierBrush}"
-        Visibility="{Binding Path=(xl:dps.IsVisible), Converter={x:Static aw:util.BooleanToVisibilityConverterInst}, Mode=TwoWay}">
+        Visibility="{Binding Path=IsVisible, Converter={x:Static aw:util.BooleanToVisibilityConverterInst}, Mode=OneWay}">
 
     <Grid HorizontalAlignment="Stretch"
           Margin="4 0 0 0">
@@ -98,20 +98,66 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox Text="{Binding Text, Mode={x:Static BindingMode.TwoWay}}"
+
+                        <TextBlock Grid.Column="0"
+                                   Text="line "
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Center" />
+
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding s_LineNumbers, Mode=OneWay}"
+                                   Padding="0 0 10 0"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Center" />
+                        
+                        <TextBox Grid.Column="2"
+                                 Padding="10 0 0 0"
+                                 Text="{Binding Text, Mode={x:Static BindingMode.TwoWay}}"
                                  Background="{Binding Path=(xl:dps.IsReadOnly), Converter={x:Static xe:IsReadOnlyToBrushConverter.Instance}, ConverterParameter=#F9D0D0}"
                                  HorizontalAlignment="Left"
                                  VerticalAlignment="Center"
                                  SelectionChanged="TextBox_SelectionChanged"
                                  PreviewMouseUp="TextBox_PreviewMouseUp" />
 
-                        <TextBlock Grid.Column="1"
+                        <TextBlock Grid.Column="3"
                                    x:Name="w_selection_info"
                                    Padding="10 0 0 0"
                                    HorizontalAlignment="Left"
                                    VerticalAlignment="Center" />
                     </Grid>
+                </DataTemplate>
+
+                <DataTemplate DataType="{x:Type xl:TextGroupTier}">
+                    <Expander IsExpanded="True">
+                        <Expander.Header>
+                            <ItemsControl ItemsSource="{Binding Mode=OneWay}">
+                                <ItemsControl.Template>
+                                    <ControlTemplate>
+                                        <StackPanel Orientation="Horizontal"
+                                                    IsItemsHost="True">
+                                            <StackPanel.RenderTransform>
+                                                <ScaleTransform ScaleX=".9"
+                                                                ScaleY=".9" />
+                                            </StackPanel.RenderTransform>
+                                        </StackPanel>
+                                    </ControlTemplate>
+                                </ItemsControl.Template>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="xl:tier_base">
+                                        <ToggleButton Margin="4 0 0 0"
+                                                      MinWidth="35"
+                                                      Content="{Binding TierType}"
+                                                      IsChecked="{Binding IsVisible}"
+                                                      BorderThickness="0" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Expander.Header>
+                        <xe:TiersControl ItemsSource="{Binding Mode=OneWay}" />
+                    </Expander>
                 </DataTemplate>
 
                 <DataTemplate DataType="{x:Type xl:TierGroupTier}">
@@ -198,8 +244,7 @@
 
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <xe:ui_part Content="{Binding}"
-                                            Margin="1 1 1 1" />
+                                <xe:ui_part Content="{Binding}" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
 

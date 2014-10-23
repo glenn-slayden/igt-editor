@@ -48,6 +48,8 @@
     <Compile Include="parts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="tiers.cs" />
+    <Compile Include="xigt-io.cs" />
+    <Compile Include="_commands.cs" />
     <Compile Include="_interface.cs" />
     <Compile Include="_promoter.cs" />
     <Compile Include="_properties.cs" />

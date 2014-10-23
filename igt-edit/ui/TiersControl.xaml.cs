@@ -29,6 +29,17 @@ namespace xie
 
 		public StackPanel Panel { get { return (StackPanel)GetTemplateChild("w_panel"); } }
 
+#if false
+		private void CommandBinding_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+		{
+			Nop.X();
+			e.CanExecute = true;
+		}
+
+		private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+		{
+			Nop.X();
+		}
 		private void menu_tok_source_tier(object sender, RoutedEventArgs e)
 		{
 			var mi = (MenuItem)sender;
@@ -46,7 +57,7 @@ namespace xie
 			var uib = (tier_ui_base)cm.PlacementTarget;
 			var tier = (tier_base)uib.Tier;
 
-			tier.SetValue(dps.IsVisibleProperty, false);
+			tier.IsVisible = false;
 		}
 
 		private void menu_pos_tag_tier(object sender, RoutedEventArgs e)
@@ -58,10 +69,18 @@ namespace xie
 			var igti = src_tier.TiersHost;
 
 #if true
-			var pos_tier = new PosTagTier(src_tier.Parts, t => new TagPart { Source = t }, u =>
-			{
-				throw new Exception("slave tier should not add new parts");
-			})
+			//var pos_tier = new PosTagTier(src_tier.Parts, t => new TagPart { Source = t }, u =>
+			//{
+			//	throw new Exception("slave tier should not add new parts");
+			//})
+			//{
+			//	TierType = "POS",
+			//};
+			var pos_tier = new PosTagTier(src_tier.Parts)
+			//	, t => new TagPart { Source = t }, u =>
+			//{
+			//	throw new Exception("slave tier should not add new parts");
+			//})
 			{
 				TierType = "POS",
 			};
@@ -90,10 +109,11 @@ namespace xie
 
 			//var uic = uib.w_cc;
 
-			var dep_tier = new DependenciesTier(src_tier.Parts, p => new DepPart { Source = p }, u =>
-			{
-				throw new Exception("slave tier (Dep) should not add new parts");
-			})
+			var dep_tier = new DependenciesTier(src_tier.Parts)
+			//var dep_tier = new DependenciesTier(src_tier.Parts, p => new DepPart { Source = p }, u =>
+			//{
+			//	throw new Exception("slave tier (Dep) should not add new parts");
+			//})
 			{
 				TierType = "Dep"
 			};
@@ -132,6 +152,7 @@ namespace xie
 			}
 #endif
 		}
+#endif
 	};
 
 	public class tree_ui_part : AttachmentHandles

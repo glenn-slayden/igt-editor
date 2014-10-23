@@ -60,7 +60,7 @@ namespace xie
 			DependencyProperty dp;
 			PropertyMetadata dpm;
 
-			dpm = (dp = dps.TextProperty).DefaultMetadata;
+			dpm = (dp = TextProperty).DefaultMetadata;
 			dp.AddOwner(typeof(SegPart), new PropertyMetadata
 			{
 				DefaultValue = dpm.DefaultValue,
@@ -72,7 +72,7 @@ namespace xie
 			dp.AddOwner(typeof(SegPart), new PropertyMetadata
 			{
 				DefaultValue = dpm.DefaultValue,
-				PropertyChangedCallback = (o, e) => ((SegPart)o).CoerceValue(dps.TextProperty),
+				PropertyChangedCallback = (o, e) => ((SegPart)o).CoerceValue(TextProperty),
 				CoerceValueCallback = dpm.CoerceValueCallback,
 			});
 
@@ -80,7 +80,7 @@ namespace xie
 			dp.AddOwner(typeof(SegPart), new PropertyMetadata
 			{
 				DefaultValue = dpm.DefaultValue,
-				PropertyChangedCallback = (o, e) => ((SegPart)o).CoerceValue(dps.TextProperty),
+				PropertyChangedCallback = (o, e) => ((SegPart)o).CoerceValue(TextProperty),
 				CoerceValueCallback = dpm.CoerceValueCallback,
 			});
 
@@ -88,7 +88,7 @@ namespace xie
 			dp.AddOwner(typeof(SegPart), new PropertyMetadata
 			{
 				DefaultValue = dpm.DefaultValue,
-				PropertyChangedCallback = (o, e) => ((SegPart)o).CoerceValue(dps.TextProperty),
+				PropertyChangedCallback = (o, e) => ((SegPart)o).CoerceValue(TextProperty),
 				CoerceValueCallback = dpm.CoerceValueCallback,
 			});
 		}
@@ -142,7 +142,7 @@ namespace xie
 
 		static MergePart()
 		{
-			dps.TextProperty.AddOwner(typeof(MergePart), new PropertyMetadata(default(String),
+			TextProperty.AddOwner(typeof(MergePart), new PropertyMetadata(default(String),
 				(o, e) => { },
 				(d, o) => ((MergePart)d).coerce_text((String)o)));
 
@@ -152,7 +152,7 @@ namespace xie
 					(o, e) =>
 					{
 						var _this = (MergePart)o;
-						_this.CoerceValue(dps.TextProperty);
+						_this.CoerceValue(TextProperty);
 					}));
 		}
 
@@ -181,7 +181,7 @@ namespace xie
 		public MergePart()
 		{
 			var ps = new OwnerPartsSet(this);
-			ps.CollectionChanged += (o, e) => CoerceValue(dps.TextProperty);
+			ps.CollectionChanged += (o, e) => CoerceValue(TextProperty);
 			SetValue(PartsPropertyKey, ps);
 		}
 	};
@@ -196,7 +196,7 @@ namespace xie
 
 		static GroupPart()
 		{
-			dps.TextProperty.AddOwner(typeof(GroupPart), new PropertyMetadata(default(String),
+			TextProperty.AddOwner(typeof(GroupPart), new PropertyMetadata(default(String),
 				(o, e) => { },
 				(d, o) => ((GroupPart)d).coerce_text((String)o)));
 
@@ -206,7 +206,7 @@ namespace xie
 					(o, e) =>
 					{
 						var _this = (GroupPart)o;
-						_this.CoerceValue(dps.TextProperty);
+						_this.CoerceValue(TextProperty);
 					}));
 		}
 
@@ -246,26 +246,26 @@ namespace xie
 	{
 		static CopyPart()
 		{
-			dps.TextProperty.AddOwner(typeof(CopyPart), new PropertyMetadata(default(String),
-				null,//(o, e) => ((CopyPart)o).Source.Text = (String)e.NewValue,
+			TextProperty.AddOwner(typeof(CopyPart), new PropertyMetadata(default(String),
+				null,//(o, e) => ((CopyPart)o).SourcePart.Text = (String)e.NewValue,
 				(d, o) =>
 				{
 					IPart src;
-					return !String.IsNullOrEmpty((String)o) || (src = ((CopyPart)d).Source) == null ? o : src.Text;
+					return !String.IsNullOrEmpty((String)o) || (src = ((CopyPart)d).SourcePart) == null ? o : src.Text;
 				}));
 
-			dps.SourceProperty.AddOwner(typeof(CopyPart), new PropertyMetadata(default(IPart),
+			dps.SourcePartProperty.AddOwner(typeof(CopyPart), new PropertyMetadata(default(IPart),
 				(o, e) =>
 				{
 					var _this = (CopyPart)o;
-					_this.CoerceValue(dps.TextProperty);
+					_this.CoerceValue(TextProperty);
 				}));
 		}
 
-		public IPart Source
+		public IPart SourcePart
 		{
-			get { return (IPart)GetValue(dps.SourceProperty); }
-			set { SetValue(dps.SourceProperty, value); }
+			get { return (IPart)GetValue(dps.SourcePartProperty); }
+			set { SetValue(dps.SourcePartProperty, value); }
 		}
 
 		//	public Dependency DependsOn;
@@ -365,7 +365,7 @@ namespace xie
 	{
 		static TagPart()
 		{
-			dps.TextProperty.AddOwner(typeof(TagPart), new PropertyMetadata("unk"));
+			TextProperty.AddOwner(typeof(TagPart), new PropertyMetadata("unk"));
 		}
 	};
 

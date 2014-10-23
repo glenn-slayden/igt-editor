@@ -12,16 +12,16 @@ using alib.Enumerable;
 
 namespace xie
 {
-	public class _promoter<T, U> : Iset<U>
+	public abstract class _promoter<T, U> : Iset<U>
 		where T : class, IHostedItem
 		where U : class, IHostedItem
 	{
-		public _promoter(Iitems<T> owner, Iset<T> src, Func<T, U> f_newU, Func<U, T> f_newT)
+		public _promoter(Iitems<T> owner, Iset<T> src)//, Func<T, U> f_newU, Func<U, T> f_newT)
 		{
 			this.owner = owner;
 			this.src = src;
-			this.f_newT = f_newT;
-			this.f_newU = f_newU;
+			//this.f_newT = f_newT;
+			//this.f_newU = f_newU;
 			this.t_u = new Dictionary<T, U>(src.Count);
 			this.u_t = new Dictionary<U, T>(src.Count);
 
@@ -97,8 +97,8 @@ namespace xie
 
 		readonly Iitems<T> owner;
 		readonly Iset<T> src;
-		readonly Func<U, T> f_newT;
-		readonly Func<T, U> f_newU;
+		//readonly Func<U, T> f_newT;
+		//readonly Func<T, U> f_newU;
 		readonly Dictionary<T, U> t_u;
 		readonly Dictionary<U, T> u_t;
 
@@ -116,12 +116,14 @@ namespace xie
 			return u;
 		}
 
+		protected abstract T f_newT(U u);
+		protected abstract U f_newU(T t);
+
 		T GetOrAddT(U u)
 		{
 			T t;
-			if (!u_t.TryGetValue(u, out t))
+			if (!u_t.TryGetValue(u, out t) && (t = f_newT(u)) != null)
 			{
-				t = f_newT(u);
 				t_u.Add(t, u);
 				u_t.Add(u, t);
 			}

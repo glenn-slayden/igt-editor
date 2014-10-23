@@ -9,12 +9,14 @@
                 xmlns:xe="clr-namespace:xie"
                 mc:Ignorable="d" 
                 d:DesignHeight="300" 
-                d:DesignWidth="300">
+                d:DesignWidth="300"
+                >
+    <!--Visibility="{Binding Path=IsVisible, Converter={x:Static aw:util.BooleanToVisibilityConverterInst}, Mode=OneWay}"-->
 
     <ContentControl.Resources>
 
         <DataTemplate DataType="{x:Type xe:temp_drag_part}">
-            <ContentControl Content="{Binding Path=Source}" />
+            <ContentControl Content="{Binding Path=SourcePart}" />
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type xl:SegPart}">
@@ -72,7 +74,6 @@
 
             </ItemsControl>
 
-
             <!--<Border Background="Bisque" BorderThickness="0" BorderBrush="Transparent" HorizontalAlignment="Left">
                         <StackPanel Orientation="Horizontal" AllowDrop="True" Margin="0 2 0 2" >
                             <TextBox Text="dummy" />
@@ -112,7 +113,6 @@
 
             </ItemsControl>
 
-
             <!--<Border Background="Bisque" BorderThickness="0" BorderBrush="Transparent" HorizontalAlignment="Left">
                         <StackPanel Orientation="Horizontal" AllowDrop="True" Margin="0 2 0 2" >
                             <TextBox Text="dummy" />
@@ -125,7 +125,7 @@
             <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
 
                 <!-- also picks up the outer data template -->
-                <ContentControl Content="{Binding Path=Source}" Margin="0 0 0 5" />
+                <ContentControl Content="{Binding Path=SourcePart}" Margin="0 0 0 5" />
 
                 <TextBox 
                                 Text="{Binding Text}"
@@ -138,7 +138,7 @@
 
         <!--<DataTemplate DataType="{x:Type xl:AlignPart}">
             <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
-                <ContentControl Content="{Binding Path=Source}" Margin="0 0 0 5" />
+                <ContentControl Content="{Binding Path=SourcePart}" Margin="0 0 0 5" />
             </StackPanel>
         </DataTemplate>-->
 
@@ -148,12 +148,21 @@
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type xl:TagPart}">
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+            <StackPanel Orientation="Vertical" 
+                        HorizontalAlignment="Left"
+                        Visibility="{Binding Path=SourcePart.IsVisible, Converter={x:Static aw:util.BooleanToVisibilityConverterInst}, Mode=OneWay}"
+                        >
 
-                <ContentControl Content="{Binding Path=Source}" Margin="0 0 0 5" />
-                <xe:ui_part_base DataContext="{Binding Path=Source}" />
+                <!--<ContentControl Content="{Binding Path=SourcePart}" Margin="0 0 0 5" />
+                
+                <xe:ui_part_base DataContext="{Binding Path=SourcePart}" />-->
+
+                <!--<ContentControl Content="{Binding Path=SourcePart}" Margin="0 0 0 5" />-->
+
+                <xe:ui_part_base DataContext="{Binding Path=SourcePart, Mode=OneWay}" />
+
                 <TextBlock 
-                            Text="{Binding Path=Source.Text, Mode=OneWay}"
+                            Text="{Binding Path=SourcePart.Text, Mode=OneWay}"
                                 HorizontalAlignment="Left"
                                 Margin="2 2 0 4"
                                 Background="#FCFCF0" />

@@ -14,6 +14,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using alib;
+using alib.Debugging;
+
 namespace xie
 {
 	public partial class ui_part_controls : StackPanel
@@ -32,28 +35,27 @@ namespace xie
 		}
 	};
 
-	public abstract class cmd_base : ICommand
+	public abstract class ui_cmd_base : ICommand
 	{
-		protected cmd_base() { }
-
 		public abstract void Execute(object parameter);
 		public bool CanExecute(object parameter) { return true; }
 		public event EventHandler CanExecuteChanged;
 	};
 
-	public class Cmd_RemovePart : cmd_base
+
+	public class Cmd_RemovePart : ui_cmd_base
 	{
 		public static readonly ICommand Instance = new Cmd_RemovePart();
 		public override void Execute(Object parameter)
 		{
 			var uipc = (ui_part_controls)parameter;
 			var uip = (ui_part_base)((Grid)uipc.Parent).Parent;
-			var part = (IPart)uip.DataContext;
-			uip.SegTier.Remove(part);
+			uip.PartsHost.Remove(uip.SourcePart);
 		}
 	};
 
-	public class Cmd_AddTextPart : cmd_base
+
+	public class Cmd_AddTextPart : ui_cmd_base
 	{
 		public static readonly ICommand Instance = new Cmd_AddTextPart();
 		public override void Execute(Object parameter)
@@ -64,7 +66,7 @@ namespace xie
 		}
 	};
 
-	public class Cmd_AddGroupPart : cmd_base
+	public class Cmd_AddGroupPart : ui_cmd_base
 	{
 		public static readonly ICommand Instance = new Cmd_AddGroupPart();
 		public override void Execute(Object parameter)
@@ -87,44 +89,32 @@ namespace xie
 		}
 	};
 
-	public class Cmd_PromotePart : cmd_base
+	public class Cmd_PromotePart : ui_cmd_base
 	{
 		public static readonly ICommand Instance = new Cmd_PromotePart();
 		public override void Execute(Object parameter)
 		{
 			var uipc = (ui_part_controls)parameter;
 			var uip = (ui_part_base)((Grid)uipc.Parent).Parent;
-			var part = (IPart)uip.DataContext;
 
-			var st = uip.SegTier as parts_tier_base;
+			var st = uip.PartsHost as parts_tier_base;
 			if (st != null)
-				st.Promote(part);
+				st.Promote(uip.SourcePart);
 		}
 	};
 
 
-	public class Cmd_MergePart : cmd_base
+	public class Cmd_MergePart : ui_cmd_base
 	{
 		public static readonly ICommand Instance = new Cmd_MergePart();
 		public override void Execute(Object parameter)
 		{
 			var uipc = (ui_part_controls)parameter;
 			var uip = (ui_part_base)((Grid)uipc.Parent).Parent;
-			var part = (IPart)uip.DataContext;
 
-			var gp = part as MergePart;
-			if (gp != null)
-			{
-				var st = uip.SegTier as parts_tier_base;
-				if (st != null)
-					st.Merge(part);
-			}
-			else
-			{
-				var st = uip.SegTier as parts_tier_base;
-				if (st != null)
-					st.Merge(part);
-			}
+			var st = uip.PartsHost as parts_tier_base;
+			if (st != null)
+				st.Merge(uip.SourcePart);
 		}
 	};
 }

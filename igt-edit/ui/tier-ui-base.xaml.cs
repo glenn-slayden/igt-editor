@@ -61,8 +61,24 @@ namespace xie
 
 		protected override void OnContextMenuOpening(ContextMenuEventArgs e)
 		{
-			base.OnContextMenuOpening(e);
+			//base.OnContextMenuOpening(e);
 
+			ContextMenu cm = null;
+			MenuItem mi;
+
+			foreach (var cmd in this.Tier.GetCommands())
+			{
+				if (cm == null)
+					cm = new ContextMenu();
+
+				cm.Items.Add(mi = new MenuItem
+				{
+					Header = cmd.CommandText,
+				});
+				mi.Click += cmd.Handler;
+			}
+
+#if false
 			if (e.Handled)
 				return;
 
@@ -81,9 +97,11 @@ namespace xie
 			contextmenu_text_tier(tier as TextTier);
 
 			contextmenu_tier_base(tier as tier_base);
-
+#endif
+			this.ContextMenu = cm;
 		}
 
+#if false
 		void contextmenu_parts_tier(parts_tier_base stier)
 		{
 			if (stier == null)
@@ -124,13 +142,14 @@ namespace xie
 				};
 				mi.Click += (o, ee) =>
 				{
-					var at = new AlignmentTier(stier.Parts, p =>
-					{
-						return new AlignPart { Source = p };
-					}, p =>
-					{
-						throw new Exception("");
-					})
+					var at = new AlignmentTier(stier.Parts)
+					//var at = new AlignmentTier(stier.Parts, p =>
+					//{
+					//	return new AlignPart { Source = p };
+					//}, p =>
+					//{
+					//	throw new Exception("");
+					//})
 					{
 						AlignWith = stier2,
 						TierType = "Align",
@@ -257,6 +276,12 @@ namespace xie
 				Debug.Print("Removing {0} from {1}", hi.GetType().Name, hi.Host.GetType().Name);
 				hi.Host.GetList().Remove(hi);
 			}
+		}
+#endif
+
+		private void delete_tier(object sender, RoutedEventArgs e)
+		{
+			new cmd_delete_tier((ITier)DataContext).Execute();
 		}
 
 

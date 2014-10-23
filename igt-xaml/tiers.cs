@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Markup;
 
+using alib;
 using alib.Debugging;
 using alib.Enumerable;
 using alib.Wpf;
@@ -24,7 +25,6 @@ namespace xie
 		{
 			dps.TiersHostProperty.AddOwner(typeof(tier_base));
 			dps.TierTypeProperty.AddOwner(typeof(tier_base));
-			dps.IsVisibleProperty.AddOwner(typeof(tier_base));
 		}
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -43,13 +43,6 @@ namespace xie
 		{
 			get { return (String)GetValue(dps.TierTypeProperty); }
 			set { SetValue(dps.TierTypeProperty, value); }
-		}
-
-		[DefaultValue(true)]
-		public Boolean IsVisible
-		{
-			get { return (Boolean)GetValue(dps.IsVisibleProperty); }
-			set { SetValue(dps.IsVisibleProperty, value); }
 		}
 
 		protected tier_base(Color tier_color)
@@ -106,6 +99,38 @@ namespace xie
 				}
 			}
 		}
+
+		/// <summary> Excluding self/'this' </summary>
+		public ISet<ITier> AncestorTiers
+		{
+			get
+			{
+				var host = TiersHost;
+				var rgt = new HashSet<ITier>(host.Tiers);
+				ITier pt;
+				while ((pt = host as ITier) != null)
+				{
+					host = pt.TiersHost;
+					rgt.UnionWith(host.Tiers);
+				}
+				rgt.Remove(this);
+				return rgt;
+			}
+		}
+
+		public virtual IEnumerable<cmd_base> GetCommands()
+		{
+			var thh = TiersHost as ITier;
+			if (thh != null)
+				yield return new cmd_promote_tier(this, thh);
+
+			yield return new cmd_add_tier_to_new_group(this);
+
+			foreach (var grp in AncestorTiers.OfType<ITiers>())
+				yield return new cmd_nest_tier(this, grp);
+
+			yield return new cmd_hide_tier(this);
+		}
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,6 +138,11 @@ namespace xie
 	[DebuggerDisplay("{ToString(),nq}")]
 	public class TextTier : tier_base, ITextTier
 	{
+		static TextTier()
+		{
+			dps.LineNumbersProperty.AddOwner(typeof(TextTier), new PropertyMetadata(default(int[])));
+		}
+
 		protected TextTier(Color tier_color)
 			: base(tier_color)
 		{
@@ -122,6 +152,18 @@ namespace xie
 			: this("#E9C0C0".ToColor())
 		{
 		}
+
+		public int[] LineNumbers
+		{
+			get { return (int[])GetValue(dps.LineNumbersProperty); }
+			set { SetValue(dps.LineNumbersProperty, value); }
+		}
+
+		public String s_LineNumbers
+		{
+			get { return LineNumbers==null ? "--" : LineNumbers.StringJoin(" "); }
+		}
+
 
 		public SegTier Segment()
 		{
@@ -152,6 +194,22 @@ namespace xie
 			TiersHost.Add(st);
 			return st;
 		}
+
+		public override IEnumerable<cmd_base> GetCommands()
+		{
+			foreach (var cmd in base.GetCommands())
+				yield return cmd;
+
+			yield return new cmd_tokenize_text_tier(this);
+
+			foreach (var tt_other in AncestorTiers.OfType<TextTier>())
+				yield return new cmd_join_text_tiers(this, tt_other);
+		}
+
+		public override string ToString()
+		{
+			return base.ToString() + " line:" + s_LineNumbers;
+		}
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -167,7 +225,7 @@ namespace xie
 			LinesPropertyKey = DependencyProperty.RegisterReadOnly("Lines", typeof(TextTierSet), typeof(CompoundTextTier),
 				new PropertyMetadata(default(TextTierSet)));
 
-			dps.TextProperty.AddOwner(typeof(CompoundTextTier), new PropertyMetadata(default(String),
+			TextProperty.AddOwner(typeof(CompoundTextTier), new PropertyMetadata(default(String),
 				null,
 				(d, o) => ((CompoundTextTier)d).coerce_text((String)o)));
 		}
@@ -205,7 +263,66 @@ namespace xie
 			: base("#D6E8B0".ToColor())
 		{
 			var _lines = new TextTierSet();
-			_lines.CollectionChanged += (o, e) => CoerceValue(dps.TextProperty);
+			_lines.CollectionChanged += (o, e) => CoerceValue(TextProperty);
+			SetValue(LinesPropertyKey, _lines);
+
+			//	if (lines.Any(x => x.Igt != this.Igt || !this.Igt.Contains(x)))
+			//		throw new Exception();
+		}
+	};
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// 
+	[DebuggerDisplay("{ToString(),nq}")]
+	public sealed class TextGroupTier : tier_base, ITextTiers
+	{
+		readonly static DependencyPropertyKey LinesPropertyKey;
+		public static DependencyProperty LinesProperty { get { return LinesPropertyKey.DependencyProperty; } }
+
+		static TextGroupTier()
+		{
+			LinesPropertyKey = DependencyProperty.RegisterReadOnly("Lines", typeof(TextTierSet), typeof(TextGroupTier),
+				new PropertyMetadata(default(TextTierSet)));
+
+			//TextProperty.AddOwner(typeof(TextGroupTier), new PropertyMetadata(default(String),
+			//	null,
+			//	(d, o) => ((TextGroupTier)d).coerce_text((String)o)));
+		}
+
+		//String coerce_text(String s)
+		//{
+		//	return Lines.Select(x => x.Text).StringJoin(" "/*Igt.IgtCorpus.Delimiter*/);
+		//}
+
+		public TextTierSet Lines { get { return (TextTierSet)GetValue(LinesProperty); } }
+		Iset<ITextTier> Iitems<ITextTier>.Items { get { return this.Lines; } }
+		IList IListSource.GetList() { return this.Lines; }
+		bool IListSource.ContainsListCollection { get { return true; } }
+
+		//[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		//public new String Text
+		//{
+		//	get { return base.Text; }
+		//	set { }
+		//}
+
+		public ITextTier this[int index]
+		{
+			get { return Lines[index]; }
+			set { Lines[index] = value; }
+		}
+
+		public int Count { get { return Lines.Count; } }
+
+		public IEnumerator<ITextTier> GetEnumerator() { return Lines.GetEnumerator(); }
+
+		IEnumerator IEnumerable.GetEnumerator() { return Lines.GetEnumerator(); }
+
+		public TextGroupTier()
+			: base("#D6E8F0".ToColor())
+		{
+			var _lines = new TextTierSet();
+			//_lines.CollectionChanged += (o, e) => CoerceValue(TextProperty);
 			SetValue(LinesPropertyKey, _lines);
 
 			//	if (lines.Any(x => x.Igt != this.Igt || !this.Igt.Contains(x)))
@@ -246,6 +363,12 @@ namespace xie
 		{
 			SetValue(dps.TiersPropertyKey, new TierSet(this));
 		}
+
+		public override IEnumerable<cmd_base> GetCommands()
+		{
+			foreach (var cmd in base.GetCommands())
+				yield return cmd;
+		}
 	};
 
 
@@ -263,7 +386,7 @@ namespace xie
 			//Selector.SelectedIndexProperty.AddOwner(typeof(parts_tier_base), new PropertyMetadata());
 			//Selector.SelectedItemProperty.AddOwner(typeof(parts_tier_base), new PropertyMetadata());
 
-			dps.TextProperty.AddOwner(typeof(parts_tier_base), new PropertyMetadata(default(String),
+			TextProperty.AddOwner(typeof(parts_tier_base), new PropertyMetadata(default(String),
 				(o, e) => { },
 				(d, o) => ((parts_tier_base)d).coerce_text((String)o)));
 
@@ -272,7 +395,7 @@ namespace xie
 					(o, e) =>
 					{
 						var _this = (parts_tier_base)o;
-						_this.CoerceValue(dps.TextProperty);
+						_this.CoerceValue(TextProperty);
 					}));
 		}
 
@@ -316,11 +439,40 @@ namespace xie
 		{
 			SetValue(PartsPropertyKey, new OwnerPartsSet(this));
 		}
-		public parts_tier_base(Color tier_color, Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
+		public parts_tier_base(Color tier_color, Iset<IPart> src)
 			: base(tier_color)
 		{
-			SetValue(PartsPropertyKey, new PartsSet(this, src, f_newU, f_newT));
+			SetValue(PartsPropertyKey, new _parts_set_proxy(this, src));
 		}
+
+		sealed class _parts_set_proxy : PartsSet
+		{
+			public _parts_set_proxy(parts_tier_base ptb, Iset<IPart> src)
+				: base(ptb, src)
+			{
+				this.ptb = ptb;
+			}
+			readonly parts_tier_base ptb;
+			protected override IPart f_newU(IPart t) { return ptb.f_newU(t); }
+			protected override IPart f_newT(IPart u) { return ptb.f_newT(u); }
+		};
+
+		protected abstract IPart f_newU(IPart t)
+			//{
+			//	throw new NotImplementedException();
+			//}
+			;
+		protected abstract IPart f_newT(IPart u)
+			//{
+			//	throw new NotImplementedException();
+			//}
+			;
+
+		//public parts_tier_base(Color tier_color, Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
+		//	: base(tier_color)
+		//{
+		//	SetValue(PartsPropertyKey, new PartsSet(this, src, f_newU, f_newT));
+		//}
 
 		public void Promote(IPart p)
 		{
@@ -328,7 +480,7 @@ namespace xie
 			var _old = Parts[ix];
 			var _new = new CopyPart
 			{
-				Source = _old,
+				SourcePart = _old,
 				//Target = new TextPart
 				//{
 				//	//PartsHost = _old.PartsHost,
@@ -363,34 +515,66 @@ namespace xie
 
 		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		IPart[] _dbg { get { return Parts.ToArray(); } }
+
+		public override IEnumerable<cmd_base> GetCommands()
+		{
+			foreach (var cmd in base.GetCommands())
+				yield return cmd;
+
+			foreach (var pt_other in AncestorTiers.OfType<IPartsTier>())
+				yield return new cmd_align_tiers(this, pt_other);
+
+			yield return new cmd_new_pos_tier(this);
+
+			yield return new cmd_new_dep_tier(this);
+		}
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public class SegTier : parts_tier_base
+	public sealed class SegTier : parts_tier_base
 	{
 		public SegTier()
 			: base("#D8F8D8".ToColor())
 		{
 		}
-		public SegTier(Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
-			: base("#D8F8D8".ToColor(), src, f_newU, f_newT)
+		//public SegTier(Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
+		//	: base("#D8F8D8".ToColor(), src, f_newU, f_newT)
+		//{
+		//}
+
+		protected override IPart f_newU(IPart t)
 		{
+			throw new NotImplementedException();
+		}
+		protected override IPart f_newT(IPart u)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override IEnumerable<cmd_base> GetCommands()
+		{
+			foreach (var cmd in base.GetCommands())
+				yield return cmd;
 		}
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public class PosTagTier : parts_tier_base
+	public sealed class PosTagTier : parts_tier_base
 	{
 		public PosTagTier()
 			: base("#F8F8D8".ToColor())
 		{
 		}
-		public PosTagTier(Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
-			: base("#F8F8D8".ToColor(), src, f_newU, f_newT)
+		//public PosTagTier(Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
+		//	: base("#F8F8D8".ToColor(), src, f_newU, f_newT)
+		//{
+		//}
+		public PosTagTier(Iset<IPart> src)
+			: base("#F8F8D8".ToColor(), src)
 		{
 		}
 
@@ -400,12 +584,28 @@ namespace xie
 		//	get { return base.Text; }
 		//	set { base.Text = value; }
 		//}
+
+		protected override IPart f_newU(IPart t)
+		{
+			return new TagPart { SourcePart = t };
+		}
+		protected override IPart f_newT(IPart u)
+		{
+			throw new Exception("slave tier should not add new parts");
+			//return null;
+		}
+
+		public override IEnumerable<cmd_base> GetCommands()
+		{
+			foreach (var cmd in base.GetCommands())
+				yield return cmd;
+		}
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public class DependenciesTier : parts_tier_base
+	public sealed class DependenciesTier : parts_tier_base
 	{
 		public static readonly DependencyProperty SelectingHeadProperty;
 
@@ -434,9 +634,28 @@ namespace xie
 			: base("#FAFA9E".ToColor())
 		{
 		}
-		public DependenciesTier(Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
-			: base("#FAFA9E".ToColor(), src, f_newU, f_newT)
+		public DependenciesTier(Iset<IPart> src)
+			: base("#FAFA9E".ToColor(), src)
 		{
+		}
+		//public DependenciesTier(Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
+		//	: base("#FAFA9E".ToColor(), src, f_newU, f_newT)
+		//{
+		//}
+
+		protected override IPart f_newU(IPart t)
+		{
+			return new DepPart { SourcePart = t };
+		}
+		protected override IPart f_newT(IPart u)
+		{
+			throw new Exception("slave tier (Dep) should not add new parts");
+		}
+
+		public override IEnumerable<cmd_base> GetCommands()
+		{
+			foreach (var cmd in base.GetCommands())
+				yield return cmd;
 		}
 	};
 
@@ -444,7 +663,7 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public class AlignmentTier : parts_tier_base
+	public sealed class AlignmentTier : parts_tier_base
 	{
 		public static readonly DependencyProperty AlignWithProperty =
 			DependencyProperty.Register("AlignWith", typeof(IParts), typeof(AlignmentTier),
@@ -454,10 +673,14 @@ namespace xie
 			: base("#FCD9CC".ToColor())
 		{
 		}
-		public AlignmentTier(Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
-			: base("#FCD9CC".ToColor(), src, f_newU, f_newT)
+		public AlignmentTier(Iset<IPart> src)
+			: base("#FCD9CC".ToColor(), src)
 		{
 		}
+		//public AlignmentTier(Iset<IPart> src, Func<IPart, IPart> f_newU, Func<IPart, IPart> f_newT)
+		//	: base("#FCD9CC".ToColor(), src, f_newU, f_newT)
+		//{
+		//}
 
 		public IParts AlignWith
 		{
@@ -490,5 +713,20 @@ namespace xie
 		//		}
 		//	}
 		//}
+
+		protected override IPart f_newU(IPart t)
+		{
+			return new AlignPart { SourcePart = t };
+		}
+		protected override IPart f_newT(IPart u)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override IEnumerable<cmd_base> GetCommands()
+		{
+			foreach (var cmd in base.GetCommands())
+				yield return cmd;
+		}
 	};
 }

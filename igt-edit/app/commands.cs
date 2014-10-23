@@ -42,6 +42,27 @@ namespace xie
 		public Action show;
 	}
 
+#if false
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// 
+	public sealed class UiCmd : DependencyObject, ICommand
+	{
+		public static readonly ICommand Instance = new UiCmd();
+
+		public bool CanExecute(cmd_base cb) { return cb == null ? true : cb.CanExecute; }
+		bool ICommand.CanExecute(Object cb) { return CanExecute((cmd_base)cb); }
+
+		public void Execute(cmd_base cb) { cb.Execute(); }
+		void ICommand.Execute(Object cb) { Execute((cmd_base)cb); }
+
+		event EventHandler ICommand.CanExecuteChanged
+		{
+			add { }
+			remove { }
+		}
+	};
+#endif
+
 	public partial class main : Window
 	{
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

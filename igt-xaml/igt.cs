@@ -24,8 +24,8 @@ namespace xie
 			dps.DocIdProperty.AddOwner(typeof(Igt));
 			dps.DocInfoProperty.AddOwner(typeof(Igt));
 			dps.LanguageProperty.AddOwner(typeof(Igt));
-			dps.FromLineProperty.AddOwner(typeof(Igt));
-			dps.ToLineProperty.AddOwner(typeof(Igt));
+			dps.FromLineProperty.AddOwner(typeof(Igt), new PropertyMetadata(-1, null, (d, v) => ((Igt)d).refresh_from_line((int)v)));
+			dps.ToLineProperty.AddOwner(typeof(Igt), new PropertyMetadata(-1, null, (d, v) => ((Igt)d).refresh_to_line((int)v)));
 		}
 
 		public Igt()
@@ -69,6 +69,17 @@ namespace xie
 		public String SourceLineRange
 		{
 			get { return String.Format("{0}-{1}", FromLine, ToLine); }
+		}
+
+		int refresh_from_line(int v)
+		{
+			var q = this.AllDescendants().SelectManyNotNull(t => (int[])t.GetValue(dps.LineNumbersProperty)).ToArray();
+			return q.Length == 0 ? v : v < 0 ? q.Min() : Math.Min(v, q.Min());
+		}
+		int refresh_to_line(int v)
+		{
+			var q = this.AllDescendants().SelectManyNotNull(t => (int[])t.GetValue(dps.LineNumbersProperty)).ToArray();
+			return q.Length == 0 ? v : Math.Max(v, q.Max());
 		}
 
 		//public IgtCorpus IgtCorpus

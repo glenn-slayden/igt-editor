@@ -14,27 +14,28 @@
 
         <DataTemplate DataType="{x:Type xl:TextTier}">
             <xe:tier_ui_base>
-                <xe:tier_ui_base.ContextMenu>
+
+                <!--<xe:tier_ui_base.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Auto Tokenize..."
-                                  Click="menu_tok_source_tier" />
-                        <!--<Separator />
-                        <MenuItem Header="Hide" Click="menu_hide_tier"  />-->
+                        <MenuItem Command="{x:Static xe:UiCmd.Instance}"
+                                  Header="{Binding RelativeSource={RelativeSource Self}, Path=CommandParameter, Mode=OneWay}">
+                            <MenuItem.CommandParameter>
+                                <xl:cmd_tokenize_tier TextTier="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Content, Mode=OneWay}" />
+                            </MenuItem.CommandParameter>
+                        </MenuItem>
                     </ContextMenu>
-                </xe:tier_ui_base.ContextMenu>
+                </xe:tier_ui_base.ContextMenu>-->
+
             </xe:tier_ui_base>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type xl:CompoundTextTier}">
             <xe:tier_ui_base>
-                <xe:tier_ui_base.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Auto Tokenize..."
-                                  Click="menu_tok_source_tier" />
-                        <!--<Separator />
-                        <MenuItem Header="Hide" Click="menu_hide_tier"  />-->
-                    </ContextMenu>
-                </xe:tier_ui_base.ContextMenu>
+            </xe:tier_ui_base>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type xl:TextGroupTier}">
+            <xe:tier_ui_base>
             </xe:tier_ui_base>
         </DataTemplate>
 
@@ -52,30 +53,34 @@
 
         <DataTemplate DataType="{x:Type xl:SegTier}">
             <xe:tier_ui_base>
-                <xe:tier_ui_base.ContextMenu>
+                <!--<xe:tier_ui_base.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Dependencies tier"
                                   Click="menu_dependencies_tier" />
                         <MenuItem Header="POS tagging tier"
                                   Click="menu_pos_tag_tier" />
-                        <!--<Separator />
+                        -->
+                <!--<Separator />
                         <MenuItem Header="Hide" Click="menu_hide_tier"  />-->
+                <!--
                     </ContextMenu>
-                </xe:tier_ui_base.ContextMenu>
+                </xe:tier_ui_base.ContextMenu>-->
             </xe:tier_ui_base>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type xl:PosTagTier}">
             <xe:tier_ui_base>
-                <xe:tier_ui_base.ContextMenu>
+                <!--<xe:tier_ui_base.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Dependencies tier"
                                   Click="menu_dependencies_tier" />
-                        <!--<MenuItem Header="Edit tier" Click="menu_edit_tier"  />-->
-                        <!--<Separator />
+                        -->
+                <!--<MenuItem Header="Edit tier" Click="menu_edit_tier"  />-->
+                <!--<Separator />
                         <MenuItem Header="Hide" Click="menu_hide_tier"  />-->
+                <!--
                     </ContextMenu>
-                </xe:tier_ui_base.ContextMenu>
+                </xe:tier_ui_base.ContextMenu>-->
             </xe:tier_ui_base>
         </DataTemplate>
 

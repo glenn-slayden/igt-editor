@@ -16,6 +16,7 @@ using System.Windows.Markup;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using alib;
 using alib.Wpf;
 using alib.Debugging;
 using alib.Enumerable;
@@ -45,55 +46,39 @@ namespace xie
 		{
 			InitializeComponent();
 
-			DataContextChanged += uipb_DataContextChanged;
-		}
-
-		public bool Highlight
-		{
-			get { return (bool)GetValue(HighlightProperty); }
-			set { SetValue(HighlightProperty, value); }
-		}
-
-		public IParts SegTier
-		{
-			get
+			DataContextChanged += (o, e) =>
 			{
-				var itc = (Panel)VisualTreeHelper.GetParent(this.TemplatedParent);
-				return (IParts)itc.DataContext;
-			}
+				var tdp = e.NewValue as temp_drag_part;
+				if (tdp != null)
+				{
+					((ui_part_base)o).Highlight = true;
+					//if (tdp.SourcePart is IEditText)
+					//	w_part_controls.w_btn_edit_part.Visibility = Visibility.Collapsed;
+				}
+
+				//if (e.NewValue.GetType() == typeof(SegPart))
+				//	Nop.X();
+
+				//var cp = e.NewValue as CopyPart;
+				//if (cp != null)
+				//{
+				//	var q = cp.SourcePart;
+
+				//	Nop.X();
+
+				//}
+
+				//Debug.Print("{0:X8} {1} {2}", o.GetHashCode(), o.GetType().Name, e.NewValue.GetType().Name);
+			};
 		}
-
-		public int Index { get { return SegTier.IndexOf((IPart)DataContext); } }
-
-		public TiersControl TiersControl
-		{
-			get { return this.FindAncestor<TiersControl>(); }
-		}
-
-		public ItemContainerGenerator ItemContainerGenerator
-		{
-			get
-			{
-				var cp = TiersControl.ItemContainerGenerator.ContainerFromItem(this.SegTier);
-				if (cp == null)
-					return null;
-				var stic = cp.EnumerateVisualChildren().OfType<ItemsControl>().Where(ic => ic.ItemsSource is SegTier).ToArray();
-				if (stic.Length == 0)
-					return null;
-				if (stic.Length > 1)
-					throw new Exception();
-				var icg = stic[0].ItemContainerGenerator;
-				return icg;
-			}
-		}
-
-		void uipb_DataContextChanged(Object sender, DependencyPropertyChangedEventArgs e)
+#if false
+		static void uipb_DataContextChanged(Object o, DependencyPropertyChangedEventArgs e)
 		{
 			var tdp = e.NewValue as temp_drag_part;
 			if (tdp != null)
 			{
-				Highlight = true;
-				//if (tdp.Source is IEditText)
+				((ui_part_base)o).Highlight = true;
+				//if (tdp.SourcePart is IEditText)
 				//	w_part_controls.w_btn_edit_part.Visibility = Visibility.Collapsed;
 			}
 		}
@@ -108,6 +93,91 @@ namespace xie
 			if (st != null)
 				st.Promote((IPart)uip.DataContext);
 		}
+#endif
+
+		public new FrameworkElement Parent { [DebuggerStepThrough] get { return (FrameworkElement)base.Parent; } }
+
+		public bool Highlight
+		{
+			get { return (bool)GetValue(HighlightProperty); }
+			set { SetValue(HighlightProperty, value); }
+		}
+
+
+		public Part SourcePart
+		{
+			//[DebuggerStepThrough]
+			get
+			{
+#if false
+				//var p1 = (Part)DataContext;
+
+				if (this.Parent != null)
+				{
+					return (Part)((FrameworkElement)this.Parent).DataContext;
+					//var p2 = ((FrameworkElement)this.Parent).DataContext;
+					//if (p1 != p2)
+					//	Nop.X();
+				}
+#endif
+				return (Part)DataContext;
+			}
+		}
+
+		//public Part CurrentPart
+		//{
+		//	[DebuggerStepThrough]
+		//	get
+		//	{
+		//		var par = this.Parent;
+		//		return (Part)(par == null ? DataContext : par.DataContext);
+		//	}
+		//}
+
+		public IParts PartsHost
+		{
+			get
+			{
+				//if (VirtualPartsHost != null)
+				//	Nop.X();
+
+				return SourcePart.PartsHost;
+			}
+		}
+
+		//public IParts VirtualPartsHost
+		//{
+		//	get
+		//	{
+		//		var vph = TemplatedParent.FindAncestor<Panel>().DataContext;
+		//		return vph == Part.PartsHost ? null : (IParts)vph;
+		//	}
+		//}
+
+
+		public int Index { get { return PartsHost.IndexOf(SourcePart); } }
+
+		public TiersControl TiersControl
+		{
+			get { return this.FindAncestor<TiersControl>(); }
+		}
+
+		public ItemContainerGenerator ItemContainerGenerator
+		{
+			get
+			{
+				var cp = TiersControl.ItemContainerGenerator.ContainerFromItem(this.PartsHost);
+				if (cp == null)
+					return null;
+				var stic = cp.EnumerateVisualChildren().OfType<ItemsControl>().Where(ic => ic.ItemsSource is SegTier).ToArray();
+				if (stic.Length == 0)
+					return null;
+				if (stic.Length > 1)
+					throw new Exception();
+				var icg = stic[0].ItemContainerGenerator;
+				return icg;
+			}
+		}
 
 		protected override HitTestResult HitTestCore(PointHitTestParameters htp)
 		{
@@ -117,19 +187,29 @@ namespace xie
 			return htr;
 		}
 
-		public PartLocationRef PartLocationRef { get { return new PartLocationRef(this.SegTier, this.Index); } }
+		public PartLocationRef PartLocationRef { get { return new PartLocationRef(this.PartsHost, this.Index); } }
 
 		temp_drag_part tdp;
 
 		protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
 		{
 			PartLocationRef __this, __drop;
+			Part p = this.SourcePart;
+
+			//FrameworkElement fe_hide = this.Parent ?? this;
+			//FrameworkElement fe_hide = this;
+
+			Nop.X();
 
 			try
 			{
-				Visibility = Visibility.Collapsed;
-
 				__this = this.PartLocationRef;
+
+				Debug.Assert(__this.SourcePart == p && !(p is temp_drag_part));
+
+				//fe_hide.Visibility = Visibility.Collapsed;
+				//Visibility = Visibility.Collapsed;
+				p.IsVisible = false;
 
 				try
 				{
@@ -150,8 +230,6 @@ namespace xie
 				if (__drop.Equals(__this))
 					return;
 
-				var p = (IPart)this.DataContext;
-				Debug.Assert(__this.Part == p && !(p is temp_drag_part));
 				Debug.Print("move {0} '{1}' {2} -> {3}", p.GetType().Name, p.ToString(), __this, __drop);
 
 				if (__this.host == __drop.host)
@@ -166,7 +244,9 @@ namespace xie
 			}
 			finally
 			{
-				Visibility = Visibility.Visible;
+				//fe_hide.Visibility = Visibility.Visible;
+				//Visibility = Visibility.Visible;
+				p.IsVisible = true;
 
 				e.Handled = true;
 			}
@@ -177,24 +257,34 @@ namespace xie
 			//var c = this.Cursor;
 			//this.Cursor = Cursors.No;
 
-			GiveFeedback += uipb_GiveFeedback;
+			GiveFeedbackEventHandler _gf_func = (o, e) =>
+			{
+				((ui_part_base)o).change();
 
-			var re = DragDrop.DoDragDrop(this, (IPart)DataContext, DragDropEffects.Link);
+				e.UseDefaultCursors = true;
+				e.Handled = true;
+			};
 
-			GiveFeedback -= uipb_GiveFeedback;
+			GiveFeedback += _gf_func;
+
+			var re = DragDrop.DoDragDrop(this, SourcePart, DragDropEffects.Link);
+
+			GiveFeedback -= _gf_func;
 
 			//this.Cursor = c;
 
 			return re;
 		}
 
-		static void uipb_GiveFeedback(Object sender, GiveFeedbackEventArgs e)
+#if false
+		static void uipb_GiveFeedback(Object o, GiveFeedbackEventArgs e)
 		{
-			((ui_part_base)sender).change();
+			((ui_part_base)o).change();
 
 			e.UseDefaultCursors = true;
 			e.Handled = true;
 		}
+#endif
 
 		void change()
 		{
@@ -211,7 +301,7 @@ namespace xie
 				},
 				new PointHitTestParameters(util.GetCorrectMousePosition(panel)));
 
-			if (uip_tgt != null && uip_tgt != this && !(uip_tgt.DataContext is temp_drag_part))
+			if (uip_tgt != null && uip_tgt != this && !(uip_tgt.SourcePart is temp_drag_part))
 				tdp.ChangeUiPart(uip_tgt);
 		}
 	};
@@ -230,7 +320,7 @@ namespace xie
 		public IParts host;
 		public int Index;
 
-		public IPart Part { get { return host.Parts[Index]; } }
+		public IPart SourcePart { get { return host.Parts[Index]; } }
 
 		public bool Equals(PartLocationRef other)
 		{
@@ -248,7 +338,7 @@ namespace xie
 		{
 			if (host == null)
 				return "null";
-			return String.Format("{0}.{1} ({2})", host.OuterIndex(), Index, Part.GetType().Name);
+			return String.Format("{0}.{1} ({2})", host.OuterIndex(), Index, SourcePart.GetType().Name);
 		}
 	};
 
@@ -261,12 +351,12 @@ namespace xie
 	{
 		temp_drag_part(IPart part)
 		{
-			base.Source = part;
+			base.SourcePart = part;
 		}
 		public temp_drag_part(ui_part_base uip_drag)
-			: this((IPart)uip_drag.DataContext)
+			: this(uip_drag.SourcePart)
 		{
-			this.tier_cur = this.tier_original = uip_drag.SegTier;
+			this.tier_cur = this.tier_original = uip_drag.PartsHost;
 
 			tier_cur.Insert(uip_drag.Index + 1, this);
 		}
@@ -293,13 +383,13 @@ namespace xie
 		public void AdjustIndex(IParts tier, ref int ix)
 		{
 			int ix_original;
-			if (tier == tier_original && (ix_original = tier_original.IndexOf(base.Source)) != -1 && ix > ix_original)
+			if (tier == tier_original && (ix_original = tier_original.IndexOf(base.SourcePart)) != -1 && ix > ix_original)
 				ix--;
 		}
 
 		bool anti_ocillation(ui_part_base uip_tgt, int ix_drag, int ix_tgt)
 		{
-			var tier = uip_tgt.SegTier;
+			var tier = uip_tgt.PartsHost;
 			AdjustIndex(tier, ref ix_drag);
 			AdjustIndex(tier, ref ix_tgt);
 
@@ -336,7 +426,7 @@ namespace xie
 
 		public void ChangeUiPart(ui_part_base uip_tgt)
 		{
-			var tgt_tier = uip_tgt.SegTier;
+			var tgt_tier = uip_tgt.PartsHost;
 			var ix_tgt = uip_tgt.Index;
 			var ic_cur = tier_cur.IndexOf(this);
 
