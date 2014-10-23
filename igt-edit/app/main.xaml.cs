@@ -50,8 +50,8 @@ namespace xie
 			if (App.settings.ReloadLastSession && (_tmp = App.settings.SessionFiles) != null)
 				foo(_tmp);
 
-			var ic = new xxx().bar(@"D:\github\igt-editor\odin-2.0-splits\by-lang\tha.xml");
-			//new xxx().bar(@"D:\github\igt-editor\odin-2.0-splits\full\odin.xml");
+			var ic = new xxx().bar(@"\github\igt-editor\odin-2.0-splits\by-lang\tha.xml");
+			//new xxx().bar(@"\github\igt-editor\odin-2.0-splits\full\odin.xml");
 
 			ccc.Add(ic);
 		}
