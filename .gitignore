@@ -1,9 +1,6 @@
 alib/
 alib-wpf/
-__test/
-__train/
-__test-in/
-__test-out/
+__*/
 odin-2.0-splits/
 app-settings.xaml
 *.*__

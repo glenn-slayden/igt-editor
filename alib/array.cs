@@ -17,6 +17,7 @@ namespace alib.Array
 	using Bitz = alib.Bits.Bitz;
 	using String = System.String;
 
+#if ! __MOBILE__
 	public static class arr<TElem>
 	{
 		static arr()
@@ -44,6 +45,7 @@ namespace alib.Array
 			return (Func<int, TElem[]>)dm.CreateDelegate(typeof(Func<int, TElem[]>));
 		}
 	};
+#endif
 
 	public static partial class arr
 	{
