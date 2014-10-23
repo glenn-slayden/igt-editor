@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "igt-edit", "igt-edit\igt-edit.csproj", "{F3C4D521-2860-457C-8153-AEF2214AFE78}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -11,6 +11,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "igt-convert", "igt-convert\igt-convert.csproj", "{9D1BE1B9-BE70-42EA-8D10-3D9D8CB01742}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "igt-xaml", "igt-xaml\igt-xaml.csproj", "{40F4792F-F470-406F-839C-5A6C7301DDAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "alib", "..\..\programming\agree\alib\alib.csproj", "{2D69BE1A-2D60-4EFF-8D0C-607F0C3448DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "alib-wpf", "..\..\programming\agree\alib-wpf\alib-wpf.csproj", "{16BB8296-90EB-4E15-99C2-0EA6FD44FB6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,6 +34,14 @@ Global
 		{40F4792F-F470-406F-839C-5A6C7301DDAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40F4792F-F470-406F-839C-5A6C7301DDAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40F4792F-F470-406F-839C-5A6C7301DDAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D69BE1A-2D60-4EFF-8D0C-607F0C3448DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D69BE1A-2D60-4EFF-8D0C-607F0C3448DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D69BE1A-2D60-4EFF-8D0C-607F0C3448DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D69BE1A-2D60-4EFF-8D0C-607F0C3448DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16BB8296-90EB-4E15-99C2-0EA6FD44FB6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16BB8296-90EB-4E15-99C2-0EA6FD44FB6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16BB8296-90EB-4E15-99C2-0EA6FD44FB6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16BB8296-90EB-4E15-99C2-0EA6FD44FB6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

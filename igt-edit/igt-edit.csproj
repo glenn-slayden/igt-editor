@@ -40,14 +40,6 @@
     <StartupObject>xie.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="alib, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\alib.dll</HintPath>
-    </Reference>
-    <Reference Include="alib-wpf, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\alib-wpf.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.WindowsAPICodePack">
       <HintPath>..\bin\Microsoft.WindowsAPICodePack.dll</HintPath>
     </Reference>
@@ -63,6 +55,14 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <ProjectReference Include="..\..\..\programming\agree\alib-wpf\alib-wpf.csproj">
+      <Project>{16bb8296-90eb-4e15-99c2-0ea6fd44fb6c}</Project>
+      <Name>alib-wpf</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\programming\agree\alib\alib.csproj">
+      <Project>{2d69be1a-2d60-4eff-8d0c-607f0c3448df}</Project>
+      <Name>alib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\igt-xaml\igt-xaml.csproj">
       <Project>{40f4792f-f470-406f-839c-5a6c7301ddad}</Project>
       <Name>igt-xaml</Name>

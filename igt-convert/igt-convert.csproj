@@ -34,14 +34,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="alib, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\alib.dll</HintPath>
-    </Reference>
-    <Reference Include="alib-wpf, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\alib-wpf.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -60,6 +52,10 @@
     <None Include="Properties\App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\programming\agree\alib\alib.csproj">
+      <Project>{2d69be1a-2d60-4eff-8d0c-607f0c3448df}</Project>
+      <Name>alib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\igt-xaml\igt-xaml.csproj">
       <Project>{40f4792f-f470-406f-839c-5a6c7301ddad}</Project>
       <Name>igt-xaml</Name>
