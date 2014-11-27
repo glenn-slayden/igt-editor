@@ -56,7 +56,7 @@ namespace xie
 		//	}
 		//}
 
-		ITiers TiersHost { get { return this.Tier.TiersHost; } }
+		ITiers<ITier> TiersHost { get { return this.Tier.TiersHost; } }
 
 
 		protected override void OnContextMenuOpening(ContextMenuEventArgs e)

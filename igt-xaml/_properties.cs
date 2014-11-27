@@ -65,7 +65,7 @@ namespace xie
 		   DependencyProperty.RegisterAttached("IgtCorpus", typeof(IgtCorpus), typeof(dps), new PropertyMetadata(default(IgtCorpus)));
 
 		public static DependencyProperty TiersHostProperty =
-			DependencyProperty.RegisterAttached("TiersHost", typeof(ITiers), typeof(dps), new PropertyMetadata(default(ITiers)));
+			DependencyProperty.RegisterAttached("TiersHost", typeof(ITiers<ITier>), typeof(dps), new PropertyMetadata(default(ITiers<ITier>)));
 
 		public static DependencyProperty SourceTierProperty =
 		   DependencyProperty.RegisterAttached("SourceTier", typeof(TextTier), typeof(dps), new PropertyMetadata(default(TextTier)));

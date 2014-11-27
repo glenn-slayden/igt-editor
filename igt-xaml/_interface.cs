@@ -13,7 +13,7 @@ using alib.Enumerable;
 
 namespace xie
 {
-	public interface Iset<T> : System.Collections.IList, IReadOnlyList<T>, INotifyCollectionChanged, INotifyPropertyChanged
+	public interface Iset<out T> : System.Collections.IList, IReadOnlyList<T>, INotifyCollectionChanged, INotifyPropertyChanged
 		where T : class, IHostedItem
 	{
 		void Move(int oldIndex, int newIndex);
@@ -49,7 +49,7 @@ namespace xie
 	};
 	public interface ITier : IHostedTextItem
 	{
-		ITiers TiersHost { get; set; }
+		ITiers<ITier> TiersHost { get; set; }
 		String TierType { get; set; }
 	};
 	public interface IPart : IHostedTextItem
@@ -60,7 +60,7 @@ namespace xie
 	{
 		int Count { get; }
 	};
-	public interface Iitems<T> : IItems, IReadOnlyList<T>
+	public interface Iitems<out T> : IItems, IReadOnlyList<T>
 		where T : class, IHostedItem
 	{
 		Iset<T> Items { get; }
@@ -76,18 +76,15 @@ namespace xie
 	public interface ITiers<T> : Iitems<T>
 		where T : class, ITier
 	{
-	};
-	public interface ITiers : ITiers<ITier>
-	{
 		TierSet Tiers { get; }
 	};
 	public interface IPartsTier : IParts, ITier
 	{
 	};
-	public interface ITiersTier : ITiers, ITier
+	public interface ITiersTier : ITiers<ITier>, ITier
 	{
 	};
-	public interface IIgt : ITiers, IHostedItem
+	public interface IIgt : ITiers<ITier>, IHostedItem
 	{
 	};
 
@@ -137,13 +134,13 @@ namespace xie
 		}
 
 
-		public static IEnumerable<ITier> AllDescendants(this ITiers _this)
+		public static IEnumerable<ITier> AllDescendants(this ITiers<ITier> _this)
 		{
-			ITiers tt;
+			ITiers<ITier> tt;
 
 			foreach (var t in _this.Tiers)
 			{
-				if ((tt = t as ITiers) != null)
+				if ((tt = t as ITiers<ITier>) != null)
 					foreach (var ttt in AllDescendants(tt))
 						yield return ttt;
 

@@ -28,15 +28,15 @@ namespace xie
 		}
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public ITiers TiersHost
+		public ITiers<ITier> TiersHost
 		{
-			get { return (ITiers)this.GetValue(dps.TiersHostProperty); }
+			get { return (ITiers<ITier>)this.GetValue(dps.TiersHostProperty); }
 			set { this.SetValue(dps.TiersHostProperty, value); }
 		}
 		public sealed override IItems Host
 		{
 			get { return TiersHost; }
-			set { TiersHost = (ITiers)value; }
+			set { TiersHost = (ITiers<ITier>)value; }
 		}
 
 		public String TierType
@@ -78,7 +78,7 @@ namespace xie
 			//	}
 			//}
 		}
-		public static void MoveTier(ITiers h0, int ix0, ITiers h1, int ix1)
+		public static void MoveTier(ITiers<ITier> h0, int ix0, ITiers<ITier> h1, int ix1)
 		{
 			if (h0 == null || h1 == null)
 				throw new NullReferenceException();
@@ -130,7 +130,7 @@ namespace xie
 
 			yield return new cmd_add_tier_to_new_group(this);
 
-			foreach (var grp in AncestorTiers.OfType<ITiers>())
+			foreach (var grp in AncestorTiers.OfType<ITiers<ITier>>())
 				yield return new cmd_nest_tier(this, grp);
 
 			yield return new cmd_hide_tier(this);
@@ -218,7 +218,7 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public sealed class CompoundTextTier : TextTier, ITiers
+	public sealed class CompoundTextTier : TextTier, ITiers<ITier>
 	{
 		static CompoundTextTier()
 		{
@@ -271,7 +271,7 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public sealed class TextGroupTier : tier_base, ITiers
+	public sealed class TextGroupTier : tier_base, ITiers<ITier>
 	{
 		static TextGroupTier()
 		{

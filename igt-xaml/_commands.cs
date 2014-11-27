@@ -139,7 +139,7 @@ namespace xie
 
 		public override void Execute()
 		{
-			ITiers thx;
+			ITiers<ITier> thx;
 			var thh = (ITier)(thx = tier.TiersHost);
 
 			tier_base.MoveTier(thx, tier.OuterIndex, thh.TiersHost, thh.OuterIndex + 1);
@@ -183,14 +183,14 @@ namespace xie
 	/// 
 	public sealed class cmd_nest_tier : cmd_base
 	{
-		public cmd_nest_tier(ITier tier, ITiers grp)
+		public cmd_nest_tier(ITier tier, ITiers<ITier> grp)
 		{
 			this.tier = tier;
 			this.grp = grp;
 		}
 
 		readonly ITier tier;
-		readonly ITiers grp;
+		readonly ITiers<ITier> grp;
 
 		public override void Execute()
 		{
