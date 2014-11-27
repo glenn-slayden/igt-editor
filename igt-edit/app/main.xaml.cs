@@ -20,6 +20,7 @@ using alib;
 using alib.Debugging;
 using alib.Enumerable;
 using alib.Wpf;
+using alib.String;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 

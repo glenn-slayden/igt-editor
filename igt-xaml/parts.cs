@@ -169,7 +169,6 @@ namespace xie
 		public IPart this[int index]
 		{
 			get { return Parts[index]; }
-			set { Parts[index] = value; }
 		}
 
 		public int Count { get { return Parts.Count; } }
@@ -223,7 +222,6 @@ namespace xie
 		public IPart this[int index]
 		{
 			get { return Parts[index]; }
-			set { Parts[index] = value; }
 		}
 
 		public int Count { get { return Parts.Count; } }
@@ -326,9 +324,8 @@ namespace xie
 
 		public AlignPart()
 		{
-			SetValue(AlignedPartsPropertyKey, new PartRefSet(PartsHost));
+			SetValue(AlignedPartsPropertyKey, new PartRefSet());
 		}
-
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

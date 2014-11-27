@@ -125,9 +125,8 @@ namespace xie
 
 		public virtual IEnumerable<cmd_base> GetCommands()
 		{
-			var thh = TiersHost as ITier;
-			if (thh != null)
-				yield return new cmd_promote_tier(this, thh);
+			if (TiersHost is ITier)
+				yield return new cmd_promote_tier(this);
 
 			yield return new cmd_add_tier_to_new_group(this);
 
@@ -141,7 +140,7 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public class TextTier : tier_base//, ITextTier
+	public class TextTier : tier_base
 	{
 		static TextTier()
 		{
@@ -168,7 +167,6 @@ namespace xie
 		{
 			get { return LineNumbers == null ? "--" : LineNumbers.StringJoin(" "); }
 		}
-
 
 		public SegTier Segment()
 		{
@@ -220,15 +218,11 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public sealed class CompoundTextTier : TextTier, ITiers<ITier>
+	public sealed class CompoundTextTier : TextTier, ITiers
 	{
-		readonly static DependencyPropertyKey LinesPropertyKey;
-		public static DependencyProperty LinesProperty { get { return LinesPropertyKey.DependencyProperty; } }
-
 		static CompoundTextTier()
 		{
-			LinesPropertyKey = DependencyProperty.RegisterReadOnly("Lines", typeof(TextTierSet), typeof(CompoundTextTier),
-				new PropertyMetadata(default(TextTierSet)));
+			dps.TiersProperty.AddOwner(typeof(CompoundTextTier));
 
 			TextProperty.AddOwner(typeof(CompoundTextTier), new PropertyMetadata(default(String),
 				null,
@@ -237,12 +231,13 @@ namespace xie
 
 		String coerce_text(String s)
 		{
-			return Lines.Select(x => x.Text).StringJoin(" "/*Igt.IgtCorpus.Delimiter*/);
+			var rgt = (TierSet)GetValue(dps.TiersProperty);
+			return rgt.Select(x => x.Text).StringJoin(" "/*Igt.IgtCorpus.Delimiter*/);
 		}
 
-		public TextTierSet Lines { get { return (TextTierSet)GetValue(LinesProperty); } }
-		Iset<ITier> Iitems<ITier>.Items { get { return this.Lines; } }
-		IList IListSource.GetList() { return this.Lines; }
+		public TierSet Tiers { get { return (TierSet)GetValue(dps.TiersProperty); } }
+		Iset<ITier> Iitems<ITier>.Items { get { return this.Tiers; } }
+		IList IListSource.GetList() { return this.Tiers; }
 		bool IListSource.ContainsListCollection { get { return true; } }
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -254,25 +249,22 @@ namespace xie
 
 		public ITier this[int index]
 		{
-			get { return Lines[index]; }
-			set { Lines[index] = value; }
+			get { return Tiers[index]; }
+			set { Tiers[index] = value; }
 		}
 
-		public int Count { get { return Lines.Count; } }
+		public int Count { get { return Tiers.Count; } }
 
-		public IEnumerator<ITier> GetEnumerator() { return Lines.GetEnumerator(); }
+		public IEnumerator<ITier> GetEnumerator() { return Tiers.GetEnumerator(); }
 
-		IEnumerator IEnumerable.GetEnumerator() { return Lines.GetEnumerator(); }
+		IEnumerator IEnumerable.GetEnumerator() { return Tiers.GetEnumerator(); }
 
 		public CompoundTextTier()
 			: base("#D6E8B0".ToColor())
 		{
 			var _lines = new TierSet(this);
 			_lines.CollectionChanged += (o, e) => CoerceValue(TextProperty);
-			SetValue(LinesPropertyKey, _lines);
-
-			//	if (lines.Any(x => x.Igt != this.Igt || !this.Igt.Contains(x)))
-			//		throw new Exception();
+			SetValue(dps.TiersPropertyKey, _lines);
 		}
 	};
 
@@ -281,92 +273,34 @@ namespace xie
 	[DebuggerDisplay("{ToString(),nq}")]
 	public sealed class TextGroupTier : tier_base, ITiers
 	{
-		readonly static DependencyPropertyKey LinesPropertyKey;
-		public static DependencyProperty LinesProperty { get { return LinesPropertyKey.DependencyProperty; } }
-
 		static TextGroupTier()
 		{
-			LinesPropertyKey = DependencyProperty.RegisterReadOnly("Lines", typeof(TextTierSet), typeof(TextGroupTier),
-				new PropertyMetadata(default(TextTierSet)));
-
-			//TextProperty.AddOwner(typeof(TextGroupTier), new PropertyMetadata(default(String),
-			//	null,
-			//	(d, o) => ((TextGroupTier)d).coerce_text((String)o)));
+			dps.TiersProperty.AddOwner(typeof(TextGroupTier));
 		}
 
-		//String coerce_text(String s)
-		//{
-		//	return Lines.Select(x => x.Text).StringJoin(" "/*Igt.IgtCorpus.Delimiter*/);
-		//}
-
-		public TextTierSet Lines { get { return (TextTierSet)GetValue(LinesProperty); } }
-		public TierSet Tiers { get { return this.Lines; } }
-		Iset<ITier> Iitems<ITier>.Items { get { return this.Lines; } }
-		IList IListSource.GetList() { return this.Lines; }
+		public TierSet Tiers { get { return (TierSet)GetValue(dps.TiersProperty); } }
+		Iset<ITier> Iitems<ITier>.Items { get { return this.Tiers; } }
+		IList IListSource.GetList() { return this.Tiers; }
 		bool IListSource.ContainsListCollection { get { return true; } }
-
-		//[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		//public new String Text
-		//{
-		//	get { return base.Text; }
-		//	set { }
-		//}
 
 		public ITier this[int index]
 		{
-			get { return Lines[index]; }
-			set { Lines[index] = value; }
+			get { return Tiers[index]; }
+			set { Tiers[index] = value; }
 		}
 
-		public int Count { get { return Lines.Count; } }
+		public int Count { get { return Tiers.Count; } }
 
-		public IEnumerator<ITier> GetEnumerator() { return Lines.GetEnumerator(); }
+		public IEnumerator<ITier> GetEnumerator() { return Tiers.GetEnumerator(); }
 
-		IEnumerator IEnumerable.GetEnumerator() { return Lines.GetEnumerator(); }
+		IEnumerator IEnumerable.GetEnumerator() { return Tiers.GetEnumerator(); }
 
 		public TextGroupTier()
 			: base("#D6E8F0".ToColor())
 		{
-			var _lines = new TextTierSet(this);
-			//_lines.CollectionChanged += (o, e) => CoerceValue(TextProperty);
-			SetValue(LinesPropertyKey, _lines);
-
-			//	if (lines.Any(x => x.Igt != this.Igt || !this.Igt.Contains(x)))
-			//		throw new Exception();
+			var _lines = new TierSet(this);
+			SetValue(dps.TiersPropertyKey, _lines);
 		}
-		//TierSet _lines;
-
-		//public TierSet Tiers
-		//{
-		//	get { return _lines; }
-		//}
-
-		//Iset<ITier> Iitems<ITier>.Items
-		//{
-		//	get { return _lines; }
-		//}
-
-		//ITier Iitems<ITier>.this[int index]
-		//{
-		//	get
-		//	{
-		//		return _lines[index];
-		//	}
-		//	set
-		//	{
-		//		_lines[index] = value;
-		//	}
-		//}
-
-		//ITier IReadOnlyList<ITier>.this[int index]
-		//{
-		//	get { return _lines[index]; }
-		//}
-
-		//IEnumerator<ITier> IEnumerable<ITier>.GetEnumerator()
-		//{
-		//	return _lines.GetEnumerator();
-		//}
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -464,7 +398,6 @@ namespace xie
 		public IPart this[int index]
 		{
 			get { return Parts[index]; }
-			set { Parts[index] = value; }
 		}
 
 		public int Count { get { return Parts.Count; } }
@@ -526,7 +459,7 @@ namespace xie
 				//	Text = _old.Text
 				//},
 			};
-			Parts[ix] = _new;
+			Parts.replace_item(ix, _new);
 		}
 
 		public void Merge(IPart p)
@@ -544,7 +477,7 @@ namespace xie
 
 				p.Host = mp;
 				mp.Parts.Add(p);
-				Parts[ix] = mp;
+				Parts.replace_item(ix, mp);
 			}
 			pnew.Host = mp;
 			mp.Parts.Add(pnew);

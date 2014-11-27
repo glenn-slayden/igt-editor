@@ -199,8 +199,6 @@ namespace xie
 			//FrameworkElement fe_hide = this.Parent ?? this;
 			//FrameworkElement fe_hide = this;
 
-			Nop.X();
-
 			try
 			{
 				__this = this.PartLocationRef;

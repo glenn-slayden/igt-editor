@@ -75,13 +75,6 @@ namespace xie
 		{
 			return CommandText;
 		}
-
-		//public static delegate void _click_del(Object sender, RoutedEventArgs e);
-
-		//public static void mi_Click(Object sender, RoutedEventArgs e)
-		//{
-
-		//}
 	};
 
 
@@ -137,18 +130,19 @@ namespace xie
 	/// 
 	public sealed class cmd_promote_tier : cmd_base
 	{
-		public cmd_promote_tier(ITier tier, ITier thh)
+		public cmd_promote_tier(ITier tier)
 		{
 			this.tier = tier;
-			this.thh = thh;
 		}
 
 		readonly ITier tier;
-		readonly ITier thh;
 
 		public override void Execute()
 		{
-			tier_base.MoveTier(tier.TiersHost, tier.OuterIndex, thh.TiersHost, thh.TiersHost.Count);
+			ITiers thx;
+			var thh = (ITier)(thx = tier.TiersHost);
+
+			tier_base.MoveTier(thx, tier.OuterIndex, thh.TiersHost, thh.OuterIndex + 1);
 		}
 
 		public override String CommandText { get { return "Promote"; } }
@@ -169,7 +163,7 @@ namespace xie
 		{
 			var thh = tier.TiersHost;
 			if (thh == null)
-				return;
+				throw new Exception();
 
 			int ix = tier.OuterIndex;
 
@@ -245,10 +239,10 @@ namespace xie
 			{
 				TierType = stt
 			};
-
-			mst.Lines.Add(t1);
-			mst.Lines.Add(t2);
 			t1.TiersHost.Add(mst);
+
+			mst.Tiers.Add(t1);
+			mst.Tiers.Add(t2);
 		}
 
 		public override String CommandText

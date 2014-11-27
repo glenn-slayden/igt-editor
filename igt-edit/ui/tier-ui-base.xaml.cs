@@ -359,5 +359,4 @@ namespace xie
 			tb_info.Text = String.Empty;
 		}
 	};
-
 }

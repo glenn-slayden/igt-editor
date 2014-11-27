@@ -13,12 +13,13 @@ using alib.Enumerable;
 
 namespace xie
 {
-	public interface Iset<T> : IList<T>, System.Collections.IList, IReadOnlyList<T>, INotifyCollectionChanged, INotifyPropertyChanged
+	public interface Iset<T> : System.Collections.IList, IReadOnlyList<T>, INotifyCollectionChanged, INotifyPropertyChanged
 		where T : class, IHostedItem
 	{
 		void Move(int oldIndex, int newIndex);
 		new void RemoveAt(int index);
-		new T this[int index] { get; set; }
+		new T this[int index] { get; }
+		void replace_item(int index, IHostedItem item);
 		new int Count { get; }
 		new void Clear();
 	};
@@ -63,7 +64,7 @@ namespace xie
 		where T : class, IHostedItem
 	{
 		Iset<T> Items { get; }
-		new T this[int index] { get; set; }
+		new T this[int index] { get; }
 		new int Count { get; }
 		//int SelectedIndex { get; set; }
 		//T SelectedItem { get; set; }
@@ -76,13 +77,6 @@ namespace xie
 		where T : class, ITier
 	{
 	};
-	//public interface ITextTier : ITier
-	//{
-	//};
-	//public interface ITextTiers : ITiers<ITextTier>
-	//{
-	//	TextTierSet Lines { get; }
-	//};
 	public interface ITiers : ITiers<ITier>
 	{
 		TierSet Tiers { get; }
@@ -93,9 +87,6 @@ namespace xie
 	public interface ITiersTier : ITiers, ITier
 	{
 	};
-	//public interface ITextTiersTier : ITextTiers, ITier
-	//{
-	//};
 	public interface IIgt : ITiers, IHostedItem
 	{
 	};
@@ -112,7 +103,11 @@ namespace xie
 		public static bool Remove<T>(this Iitems<T> _this, T p)
 			where T : class,IHostedItem
 		{
-			return _this.Items.Remove(p);
+			int ix;
+			if ((ix = _this.Items.IndexOf(p)) == -1)
+				return false;
+			_this.Items.RemoveAt(ix);
+			return true;
 		}
 		public static void RemoveAt<T>(this Iitems<T> _this, int ix)
 			where T : class,IHostedItem
@@ -155,23 +150,5 @@ namespace xie
 				yield return t;
 			}
 		}
-		//public static IEnumerable<ITier> AllDescendants(this ITextTiers _this)
-		//{
-		//	ITiers tt;
-		//	ITextTiers itt;
-
-		//	foreach (var t in _this.Lines)
-		//	{
-		//		if ((tt = t as ITiers) != null)
-		//			foreach (var ttt in AllDescendants(tt))
-		//				yield return ttt;
-		//		else if ((itt = t as ITextTiers) != null)
-		//			foreach (var ttt in AllDescendants(itt))
-		//				yield return ttt;
-		//		yield return t;
-		//	}
-		//}
 	};
-
-
 }

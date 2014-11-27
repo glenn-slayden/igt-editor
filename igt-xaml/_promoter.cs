@@ -19,7 +19,7 @@ namespace xie
 		public _promoter(Iitems<T> owner, Iset<T> src)//, Func<T, U> f_newU, Func<U, T> f_newT)
 		{
 			if (owner == null)
-				Nop.X();
+				throw new Exception();
 
 			this.owner = owner;
 			this.src = src;
@@ -138,12 +138,16 @@ namespace xie
 		public U this[int index]
 		{
 			get { return GetOrAddU(src[index]); }
-			set { src[index] = GetOrAddT(value); }
 		}
 		Object IList.this[int index]
 		{
 			get { return this[index]; }
-			set { this[index] = (U)value; }
+			set { src.replace_item(index, GetOrAddT((U)value)); }
+		}
+
+		public void replace_item(int index, IHostedItem value)
+		{
+			src.replace_item(index, GetOrAddT((U)value));
 		}
 
 		public void Add(U u)
@@ -164,14 +168,12 @@ namespace xie
 			Insert(index, (U)value);
 		}
 
-		public bool Remove(U u)
+		public void Remove(Object value)
 		{
+			U u = (U)value;
 			T t;
-			return u_t.TryGetValue(u, out t) ? src.Remove(t) : false;
-		}
-		void IList.Remove(Object value)
-		{
-			Remove((U)value);
+			if (u_t.TryGetValue(u, out t))
+				src.Remove(t);
 		}
 
 		public void RemoveAt(int index) { src.RemoveAt(index); }

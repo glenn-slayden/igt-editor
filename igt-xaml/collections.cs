@@ -13,12 +13,7 @@ using alib.Enumerable;
 
 namespace xie
 {
-	//public class _set_of<T> : ObservableCollection<T>, Iset<T>
-	//	where T : class, IHostedItem
-	//{
-	//};
-
-	public abstract class _take_ownership_set<T> :ObservableCollection<T>, Iset<T>// _set_of<T>
+	public abstract class _take_ownership_set<T> : ObservableCollection<T>, Iset<T>
 		where T : class, IHostedItem
 	{
 		protected _take_ownership_set(IItem owner)
@@ -31,10 +26,18 @@ namespace xie
 
 		readonly Iitems<T> owner;
 
+		public void replace_item(int index, IHostedItem item)
+		{
+			base[index] = (T)item;
+		}
+
 		protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
 		{
 			if (e.Action == NotifyCollectionChangedAction.Add)
 			{
+				if (owner == null)
+					throw new Exception();
+
 				foreach (IHostedItem hi in e.NewItems)
 				{
 					//if (hi.Host == null)
@@ -59,13 +62,6 @@ namespace xie
 		}
 	};
 
-	//public class TextTierSet : _set_of<ITextTier>
-	//{
-	//	//public TextTierSet(Iitems<ITier> owner)
-	//	//{
-	//	//}
-	//};
-
 	public abstract class owner_tier_set<T> : _take_ownership_set<T>
 		where T : class, ITier
 	{
@@ -83,14 +79,6 @@ namespace xie
 		}
 	};
 
-	public class TextTierSet : TierSet//owner_tier_set<ITier>
-	{
-		public TextTierSet(Iitems<ITier> owner)
-			: base(owner)
-		{
-		}
-	};
-
 	public class PartsTierSet : owner_tier_set<IPartsTier>
 	{
 		public PartsTierSet(Iitems<IPartsTier> owner)
@@ -99,20 +87,8 @@ namespace xie
 		}
 	};
 
-	//public class PartRefSet : _set_of<IPart>
-	//{
-	//	public PartRefSet()
-	//		: base()
-	//	{
-	//	}
-	//};
-
-	public class PartRefSet : _take_ownership_set<IPart>
+	public class PartRefSet : ObservableCollection<IPart>
 	{
-		public PartRefSet(Iitems<IPart> owner)
-			: base(owner)
-		{
-		}
 	};
 
 	public class OwnerPartsSet : _take_ownership_set<IPart>

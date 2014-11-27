@@ -133,11 +133,12 @@
                 <DataTemplate DataType="{x:Type xl:TextGroupTier}">
                     <Expander IsExpanded="True">
                         <Expander.Header>
-                            <ItemsControl ItemsSource="{Binding Mode=OneWay}">
+                            <ItemsControl ItemsSource="{Binding Mode=OneWay}"  >
                                 <ItemsControl.Template>
                                     <ControlTemplate>
                                         <StackPanel Orientation="Horizontal"
-                                                    IsItemsHost="True">
+                                                    IsItemsHost="True"
+                                                    HorizontalAlignment="Left">
                                             <StackPanel.RenderTransform>
                                                 <ScaleTransform ScaleX=".9"
                                                                 ScaleY=".9" />
@@ -163,11 +164,13 @@
                 <DataTemplate DataType="{x:Type xl:TierGroupTier}">
                     <Expander IsExpanded="True">
                         <Expander.Header>
-                            <ItemsControl ItemsSource="{Binding Mode=OneWay}">
+                            <ItemsControl ItemsSource="{Binding Mode=OneWay}"
+                                          HorizontalAlignment="Left">
                                 <ItemsControl.Template>
                                     <ControlTemplate>
                                         <StackPanel Orientation="Horizontal"
-                                                    IsItemsHost="True">
+                                                    IsItemsHost="True"
+                                                    HorizontalAlignment="Left">
                                             <StackPanel.RenderTransform>
                                                 <ScaleTransform ScaleX=".9"
                                                                 ScaleY=".9" />
