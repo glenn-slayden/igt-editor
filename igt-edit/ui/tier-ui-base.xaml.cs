@@ -307,7 +307,8 @@ namespace xie
 		private void TextBox_SelectionChanged(object sender, RoutedEventArgs e)
 		{
 			var tb = (TextBox)sender;
-			var tb_info = (TextBlock)((Grid)tb.Parent).Children[1];
+			var tb_info = (TextBlock)((Grid)tb.Parent).Children[3];
+			
 			tb_info.Text = String.Format("<{0} - {1}> ({2})", tb.SelectionStart, tb.SelectionStart + tb.SelectionLength, tb.SelectionLength);
 		}
 
@@ -354,7 +355,7 @@ namespace xie
 				}
 			}
 
-			var tb_info = (TextBlock)((Grid)tb.Parent).Children[1];
+			var tb_info = (TextBlock)((Grid)tb.Parent).Children[3];
 			tb_info.Text = String.Empty;
 		}
 	};

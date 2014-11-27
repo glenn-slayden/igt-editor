@@ -18,6 +18,9 @@ namespace xie
 	{
 		public _promoter(Iitems<T> owner, Iset<T> src)//, Func<T, U> f_newU, Func<U, T> f_newT)
 		{
+			if (owner == null)
+				Nop.X();
+
 			this.owner = owner;
 			this.src = src;
 			//this.f_newT = f_newT;

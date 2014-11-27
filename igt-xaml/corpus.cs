@@ -20,7 +20,7 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	public class IgtCorpora : OwnerCorpusSet, Iitems<IgtCorpus>
+	public class IgtCorpora : Iitems<IgtCorpus>
 	{
 		static IgtCorpora()
 		{
@@ -28,14 +28,11 @@ namespace xie
 		}
 
 		public IgtCorpora()
-			: base(null)
 		{
+			this.set = new OwnerCorpusSet(this);
 		}
 
-		public void Reset()
-		{
-			base.Clear();
-		}
+		readonly OwnerCorpusSet set;
 
 		public String Name
 		{
@@ -43,8 +40,8 @@ namespace xie
 			set { this.SetValue(FrameworkElement.NameProperty, value); }
 		}
 
-		public new Iset<IgtCorpus> Items { get { return this; } }
-		public IList GetList() { return this; }
+		public Iset<IgtCorpus> Items { get { return set; } }
+		public IList GetList() { return set; }
 		public bool ContainsListCollection { get { return true; } }
 
 		public Object GetValue(DependencyProperty dp) { throw not.impl; }
@@ -54,8 +51,18 @@ namespace xie
 		public bool ContainsFile(String filename)
 		{
 			var fn_check = Path.GetFileNameWithoutExtension(filename);
-			return this.Any(x => String.Equals(x.FilenameWithoutExtension, fn_check, StringComparison.OrdinalIgnoreCase));
+			return set.Any(x => String.Equals(x.FilenameWithoutExtension, fn_check, StringComparison.OrdinalIgnoreCase));
 		}
+
+		public void Clear() { set.Clear(); }
+		public IgtCorpus this[int index]
+		{
+			get { return set[index]; }
+			set { set[index] = value; }
+		}
+		public int Count { get { return set.Count; } }
+		public IEnumerator<IgtCorpus> GetEnumerator() { return set.GetEnumerator(); }
+		IEnumerator IEnumerable.GetEnumerator() { return set.GetEnumerator(); }
 	};
 
 

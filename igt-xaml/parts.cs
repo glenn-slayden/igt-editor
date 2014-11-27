@@ -326,7 +326,7 @@ namespace xie
 
 		public AlignPart()
 		{
-			SetValue(AlignedPartsPropertyKey, new PartRefSet());
+			SetValue(AlignedPartsPropertyKey, new PartRefSet(PartsHost));
 		}
 
 	};

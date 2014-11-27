@@ -80,6 +80,8 @@ namespace xie
 		}
 		public static void MoveTier(ITiers h0, int ix0, ITiers h1, int ix1)
 		{
+			if (h0 == null || h1 == null)
+				throw new NullReferenceException();
 			if (h0 == h1)
 			{
 				if (ix0 != ix1)
@@ -106,6 +108,9 @@ namespace xie
 			get
 			{
 				var host = TiersHost;
+				if (host == null)
+					return new HashSet<ITier>();
+
 				var rgt = new HashSet<ITier>(host.Tiers);
 				ITier pt;
 				while ((pt = host as ITier) != null)
@@ -136,7 +141,7 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public class TextTier : tier_base, ITextTier
+	public class TextTier : tier_base//, ITextTier
 	{
 		static TextTier()
 		{
@@ -161,7 +166,7 @@ namespace xie
 
 		public String s_LineNumbers
 		{
-			get { return LineNumbers==null ? "--" : LineNumbers.StringJoin(" "); }
+			get { return LineNumbers == null ? "--" : LineNumbers.StringJoin(" "); }
 		}
 
 
@@ -215,7 +220,7 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public sealed class CompoundTextTier : TextTier, ITextTiers
+	public sealed class CompoundTextTier : TextTier, ITiers<ITier>
 	{
 		readonly static DependencyPropertyKey LinesPropertyKey;
 		public static DependencyProperty LinesProperty { get { return LinesPropertyKey.DependencyProperty; } }
@@ -236,7 +241,7 @@ namespace xie
 		}
 
 		public TextTierSet Lines { get { return (TextTierSet)GetValue(LinesProperty); } }
-		Iset<ITextTier> Iitems<ITextTier>.Items { get { return this.Lines; } }
+		Iset<ITier> Iitems<ITier>.Items { get { return this.Lines; } }
 		IList IListSource.GetList() { return this.Lines; }
 		bool IListSource.ContainsListCollection { get { return true; } }
 
@@ -247,7 +252,7 @@ namespace xie
 			set { }
 		}
 
-		public ITextTier this[int index]
+		public ITier this[int index]
 		{
 			get { return Lines[index]; }
 			set { Lines[index] = value; }
@@ -255,14 +260,14 @@ namespace xie
 
 		public int Count { get { return Lines.Count; } }
 
-		public IEnumerator<ITextTier> GetEnumerator() { return Lines.GetEnumerator(); }
+		public IEnumerator<ITier> GetEnumerator() { return Lines.GetEnumerator(); }
 
 		IEnumerator IEnumerable.GetEnumerator() { return Lines.GetEnumerator(); }
 
 		public CompoundTextTier()
 			: base("#D6E8B0".ToColor())
 		{
-			var _lines = new TextTierSet();
+			var _lines = new TierSet(this);
 			_lines.CollectionChanged += (o, e) => CoerceValue(TextProperty);
 			SetValue(LinesPropertyKey, _lines);
 
@@ -274,7 +279,7 @@ namespace xie
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// 
 	[DebuggerDisplay("{ToString(),nq}")]
-	public sealed class TextGroupTier : tier_base, ITextTiers
+	public sealed class TextGroupTier : tier_base, ITiers
 	{
 		readonly static DependencyPropertyKey LinesPropertyKey;
 		public static DependencyProperty LinesProperty { get { return LinesPropertyKey.DependencyProperty; } }
@@ -295,7 +300,8 @@ namespace xie
 		//}
 
 		public TextTierSet Lines { get { return (TextTierSet)GetValue(LinesProperty); } }
-		Iset<ITextTier> Iitems<ITextTier>.Items { get { return this.Lines; } }
+		public TierSet Tiers { get { return this.Lines; } }
+		Iset<ITier> Iitems<ITier>.Items { get { return this.Lines; } }
 		IList IListSource.GetList() { return this.Lines; }
 		bool IListSource.ContainsListCollection { get { return true; } }
 
@@ -306,7 +312,7 @@ namespace xie
 		//	set { }
 		//}
 
-		public ITextTier this[int index]
+		public ITier this[int index]
 		{
 			get { return Lines[index]; }
 			set { Lines[index] = value; }
@@ -314,20 +320,53 @@ namespace xie
 
 		public int Count { get { return Lines.Count; } }
 
-		public IEnumerator<ITextTier> GetEnumerator() { return Lines.GetEnumerator(); }
+		public IEnumerator<ITier> GetEnumerator() { return Lines.GetEnumerator(); }
 
 		IEnumerator IEnumerable.GetEnumerator() { return Lines.GetEnumerator(); }
 
 		public TextGroupTier()
 			: base("#D6E8F0".ToColor())
 		{
-			var _lines = new TextTierSet();
+			var _lines = new TextTierSet(this);
 			//_lines.CollectionChanged += (o, e) => CoerceValue(TextProperty);
 			SetValue(LinesPropertyKey, _lines);
 
 			//	if (lines.Any(x => x.Igt != this.Igt || !this.Igt.Contains(x)))
 			//		throw new Exception();
 		}
+		//TierSet _lines;
+
+		//public TierSet Tiers
+		//{
+		//	get { return _lines; }
+		//}
+
+		//Iset<ITier> Iitems<ITier>.Items
+		//{
+		//	get { return _lines; }
+		//}
+
+		//ITier Iitems<ITier>.this[int index]
+		//{
+		//	get
+		//	{
+		//		return _lines[index];
+		//	}
+		//	set
+		//	{
+		//		_lines[index] = value;
+		//	}
+		//}
+
+		//ITier IReadOnlyList<ITier>.this[int index]
+		//{
+		//	get { return _lines[index]; }
+		//}
+
+		//IEnumerator<ITier> IEnumerable<ITier>.GetEnumerator()
+		//{
+		//	return _lines.GetEnumerator();
+		//}
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

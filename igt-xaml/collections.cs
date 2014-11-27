@@ -13,17 +13,20 @@ using alib.Enumerable;
 
 namespace xie
 {
-	public abstract class _set_of<T> : ObservableCollection<T>, Iset<T>
-		where T : class, IHostedItem
-	{
-	};
+	//public class _set_of<T> : ObservableCollection<T>, Iset<T>
+	//	where T : class, IHostedItem
+	//{
+	//};
 
-	public abstract class _take_ownership_set<T> : _set_of<T>
+	public abstract class _take_ownership_set<T> :ObservableCollection<T>, Iset<T>// _set_of<T>
 		where T : class, IHostedItem
 	{
-		protected _take_ownership_set(Iitems<T> owner)
+		protected _take_ownership_set(IItem owner)
 		{
-			this.owner = owner ?? (Iitems<T>)this;
+			this.owner = owner as Iitems<T>;
+
+			if (this.owner == null)
+				Nop.X();
 		}
 
 		readonly Iitems<T> owner;
@@ -32,9 +35,6 @@ namespace xie
 		{
 			if (e.Action == NotifyCollectionChangedAction.Add)
 			{
-				if (owner == null)
-					throw new Exception();
-
 				foreach (IHostedItem hi in e.NewItems)
 				{
 					//if (hi.Host == null)
@@ -59,9 +59,12 @@ namespace xie
 		}
 	};
 
-	public class TextTierSet : _set_of<ITextTier>
-	{
-	};
+	//public class TextTierSet : _set_of<ITextTier>
+	//{
+	//	//public TextTierSet(Iitems<ITier> owner)
+	//	//{
+	//	//}
+	//};
 
 	public abstract class owner_tier_set<T> : _take_ownership_set<T>
 		where T : class, ITier
@@ -80,6 +83,14 @@ namespace xie
 		}
 	};
 
+	public class TextTierSet : TierSet//owner_tier_set<ITier>
+	{
+		public TextTierSet(Iitems<ITier> owner)
+			: base(owner)
+		{
+		}
+	};
+
 	public class PartsTierSet : owner_tier_set<IPartsTier>
 	{
 		public PartsTierSet(Iitems<IPartsTier> owner)
@@ -88,10 +99,18 @@ namespace xie
 		}
 	};
 
-	public class PartRefSet : _set_of<IPart>
+	//public class PartRefSet : _set_of<IPart>
+	//{
+	//	public PartRefSet()
+	//		: base()
+	//	{
+	//	}
+	//};
+
+	public class PartRefSet : _take_ownership_set<IPart>
 	{
-		public PartRefSet()
-			: base()
+		public PartRefSet(Iitems<IPart> owner)
+			: base(owner)
 		{
 		}
 	};
@@ -114,7 +133,7 @@ namespace xie
 
 	public class OwnerCorpusSet : _take_ownership_set<IgtCorpus>
 	{
-		public OwnerCorpusSet(Iitems<IgtCorpus> owner)
+		public OwnerCorpusSet(IgtCorpora owner)
 			: base(owner)
 		{
 		}

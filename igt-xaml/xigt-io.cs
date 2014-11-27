@@ -49,6 +49,8 @@ namespace xie
 			{
 				ic.Add(igt = new Igt
 				{
+					Host = ic,
+
 				});
 
 				id_map.Clear();
@@ -100,6 +102,7 @@ namespace xie
 
 										id_map.Add(t.Name = _el.GetAttribute("id"), t);
 										t.TierType = _el.GetAttribute("type");
+										igt.Add(t);
 									}
 
 									s_attr = _it.GetAttribute("id");
@@ -115,7 +118,9 @@ namespace xie
 															.ToArray(),
 											TierType = s_attr,
 										};
-										((TextGroupTier)t).Add(tt);
+										((ITiers<ITier>)t).Add(tt);
+										if (tt.Host == null)
+											Nop.X();
 										hi = tt;
 									}
 									else if (t is SegTier)
@@ -132,9 +137,9 @@ namespace xie
 										{
 											//Text = _it.InnerText
 											//Name = _it.GetAttribute("id"),
-											SourceTier = (TextTier)id_map[rgs[0]],
-											FromChar = int.Parse(rgs[1]),
-											ToChar = int.Parse(rgs[2]),
+											//SourceTier = (TextTier)id_map[rgs[0]],
+											//FromChar = int.Parse(rgs[1]),
+											//ToChar = int.Parse(rgs[2]),
 										};
 										((SegTier)t).Add(sp);
 										hi = sp;
@@ -150,7 +155,7 @@ namespace xie
 								//if (t == null || t.Count == 0)
 								//	throw not.expected;
 
-								igt.Add(t);
+								//igt.Add(t);
 							}
 							break;
 
@@ -159,8 +164,8 @@ namespace xie
 					}
 				}
 
-				igt.CoerceValue(dps.FromLineProperty);
-				igt.CoerceValue(dps.ToLineProperty);
+				//igt.CoerceValue(dps.FromLineProperty);
+				//igt.CoerceValue(dps.ToLineProperty);
 				Nop.X();
 			}
 		}

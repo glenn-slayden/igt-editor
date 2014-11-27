@@ -76,13 +76,13 @@ namespace xie
 		where T : class, ITier
 	{
 	};
-	public interface ITextTier : ITier
-	{
-	};
-	public interface ITextTiers : ITiers<ITextTier>, ITier
-	{
-		TextTierSet Lines { get; }
-	};
+	//public interface ITextTier : ITier
+	//{
+	//};
+	//public interface ITextTiers : ITiers<ITextTier>
+	//{
+	//	TextTierSet Lines { get; }
+	//};
 	public interface ITiers : ITiers<ITier>
 	{
 		TierSet Tiers { get; }
@@ -145,36 +145,32 @@ namespace xie
 		public static IEnumerable<ITier> AllDescendants(this ITiers _this)
 		{
 			ITiers tt;
-			ITextTiers itt;
 
 			foreach (var t in _this.Tiers)
 			{
 				if ((tt = t as ITiers) != null)
 					foreach (var ttt in AllDescendants(tt))
 						yield return ttt;
-				else if ((itt = t as ITextTiers) != null)
-					foreach (var ttt in AllDescendants(itt))
-						yield return ttt;
 
 				yield return t;
 			}
 		}
-		public static IEnumerable<ITier> AllDescendants(this ITextTiers _this)
-		{
-			ITiers tt;
-			ITextTiers itt;
+		//public static IEnumerable<ITier> AllDescendants(this ITextTiers _this)
+		//{
+		//	ITiers tt;
+		//	ITextTiers itt;
 
-			foreach (var t in _this.Lines)
-			{
-				if ((tt = t as ITiers) != null)
-					foreach (var ttt in AllDescendants(tt))
-						yield return ttt;
-				else if ((itt = t as ITextTiers) != null)
-					foreach (var ttt in AllDescendants(itt))
-						yield return ttt;
-				yield return t;
-			}
-		}
+		//	foreach (var t in _this.Lines)
+		//	{
+		//		if ((tt = t as ITiers) != null)
+		//			foreach (var ttt in AllDescendants(tt))
+		//				yield return ttt;
+		//		else if ((itt = t as ITextTiers) != null)
+		//			foreach (var ttt in AllDescendants(itt))
+		//				yield return ttt;
+		//		yield return t;
+		//	}
+		//}
 	};
 
 

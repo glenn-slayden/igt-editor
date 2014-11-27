@@ -24,8 +24,11 @@ namespace xie
 			dps.DocIdProperty.AddOwner(typeof(Igt));
 			dps.DocInfoProperty.AddOwner(typeof(Igt));
 			dps.LanguageProperty.AddOwner(typeof(Igt));
-			dps.FromLineProperty.AddOwner(typeof(Igt), new PropertyMetadata(-1, null, (d, v) => ((Igt)d).refresh_from_line((int)v)));
-			dps.ToLineProperty.AddOwner(typeof(Igt), new PropertyMetadata(-1, null, (d, v) => ((Igt)d).refresh_to_line((int)v)));
+			//dps.FromLineProperty.AddOwner(typeof(Igt), new PropertyMetadata(-1, null, (d, v) => ((Igt)d).refresh_from_line((int)v)));
+			//dps.ToLineProperty.AddOwner(typeof(Igt), new PropertyMetadata(-1, null, (d, v) => ((Igt)d).refresh_to_line((int)v)));
+			dps.FromLineProperty.AddOwner(typeof(Igt));
+			dps.ToLineProperty.AddOwner(typeof(Igt));
+
 		}
 
 		public Igt()

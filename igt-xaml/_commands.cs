@@ -169,7 +169,7 @@ namespace xie
 		{
 			var thh = tier.TiersHost;
 			if (thh == null)
-				throw new Exception();
+				return;
 
 			int ix = tier.OuterIndex;
 
